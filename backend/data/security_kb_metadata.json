@@ -15,7 +15,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Oturumlar 15dk içinde kapanmalıdır.",
+    "remediation": "set admintimeout 10",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admintimeout",
+    "eval_type": "max_num",
+    "eval_expected": 15,
+    "default_val": "5"
   },
   {
     "id": "V-236548",
@@ -33,7 +45,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/279661/configuring-the-maximum-log-in-attempts-and-lockout-period"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Hatalı deneme eşiği <= 3.",
+    "remediation": "set admin-lockout-threshold 3",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-lockout-threshold",
+    "eval_type": "max_num",
+    "eval_expected": 3,
+    "default_val": "3"
   },
   {
     "id": "V-236555",
@@ -50,7 +74,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "Banner aktif olmalıdır.",
+    "remediation": "set pre-login-banner enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.pre-login-banner",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236545",
@@ -67,7 +103,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Güvensiz SSHv1 kapatılmalıdır.",
+    "remediation": "set admin-ssh-v1 disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-ssh-v1",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "disable"
   },
   {
     "id": "V-236588",
@@ -84,7 +132,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Arka kapı hesabı kapatılmalıdır.",
+    "remediation": "set admin-maintainer disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-maintainer",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236558",
@@ -102,7 +162,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Güçlü şifreleme aktif olmalıdır.",
+    "remediation": "set strong-crypto enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.strong-crypto",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236547",
@@ -122,7 +194,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "password-policy",
+    "check_logic": "Şifre politikası aktif olmalıdır.",
+    "remediation": "set status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236576",
@@ -142,7 +226,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "password-policy",
+    "check_logic": "En az 14 karakter olmalıdır.",
+    "remediation": "set minimum-length 14",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.minimum-length",
+    "eval_type": "min_num",
+    "eval_expected": 14,
+    "default_val": "8"
   },
   {
     "id": "V-236549",
@@ -161,7 +257,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "syslog setting",
+    "check_logic": "Uzak log iletimi aktif olmalıdır.",
+    "remediation": "set status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "syslog_setting.status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236608",
@@ -180,7 +288,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/100733/ssl-vpn-web-mode"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "CRITICAL",
+    "cli_path": "vpn ssl settings",
+    "check_logic": "Web modu kapatılmalıdır.",
+    "remediation": "set web-mode disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "vpn_ssl_settings.web-mode",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236561",
@@ -197,7 +317,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "SYN Flood koruması aktif olmalıdır.",
+    "remediation": "set tcp-syncookies enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.tcp-syncookies",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236563",
@@ -214,7 +346,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "Asimetrik yönlendirme kapalı olmalıdır.",
+    "remediation": "set asymroute disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.asymroute",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236572",
@@ -233,7 +377,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547825/snmp-v1-v2c-communities"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "snmp sysinfo",
+    "check_logic": "Güvensiz SNMP kapatılmalıdır.",
+    "remediation": "set status disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_snmp.status",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236559",
@@ -251,7 +407,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system ntp",
+    "check_logic": "Zaman senkronizasyonu aktif olmalıdır.",
+    "remediation": "set ntpsync enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "ntp_setting.ntpsync",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236583",
@@ -268,7 +436,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Zayıf algoritmalar kapatılmalıdır.",
+    "remediation": "set ssh-mac-algo hmac-sha2-256",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.ssh-mac-algo",
+    "eval_type": "not_contains",
+    "eval_expected": "md5",
+    "default_val": "hmac-sha2-256"
   },
   {
     "id": "V-236585",
@@ -286,7 +466,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "HSTS aktif olmalıdır.",
+    "remediation": "set admin-hsts enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-hsts",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236586",
@@ -303,7 +495,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "Port 443 olmamalıdır.",
+    "remediation": "set admin-sport 8443",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-sport",
+    "eval_type": "not_equal",
+    "eval_expected": "443",
+    "default_val": "443"
   },
   {
     "id": "V-236587",
@@ -320,7 +524,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Konsol zaman aşımı aktif olmalıdır.",
+    "remediation": "set console-timeout 5",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.console-timeout",
+    "eval_type": "max_num",
+    "eval_expected": 15,
+    "default_val": "0"
   },
   {
     "id": "V-236589",
@@ -339,7 +555,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system ha",
+    "check_logic": "Oturum paketleri şifrelenmelidir.",
+    "remediation": "set session-pickup-expectation enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_ha.session-pickup-expectation",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236590",
@@ -358,7 +586,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system ha",
+    "check_logic": "Senkronizasyon şifresi olmalıdır.",
+    "remediation": "set password <SIFRE>",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_ha.password",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "V-236614",
@@ -376,7 +616,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system settings",
+    "check_logic": "Hata durumunda trafik engellenmelidir.",
+    "remediation": "set ips-fail-open disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.ips-fail-open",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "disable"
   },
   {
     "id": "V-236600",
@@ -397,7 +649,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "Oto-güncelleme aktif olmalıdır.",
+    "remediation": "set ips-status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_fortiguard.ips-status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236601",
@@ -420,7 +684,19 @@
     "validation_status": "mapped",
     "quality_notes": [
       "Antivirus guncelleme kontrolu antivirus-status alanina gore normalize edildi; cihaz surumune gore son bir kez dogrulanmasi tavsiye edilir."
-    ]
+    ],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "Antivirus imza güncellemeleri aktif olmalıdır.",
+    "remediation": "set antivirus-status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_fortiguard.antivirus-status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236613",
@@ -440,7 +716,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "system fortiguard",
+    "check_logic": "Anycast servisi aktif olmalıdır.",
+    "remediation": "set fortiguard-anycast enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_fortiguard.fortiguard-anycast",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236612",
@@ -459,7 +747,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "log disk setting",
+    "check_logic": "Doluluk uyarısı aktif olmalıdır.",
+    "remediation": "set storage-full-warning enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "log_disk.storage-full-warning",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236573",
@@ -478,7 +778,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/457149/snmp-v3-users"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "snmp user",
+    "check_logic": "Kimlik doğrulama zorunlu.",
+    "remediation": "set auth-proto sha",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "snmp_user.auth-proto",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "V-236570",
@@ -495,7 +807,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system settings",
+    "check_logic": "Yönetim ayrımı yapılmalıdır.",
+    "remediation": "set allow-inband-mgmt disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.allow-inband-mgmt",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236571",
@@ -514,7 +838,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "IP kısıtlaması olmalıdır.",
+    "remediation": "set trusthost1 <IP>",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_admin.trusthost1",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "V-236567",
@@ -531,7 +867,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "Broadcast forwarding kapalı.",
+    "remediation": "set bcast-forwarding disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.bcast-forwarding",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "disable"
   },
   {
     "id": "V-236568",
@@ -548,7 +896,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "Proxy ARP kapatılmalıdır.",
+    "remediation": "set proxy-arp disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.proxy-arp",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236564",
@@ -567,7 +927,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "Anormal paketler loglanmalıdır.",
+    "remediation": "set log-invalid-packet enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.log-invalid-packet",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236556-2",
@@ -584,7 +956,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "Giriş sonrası mesaj aktif.",
+    "remediation": "set post-login-banner enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.post-login-banner",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236560-2",
@@ -601,7 +985,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "system settings",
+    "check_logic": "ICMP hata hızı 100ms.",
+    "remediation": "set icmp-error-interval 100",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.icmp-error-interval",
+    "eval_type": "min_num",
+    "eval_expected": 100,
+    "default_val": "100"
   },
   {
     "id": "V-236562-2",
@@ -618,7 +1014,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "SCTP kapatılmalıdır.",
+    "remediation": "set sctp disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_settings.sctp",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "disable"
   },
   {
     "id": "V-236609-2",
@@ -639,7 +1047,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/774877/dtls-support"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "vpn ssl settings",
+    "check_logic": "DTLS aktif olmalıdır.",
+    "remediation": "set dtls-tunnel enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "vpn_ssl_settings.dtls-tunnel",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236610-2",
@@ -658,7 +1078,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/100733/ssl-vpn-web-mode"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "vpn ssl settings",
+    "check_logic": "Maksimum 300 saniye.",
+    "remediation": "set idle-timeout 300",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "vpn_ssl_settings.idle-timeout",
+    "eval_type": "max_num",
+    "eval_expected": 300,
+    "default_val": "300"
   },
   {
     "id": "V-236581-2",
@@ -678,7 +1110,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "password-policy",
+    "check_logic": "Şifre tekrarı engellenmelidir.",
+    "remediation": "set reuse-password disable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.reuse-password",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "V-236582-2",
@@ -698,7 +1142,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "LOW",
+    "cli_path": "password-policy",
+    "check_logic": "90 günlük süre.",
+    "remediation": "set expire-days 90",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.expire-days",
+    "eval_type": "max_num",
+    "eval_expected": 90,
+    "default_val": "0"
   },
   {
     "id": "V-236577-2",
@@ -718,7 +1174,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "password-policy",
+    "check_logic": "Büyük harf zorunlu.",
+    "remediation": "set min-upper-case 1",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.min-upper-case",
+    "eval_type": "min_num",
+    "eval_expected": 1,
+    "default_val": "0"
   },
   {
     "id": "V-236578-2",
@@ -738,7 +1206,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "password-policy",
+    "check_logic": "Küçük harf zorunlu.",
+    "remediation": "set min-lower-case 1",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.min-lower-case",
+    "eval_type": "min_num",
+    "eval_expected": 1,
+    "default_val": "0"
   },
   {
     "id": "V-236579-2",
@@ -758,7 +1238,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "password-policy",
+    "check_logic": "Özel karakter zorunlu.",
+    "remediation": "set min-non-alphanumeric 1",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.min-non-alphanumeric",
+    "eval_type": "min_num",
+    "eval_expected": 1,
+    "default_val": "0"
   },
   {
     "id": "V-236580-2",
@@ -778,7 +1270,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "password-policy",
+    "check_logic": "Rakam zorunlu.",
+    "remediation": "set min-digit 1",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "password_policy.min-digit",
+    "eval_type": "min_num",
+    "eval_expected": 1,
+    "default_val": "0"
   },
   {
     "id": "V-236574-3",
@@ -799,7 +1303,19 @@
     "validation_status": "mapped",
     "quality_notes": [
       "Orijinal ad alaninda bozuk karakter vardi; metadata tarafinda okunabilir aciklama ile destekleniyor."
-    ]
+    ],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "log disk setting",
+    "check_logic": "Disk doluluk uyarısı en geç %90 seviyesinde üretilmelidir.",
+    "remediation": "set full-first-warning 90",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "log_disk.full-first-warning",
+    "eval_type": "max_num",
+    "eval_expected": 90,
+    "default_val": "75"
   },
   {
     "id": "V-236546",
@@ -818,7 +1334,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "CRITICAL",
+    "cli_path": "system interface",
+    "check_logic": "Arayüzde HTTP kapalı olmalı.",
+    "remediation": "unset allowaccess http",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "interface.allowaccess",
+    "eval_type": "not_contains",
+    "eval_expected": "http",
+    "default_val": "https"
   },
   {
     "id": "V-236569",
@@ -837,7 +1365,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system interface",
+    "check_logic": "Port status down olmalı.",
+    "remediation": "set status down",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "interface.status",
+    "eval_type": "equal",
+    "eval_expected": "down",
+    "default_val": "up"
   },
   {
     "id": "V-236573-3",
@@ -856,7 +1396,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/457149/snmp-v3-users"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "snmp user",
+    "check_logic": "Şifreleme (Privacy) olmalı.",
+    "remediation": "set priv-proto aes",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "snmp_user.priv-proto",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-1.1.1",
@@ -874,7 +1426,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "10 dakika sınırı.",
+    "remediation": "set admintimeout 10",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_global.admintimeout",
+    "eval_type": "max_num",
+    "eval_expected": 10,
+    "default_val": "5"
   },
   {
     "id": "CIS-1.1.7",
@@ -891,7 +1455,19 @@
       "https://www.cisecurity.org/benchmark/fortinet"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "HTTPS'e yönlendirme aktif.",
+    "remediation": "set admin-https-redirect enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_global.admin-https-redirect",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "CIS-1.1.9",
@@ -908,7 +1484,19 @@
       "https://www.cisecurity.org/benchmark/fortinet"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "USB yönetimi kapalı.",
+    "remediation": "set usb-config disable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_global.usb-config",
+    "eval_type": "equal",
+    "eval_expected": "disable",
+    "default_val": "enable"
   },
   {
     "id": "CIS-1.2.1",
@@ -927,7 +1515,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Trusted host tanımlı.",
+    "remediation": "set trusthost1 <IP>",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_admin.trusthost1",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-2.2.1",
@@ -945,7 +1545,22 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/780581/dns"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system dns",
+    "check_logic": "Kurumsal DNS kullanılmalı.",
+    "remediation": "set primary 8.8.8.8",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_dns.primary",
+    "eval_type": "not_in_array",
+    "eval_expected": [
+      "208.91.112.53",
+      "208.91.112.52"
+    ],
+    "default_val": "208.91.112.53"
   },
   {
     "id": "CIS-4.1.2",
@@ -964,7 +1579,22 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "syslog setting",
+    "check_logic": "Bilgi seviyesi loglama.",
+    "remediation": "set level information",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "syslog_setting.level",
+    "eval_type": "in_array",
+    "eval_expected": [
+      "information",
+      "notice"
+    ],
+    "default_val": "warning"
   },
   {
     "id": "CIS-4.2.1",
@@ -984,7 +1614,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system settings",
+    "check_logic": "Varsayılan kural loglanmalı.",
+    "remediation": "set default-policy-log enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_settings.default-policy-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "CIS-4.2.2",
@@ -1003,7 +1645,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "log disk setting",
+    "check_logic": "Disk loglama aktif.",
+    "remediation": "set status enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "log_disk.status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "CIS-8.2.1",
@@ -1023,7 +1677,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/235849/logging-to-fortianalyzer"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "log fortianalyzer",
+    "check_logic": "Merkezi analiz aktif.",
+    "remediation": "set status enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "log_fortianalyzer.status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-1.1.1",
@@ -1042,7 +1708,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "HIGH",
+    "cli_path": "firewall policy",
+    "check_logic": "DPI aktif olmalı.",
+    "remediation": "set ssl-ssh-profile deep-inspection",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.ssl-ssh-profile",
+    "eval_type": "equal",
+    "eval_expected": "deep-inspection",
+    "default_val": "no-inspection"
   },
   {
     "id": "FB-1.1.3",
@@ -1063,7 +1741,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Botnet trafiği engellenmeli.",
+    "remediation": "set scan-botnet-connections block",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.scan-botnet-connections",
+    "eval_type": "equal",
+    "eval_expected": "block",
+    "default_val": "disable"
   },
   {
     "id": "FB-1.1.4",
@@ -1080,7 +1770,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "Otomatik yama aktif.",
+    "remediation": "set auto-fw-upgrade enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_global.auto-fw-upgrade",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-1.1.6",
@@ -1097,7 +1799,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "LOW",
+    "cli_path": "system settings",
+    "check_logic": "3600 sn optimizasyonu.",
+    "remediation": "set default-session-ttl 3600",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_settings.default-session-ttl",
+    "eval_type": "max_num",
+    "eval_expected": 3600,
+    "default_val": "3600"
   },
   {
     "id": "FB-1.1.18",
@@ -1117,7 +1831,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42181/dns-over-tls-and-https"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "system dns",
+    "check_logic": "DoT aktif olmalı.",
+    "remediation": "set dns-over-tls enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_dns.dns-over-tls",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-1.1.35",
@@ -1135,7 +1861,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/702257/configuration-backups"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Yedekler şifrelenmeli.",
+    "remediation": "set pcfg-password-enc enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_global.pcfg-password-enc",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-1.1.8",
@@ -1155,7 +1893,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/419391/applying-multi-factor-authentication"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "system admin",
+    "check_logic": "MFA zorunlu.",
+    "remediation": "set two-factor email",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_admin.two-factor",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "FB-1.1.2",
@@ -1174,7 +1924,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/836937/configuring-an-application-sensor"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "firewall policy",
+    "check_logic": "Uygulama denetimi.",
+    "remediation": "set appctrl-profile default",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.appctrl-profile",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "STIG-V-236544-ALT",
@@ -1191,7 +1953,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "TTL check.",
+    "remediation": "set udp-idle-timer 60",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.udp-idle-timer",
+    "eval_type": "max_num",
+    "eval_expected": 180,
+    "default_val": "180"
   },
   {
     "id": "CIS-2.3.2",
@@ -1209,7 +1983,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system ntp",
+    "check_logic": "NTP doğrulama.",
+    "remediation": "set authentication enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "ntp_setting.authentication",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-RESOURCE-CPU",
@@ -1226,7 +2012,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "LOW",
+    "cli_path": "system global",
+    "check_logic": "CPU uyarı eşiği.",
+    "remediation": "set cpu-usage-threshold 90",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_global.cpu-usage-threshold",
+    "eval_type": "max_num",
+    "eval_expected": 90,
+    "default_val": "80"
   },
   {
     "id": "V-236615",
@@ -1245,7 +2043,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system interface",
+    "check_logic": "Firewall ara yüzleri yapılandırılmalı.",
+    "remediation": "set allowaccess ping https ssh",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "interface.allowaccess",
+    "eval_type": "not_contains",
+    "eval_expected": "http",
+    "default_val": "https"
   },
   {
     "id": "V-236616",
@@ -1263,7 +2073,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Oturum zaman aşımı 15 dakika.",
+    "remediation": "set session-timeout 15",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.session-timeout",
+    "eval_type": "max_num",
+    "eval_expected": 15,
+    "default_val": "30"
   },
   {
     "id": "V-236617",
@@ -1281,7 +2103,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Sertifika doğrulama zorunlu.",
+    "remediation": "set certificate-validation enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.certificate-validation",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236618",
@@ -1299,7 +2133,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/216371/bgp-neighbor-password"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "CRITICAL",
+    "cli_path": "router bgp",
+    "check_logic": "BGP kimlik doğrulama gerekli.",
+    "remediation": "set auth-key <KEY>",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "router_bgp.auth-key",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "V-236619",
@@ -1317,7 +2163,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/425672/ospfv3-neighbor-authentication"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "router ospf",
+    "check_logic": "OSPF kimlik doğrulama gerekli.",
+    "remediation": "set auth-key <KEY>",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "router_ospf.auth-key",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "V-236620",
@@ -1335,7 +2193,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/214805/address-objects"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "firewall address",
+    "check_logic": "ACL değişiklikleri loglanmalı.",
+    "remediation": "set log-changes enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "firewall_address.log-changes",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236621",
@@ -1352,7 +2222,19 @@
       "https://www.cyber.mil/stigs/downloads/"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "CRITICAL",
+    "cli_path": "system console",
+    "check_logic": "Konsol erişim sınırlandırılmalı.",
+    "remediation": "set access enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_console.access",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236622",
@@ -1370,7 +2252,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "firewall policy",
+    "check_logic": "Kurallar düzenli gözden geçirilmeli.",
+    "remediation": "set custom-log-fields enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "firewall_policy.custom-log-fields",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236623",
@@ -1389,7 +2283,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "log memory",
+    "check_logic": "Kurallar arşivlenmeli.",
+    "remediation": "set diskarchive enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "log_memory.diskarchive",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "V-236624",
@@ -1410,7 +2316,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/922423/configuring-an-antivirus-profile"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "AV imzaları otomatik güncellenmelidir.",
+    "remediation": "set antivirus-status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_fortiguard.antivirus-status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236625",
@@ -1430,7 +2348,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "Botnet algılama aktif.",
+    "remediation": "set botnet-status enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_fortiguard.botnet-status",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "CIS-1.1.2",
@@ -1449,7 +2379,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Admin hesapları güvenli.",
+    "remediation": "set name admin-prod",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_admin.name",
+    "eval_type": "not_equal",
+    "eval_expected": "admin",
+    "default_val": "admin"
   },
   {
     "id": "CIS-1.1.3",
@@ -1468,7 +2410,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Şifre-dışı yöntemler.",
+    "remediation": "set password-reset enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_admin.password-reset",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "CIS-1.1.4",
@@ -1489,7 +2443,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol FortiGate uzerinde dogrudan SSH key zorunlulugu yerine yonetici erisim tasarimi ile ele alinabilir; access-profile alani tek basina yeterli olmayabilir."
-    ]
+    ],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system admin",
+    "check_logic": "SSH anahtar kimliğe dayalı.",
+    "remediation": "set access-profile SSH-Key",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_admin.access-profile",
+    "eval_type": "equal",
+    "eval_expected": "SSH-Key",
+    "default_val": "password"
   },
   {
     "id": "CIS-2.1.1",
@@ -1507,7 +2473,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "MEDIUM",
+    "cli_path": "system ntp",
+    "check_logic": "Güvenilir NTP sunucusu.",
+    "remediation": "set server 0.pool.ntp.org",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "ntp_setting.server",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-3.1.1",
@@ -1526,7 +2504,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/762500/general-ipsec-vpn-configuration"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "CRITICAL",
+    "cli_path": "vpn ipsec",
+    "check_logic": "IPsec şifreleme.",
+    "remediation": "set encapsulation tunnel-mode",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "vpn_ipsec.encapsulation",
+    "eval_type": "equal",
+    "eval_expected": "tunnel-mode",
+    "default_val": "transport-mode"
   },
   {
     "id": "CIS-3.1.2",
@@ -1545,7 +2535,23 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/762500/general-ipsec-vpn-configuration"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "vpn ipsec",
+    "check_logic": "IPsec kimlik doğrulama.",
+    "remediation": "set authentication sha256",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "vpn_ipsec.authentication",
+    "eval_type": "in_array",
+    "eval_expected": [
+      "sha256",
+      "sha384",
+      "sha512"
+    ],
+    "default_val": "md5"
   },
   {
     "id": "CIS-3.2.1",
@@ -1563,7 +2569,22 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "firewall ssl-setting",
+    "check_logic": "TLS 1.2+ gereklidir.",
+    "remediation": "set min-version tls1-2",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "firewall_ssl_setting.min-version",
+    "eval_type": "in_array",
+    "eval_expected": [
+      "tls1-2",
+      "tls1-3"
+    ],
+    "default_val": "tls1-1"
   },
   {
     "id": "CIS-4.0.1",
@@ -1582,7 +2603,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "CRITICAL",
+    "cli_path": "syslog setting",
+    "check_logic": "Uzak syslog sunucusu.",
+    "remediation": "set server <IP>",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "syslog_setting.server",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-4.0.2",
@@ -1601,7 +2634,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "log disk setting",
+    "check_logic": "Loglar arşivlenmeli.",
+    "remediation": "set diskquota 3GB",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "log_disk_setting.diskquota",
+    "eval_type": "min_num",
+    "eval_expected": 1024,
+    "default_val": "102400"
   },
   {
     "id": "FB-REDUNDANCY",
@@ -1620,7 +2665,22 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "CRITICAL",
+    "cli_path": "system ha",
+    "check_logic": "Yüksek erişilebilirlik yapılandırılması.",
+    "remediation": "set mode active-passive",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_ha.mode",
+    "eval_type": "in_array",
+    "eval_expected": [
+      "active-passive",
+      "active-active"
+    ],
+    "default_val": "standalone"
   },
   {
     "id": "FB-PERFORMANCE",
@@ -1637,7 +2697,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Desteklenen donanımda NP hızlandırması etkin olmalıdır.",
+    "remediation": "set np6-flow-hash-enable enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_global.np6-flow-hash-enable",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-PROXY-PROTOCOL",
@@ -1655,7 +2727,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "firewall policy",
+    "check_logic": "Proxy ayarları kontrol edilmeli.",
+    "remediation": "set proxy-based enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.proxy-based",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-INSPECTION-MODE",
@@ -1674,7 +2758,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "DLP trafik taraması.",
+    "remediation": "set inspect-all enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.inspect-all",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-RATE-LIMIT",
@@ -1692,7 +2788,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "HIGH",
+    "cli_path": "firewall policy",
+    "check_logic": "Hız sınırlaması etkinleştirilmeli.",
+    "remediation": "set traffic-shaper enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.traffic-shaper",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "FB-THREAT-FEED",
@@ -1712,7 +2820,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "Tehdit istihbaratı aktif.",
+    "remediation": "set threat-weight enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_fortiguard.threat-weight",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-SANDBOX",
@@ -1732,7 +2852,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "CRITICAL",
+    "cli_path": "system fortiguard",
+    "check_logic": "Sandbox analiz aktif.",
+    "remediation": "set sandbox enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_fortiguard.sandbox",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-WEBFILTER",
@@ -1751,7 +2883,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/833698/web-filter"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "firewall policy",
+    "check_logic": "Web filtreleme uygulanmalı.",
+    "remediation": "set webfilter-profile extended",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.webfilter-profile",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "FB-DNS-SECURITY",
@@ -1769,7 +2913,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/780581/dns"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "HIGH",
+    "cli_path": "system dns",
+    "check_logic": "DNS güvenliği etkinleştirilmeli.",
+    "remediation": "set dns-cache-limit 5000",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "system_dns.dns-cache-limit",
+    "eval_type": "min_num",
+    "eval_expected": 5000,
+    "default_val": "5000"
   },
   {
     "id": "FB-SMTP-SCANNING",
@@ -1788,7 +2944,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "firewall policy",
+    "check_logic": "E-posta taraması aktif.",
+    "remediation": "set inspection-mode advanced",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_policy.inspection-mode",
+    "eval_type": "equal",
+    "eval_expected": "advanced",
+    "default_val": "basic"
   },
   {
     "id": "V-236626",
@@ -1807,7 +2975,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Admin işlemleri loglanmalı.",
+    "remediation": "set admin-audit-log enable",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.admin-audit-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "V-236627",
@@ -1825,7 +3005,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/109991/virtual-domains"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "VDOM izolasyonu etkinleştirilmeli.",
+    "remediation": "set vdom-mode multi-vdom",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "system_global.vdom-mode",
+    "eval_type": "equal",
+    "eval_expected": "multi-vdom",
+    "default_val": "single-vdom"
   },
   {
     "id": "V-236628",
@@ -1844,7 +3036,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
     ],
     "validation_status": "mapped",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "STIG",
+    "severity": "HIGH",
+    "cli_path": "system interface",
+    "check_logic": "Yönetim arayüzü ayrı VLAN.",
+    "remediation": "set vlanid 4094",
+    "references": [
+      "STIG"
+    ],
+    "eval_path": "interface.vlanid",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-5.1.1",
@@ -1861,7 +3065,19 @@
       "https://www.cisecurity.org/benchmark/fortinet"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "HIGH",
+    "cli_path": "system alert",
+    "check_logic": "Uyarı planı yapılandırılmalı.",
+    "remediation": "set email-to security@company.com",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_alert.email-to",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "CIS-5.2.1",
@@ -1878,7 +3094,19 @@
       "https://www.cisecurity.org/benchmark/fortinet"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "CIS",
+    "severity": "CRITICAL",
+    "cli_path": "system alert-event",
+    "check_logic": "Kritik uyarılar bildirilmeli.",
+    "remediation": "set critical-event enable",
+    "references": [
+      "CIS"
+    ],
+    "eval_path": "system_alert_event.critical-event",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "enable"
   },
   {
     "id": "FB-COMPLIANCE-REPORTING",
@@ -1897,7 +3125,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "MEDIUM",
+    "cli_path": "log report",
+    "check_logic": "Uyum raporları oluşturmalı.",
+    "remediation": "set compliance-report enable",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "log_report.compliance-report",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "FB-NETWORK-SEGMENTATION",
@@ -1915,7 +3155,19 @@
       "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/214805/address-objects"
     ],
     "validation_status": "needs_review",
-    "quality_notes": []
+    "quality_notes": [],
+    "category": "BP",
+    "severity": "CRITICAL",
+    "cli_path": "firewall address",
+    "check_logic": "Ağ segmentasyonu.",
+    "remediation": "set zone-id 2",
+    "references": [
+      "BP"
+    ],
+    "eval_path": "firewall_address.zone-id",
+    "eval_type": "exists",
+    "eval_expected": true,
+    "default_val": null
   },
   {
     "id": "NIST-CSF-1.1",
@@ -1934,7 +3186,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Cihaz envanteri düzenli güncellenmelidir.",
+    "remediation": "set device-inventory enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_global.device-inventory",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-1.2",
@@ -1954,7 +3218,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Yazılım envanteri yönetilmeli.",
+    "remediation": "set fw-policy-track enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_global.fw-policy-track",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-2.1",
@@ -1974,7 +3250,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Erişim kontrolleri tanımlanmalı.",
+    "remediation": "set action accept",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "firewall_policy.action",
+    "eval_type": "equal",
+    "eval_expected": "accept",
+    "default_val": "deny"
   },
   {
     "id": "NIST-CSF-2.2",
@@ -1995,7 +3283,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Ayrıcalıklı erişim kısıtlanmalı.",
+    "remediation": "set privilege-access limited",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_admin.privilege-access",
+    "eval_type": "equal",
+    "eval_expected": "limited",
+    "default_val": "full"
   },
   {
     "id": "NIST-CSF-3.1",
@@ -2017,7 +3317,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "CRITICAL",
+    "cli_path": "system fortiguard",
+    "check_logic": "Tehdit algılama aktif.",
+    "remediation": "set threat-weight enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_fortiguard.threat-weight",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-3.2",
@@ -2040,7 +3352,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "IDS/IPS etkinleştirilmeli.",
+    "remediation": "set ips-detect-anomaly enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_fortiguard.ips-detect-anomaly",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-4.1",
@@ -2059,7 +3383,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "HIGH",
+    "cli_path": "system alert",
+    "check_logic": "Olay yanıt prosedürü tanımlanmalı.",
+    "remediation": "set incident-response enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_alert.incident-response",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-4.2",
@@ -2079,7 +3415,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "MEDIUM",
+    "cli_path": "system backup",
+    "check_logic": "Yedekleme ve kurtarma planı.",
+    "remediation": "set auto-backup enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_backup.auto-backup",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "NIST-CSF-5.1",
@@ -2098,7 +3446,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "NIST",
+    "severity": "HIGH",
+    "cli_path": "system settings",
+    "check_logic": "Risk assessment yapılmalı.",
+    "remediation": "set risk-assessment enable",
+    "references": [
+      "NIST"
+    ],
+    "eval_path": "system_settings.risk-assessment",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.5.1",
@@ -2118,7 +3478,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Bilgi politikası tanımlanmalı.",
+    "remediation": "set policy-enforcement enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_global.policy-enforcement",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.6.1",
@@ -2139,7 +3511,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "CRITICAL",
+    "cli_path": "system admin",
+    "check_logic": "Organizasyon erişimi kontrol edilmeli.",
+    "remediation": "set org-id enabled",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_admin.org-id",
+    "eval_type": "equal",
+    "eval_expected": "enabled",
+    "default_val": "disabled"
   },
   {
     "id": "ISO27001-A.7.1",
@@ -2160,7 +3544,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Personel güvenliği kontrol edilmeli.",
+    "remediation": "set accountability enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_admin.accountability",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.8.1",
@@ -2181,7 +3577,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "CRITICAL",
+    "cli_path": "system interface",
+    "check_logic": "Varlık envanteri yönetilmeli.",
+    "remediation": "set asset-tag required",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_interface.asset-tag",
+    "eval_type": "equal",
+    "eval_expected": "required",
+    "default_val": "optional"
   },
   {
     "id": "ISO27001-A.9.1",
@@ -2204,7 +3612,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "HIGH",
+    "cli_path": "system admin",
+    "check_logic": "Kullanıcı kaydı kontrol edilmeli.",
+    "remediation": "set registration-log enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_admin.registration-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.9.2",
@@ -2223,7 +3643,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "HIGH",
+    "cli_path": "system settings",
+    "check_logic": "Erişim gözden geçirmesi yapılmalı.",
+    "remediation": "set access-review-cycle 90",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_settings.access-review-cycle",
+    "eval_type": "max_num",
+    "eval_expected": 90,
+    "default_val": "365"
   },
   {
     "id": "ISO27001-A.10.1",
@@ -2243,7 +3675,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Şifreleme gerekli ve güçlü olmalı.",
+    "remediation": "set encryption-algorithm AES-256",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_global.encryption-algorithm",
+    "eval_type": "equal",
+    "eval_expected": "AES-256",
+    "default_val": "AES-128"
   },
   {
     "id": "ISO27001-A.12.1",
@@ -2266,7 +3710,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "HIGH",
+    "cli_path": "system hardware",
+    "check_logic": "Donanım yönetimi ve bakımı.",
+    "remediation": "set maintenance-log enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_hardware.maintenance-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.12.2",
@@ -2285,7 +3741,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "MEDIUM",
+    "cli_path": "system global",
+    "check_logic": "Medya işleme prosedürü.",
+    "remediation": "set media-secure-erase enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_global.media-secure-erase",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.13.1",
@@ -2305,7 +3773,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Ağ güvenliği kontrol edilmeli.",
+    "remediation": "set network-isolation enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "firewall_policy.network-isolation",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "ISO27001-A.14.1",
@@ -2324,7 +3804,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "ISO27001",
+    "severity": "HIGH",
+    "cli_path": "system settings",
+    "check_logic": "Test ortamı üretimden ayrık.",
+    "remediation": "set environment-separation enable",
+    "references": [
+      "ISO27001"
+    ],
+    "eval_path": "system_settings.environment-separation",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-1.1",
@@ -2345,7 +3837,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Güvenlik duvarı kuralları tanımlanmalı.",
+    "remediation": "set firewall-enforce-policy enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "firewall_policy.firewall-enforce-policy",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-1.2",
@@ -2366,7 +3870,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Açık kural sonrasında Reddet olmalı.",
+    "remediation": "set default-action deny",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "firewall_policy.default-action",
+    "eval_type": "equal",
+    "eval_expected": "deny",
+    "default_val": "accept"
   },
   {
     "id": "PCI-DSS-2.1",
@@ -2388,7 +3904,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "system admin",
+    "check_logic": "Varsayılan kimlik bilgileri kaldırılmalı.",
+    "remediation": "set change-default-password enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "system_admin.change-default-password",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-2.2",
@@ -2409,7 +3937,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Yapılandırma standartları uygulanmalı.",
+    "remediation": "set config-enforce-policy enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "system_global.config-enforce-policy",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-3.1",
@@ -2431,7 +3971,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "vpn ipsec",
+    "check_logic": "Veriler şifreli olmalı.",
+    "remediation": "set encrypt-data enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "vpn_ipsec.encrypt-data",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-4.1",
@@ -2452,7 +4004,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "firewall policy",
+    "check_logic": "Trafik şifrelemesi aktif.",
+    "remediation": "set encryption-enforce enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "firewall_policy.encryption-enforce",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-6.1",
@@ -2475,7 +4039,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "HIGH",
+    "cli_path": "system fortiguard",
+    "check_logic": "Güvenlik güncellemeleri otomatik.",
+    "remediation": "set security-update-schedule daily",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "system_fortiguard.security-update-schedule",
+    "eval_type": "equal",
+    "eval_expected": "daily",
+    "default_val": "weekly"
   },
   {
     "id": "PCI-DSS-8.1",
@@ -2497,7 +4073,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "system admin",
+    "check_logic": "Her kullanıcı benzersiz kimlik.",
+    "remediation": "set user-unique-id enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "system_admin.user-unique-id",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-8.2",
@@ -2520,7 +4108,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "system admin",
+    "check_logic": "Güçlü kimlik doğrulama gerekli.",
+    "remediation": "set authentication-policy strong",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "system_admin.authentication-policy",
+    "eval_type": "equal",
+    "eval_expected": "strong",
+    "default_val": "weak"
   },
   {
     "id": "PCI-DSS-10.1",
@@ -2542,7 +4142,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "log syslogd",
+    "check_logic": "Denetim izleri tutulmalı.",
+    "remediation": "set audit-logging enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "log_syslogd.audit-logging",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "PCI-DSS-10.2",
@@ -2564,7 +4176,19 @@
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
       "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
-    ]
+    ],
+    "category": "PCIDSS",
+    "severity": "CRITICAL",
+    "cli_path": "log setting",
+    "check_logic": "Tüm kullanıcı etkinlikleri loglanmalı.",
+    "remediation": "set user-activity-log enable",
+    "references": [
+      "PCI-DSS"
+    ],
+    "eval_path": "log_setting.user-activity-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "HIPAA-164.308",
@@ -2585,7 +4209,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "HIPAA",
+    "severity": "CRITICAL",
+    "cli_path": "system admin",
+    "check_logic": "Erişim kontrolleri uygulanmalı.",
+    "remediation": "set hipaa-compliance enable",
+    "references": [
+      "HIPAA"
+    ],
+    "eval_path": "system_admin.hipaa-compliance",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "HIPAA-164.312",
@@ -2604,7 +4240,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "HIPAA",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Veriler HIPAA şifresi ile korunmalı.",
+    "remediation": "set hipaa-encryption enable",
+    "references": [
+      "HIPAA"
+    ],
+    "eval_path": "system_global.hipaa-encryption",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "HIPAA-164.320",
@@ -2623,7 +4271,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "HIPAA",
+    "severity": "CRITICAL",
+    "cli_path": "system global",
+    "check_logic": "Gizlilik planı yer almalı.",
+    "remediation": "set privacy-plan-enabled enable",
+    "references": [
+      "HIPAA"
+    ],
+    "eval_path": "system_global.privacy-plan-enabled",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "SOX-302",
@@ -2642,7 +4302,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "SOX",
+    "severity": "CRITICAL",
+    "cli_path": "system settings",
+    "check_logic": "İç kontroller uygulanmalı.",
+    "remediation": "set sox-internal-controls enable",
+    "references": [
+      "SOX"
+    ],
+    "eval_path": "system_settings.sox-internal-controls",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "SOX-404",
@@ -2663,7 +4335,19 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "SOX",
+    "severity": "HIGH",
+    "cli_path": "system global",
+    "check_logic": "Değişiklik yönetimi uygulanmalı.",
+    "remediation": "set change-log enable",
+    "references": [
+      "SOX"
+    ],
+    "eval_path": "system_global.change-log",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   },
   {
     "id": "SOX-409",
@@ -2684,6 +4368,18 @@
     "validation_status": "needs_review",
     "quality_notes": [
       "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
-    ]
+    ],
+    "category": "SOX",
+    "severity": "HIGH",
+    "cli_path": "log report",
+    "check_logic": "Gerçek zamanlı raporlama.",
+    "remediation": "set realtime-report enable",
+    "references": [
+      "SOX"
+    ],
+    "eval_path": "log_report.realtime-report",
+    "eval_type": "equal",
+    "eval_expected": "enable",
+    "default_val": "disable"
   }
 ]

@@ -81,6 +81,52 @@ CREATE TABLE IF NOT EXISTS parsed_config_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- snmp_templates tablosu
+CREATE TABLE IF NOT EXISTS snmp_templates (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  version VARCHAR(10) NOT NULL, -- 'v2c' veya 'v3'
+  community VARCHAR(255), -- v2c için
+  security_name VARCHAR(255), -- v3 için
+  security_level VARCHAR(50), -- v3: noAuthNoPriv, authNoPriv, authPriv
+  auth_protocol VARCHAR(20), -- v3: MD5, SHA
+  auth_key VARCHAR(255), -- v3
+  priv_protocol VARCHAR(20), -- v3: DES, AES, AES256...
+  priv_key VARCHAR(255), -- v3
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- devices tablosu
+CREATE TABLE IF NOT EXISTS devices (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  ip_address INET NOT NULL UNIQUE,
+  snmp_template_id INTEGER REFERENCES snmp_templates(id) ON DELETE SET NULL,
+  manual_snmp_config JSONB, -- Eğer template seçilmezse burası dolu olacak
+  status VARCHAR(20) DEFAULT 'unknown', -- online, offline, unknown
+  last_seen TIMESTAMP,
+  metadata JSONB, -- Cihazdan çekilen sysName, sysDescr gibi veriler için
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index'ler
+CREATE INDEX idx_devices_ip ON devices(ip_address);
+CREATE INDEX idx_devices_template ON devices(snmp_template_id);
+CREATE INDEX idx_snmp_templates_name ON snmp_templates(name);
+
+-- Trigger'lar (Timestamp güncelleme için)
+CREATE TRIGGER update_snmp_templates_timestamp
+BEFORE UPDATE ON snmp_templates
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+CREATE TRIGGER update_devices_timestamp
+BEFORE UPDATE ON devices
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
 -- Index'ler
 CREATE INDEX idx_policies_active ON network_policies(active);
 CREATE INDEX idx_rules_policy ON security_rules(policy_id);

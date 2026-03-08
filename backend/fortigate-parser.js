@@ -161,12 +161,20 @@ class FortiGateParser {
     };
   }
 
-  getSummary() {
+  getSummary(deviceNameOverride) {
     const summary = { device_name: 'Unknown', model: 'FortiGate', version: 'v7.2.4', total_vdom: 0, total_interface: 0, total_rules: 0, total_ipsec: 0 };
     const vdomNames = new Set(); const interfaceNames = new Set(); const ipsecNames = new Set();
     this.parsedItems.forEach(item => {
       if (item.item_type === 'device_info') {
-        if (item.item_name === 'hostname') summary.device_name = item.config_value;
+        if (item.item_name === 'hostname') {
+          // Clean up invalid hostname patterns (like translate.goog artifacts)
+          let hostname = item.config_value;
+          if (hostname && (hostname.includes('translate.goog') || hostname.includes('\\.translate\\.') || hostname.startsWith('.*'))) {
+            // Use device name override if available, otherwise use a generic name
+            hostname = deviceNameOverride || 'FortiGate-Device';
+          }
+          summary.device_name = hostname;
+        }
         if (item.item_name === 'model') summary.model = item.config_value;
         if (item.item_name === 'version') summary.version = item.config_value;
       }
