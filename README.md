@@ -1,92 +1,176 @@
-# NSS ENGINE - Network Security Suite
+﻿# Network Security Suite (NSS ENGINE)
 
-NSS ENGINE, FortiGate firewall konfigürasyon dosyalarını derinlemesine analiz eden, güvenlik açıklarını tespit eden ve ağ envanterini yöneten profesyonel bir denetim platformudur.
+FortiGate konfigürasyon analizi, CVE takibi ve cihaz izleme islevlerini tek panelde birlestiren Docker tabanli bir guvenlik denetim platformu.
 
-![NSS Engine Dashboard](https://img.shields.io/badge/Security-Audit-blue)
-![React](https://img.shields.io/badge/Frontend-React-61dafb)
-![Node.js](https://img.shields.io/badge/Backend-Node.js-339933)
-![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791)
+## Ne Yapar?
+- FortiGate config dosyalarini parse eder ve guvenlik bulgularini raporlar.
+- Shadow rule, genis erisim, profil eksigi, IP/DHCP gibi analizleri cikarir.
+- CVE verilerini birden fazla kaynaktan cekip veritabaninda saklar (offline goruntuleme).
+- FortiGate API ve SNMP uzerinden cihazlari izler, metrik ve hit count toplar.
+- PDF/rapor gorunumu ile bulgulari sunar.
 
-## 🚀 Öne Çıkan Özellikler
+## Mimari
+- Frontend: React (`frontend`)
+- Backend: Node.js + Express (`backend`)
+- DB: PostgreSQL (`db`)
+- Orkestrasyon: Docker Compose
 
-*   **Derin Konfigürasyon Analizi:** 158+ kriterde STIG, CIS Benchmark ve Best Practices uyumluluk denetimi.
-*   **Gölge Kural (Shadow Analizi):** Üst kurallar tarafından engellenen veya geçersiz kılınan pasif kuralların tespiti.
-*   **Geniş Erişim Analizi:** "ALL" veya "ANY" nesneleri içeren, saldırı yüzeyini genişleten riskli kuralların görselleştirilmesi.
-*   **IP ve DHCP Envanteri:** 
-    *   Kullanılan, boşta ve şüpheli IP adreslerinin takibi.
-    *   DHCP havuzlarının otomatik tespiti ve VLAN bazlı eşleştirme.
-    *   Range içi "gölge IP" tespiti ve tooltip uyarıları.
-*   **Arayüz Etkileşim Grafiği:** Arayüzler arasındaki trafik yoğunluğunu gösteren profesyonel görselleştirme.
-*   **Güvenlik Profil Tespiti:** Kurallar üzerindeki IPS, AV, Web Filter ve SSL Inspection eksikliklerinin renkli kodlanmış raporu.
-*   **Cihaz Yönetimi:** FortiGate cihazlarını API üzerinden bağlama, veritabanına kayıt ve merkezi yönetim.
-*   **PDF Raporlama:** Tüm analiz sonuçlarını kurumsal formatta dışa aktarma.
+Servisler:
+- `nss-frontend` -> `http://localhost:3001`
+- `nss-backend` -> `http://localhost:5001` (API root: `/api`)
+- `nss-postgres` -> `localhost:5433`
 
-## 🛠 Teknik Mimari
+## Ozellikler
 
-### Frontend (nss-frontend)
-- **React (v18):** Modern bileşen yapısı ve state yönetimi.
-- **Lucide-React:** Profesyonel ikon seti.
-- **Axios:** Backend API iletişimi.
-- **CSS3:** Özel tasarlanmış dashboard ve animasyonlar.
+### 1) Konfigurasyon Analizi
+- Dosya yukleme (`/api/upload-config`) ve parse (`/api/parse-config`)
+- Ozet, detay, interface etkilesimi, IP analizi, shadow analizi
+- Guvenlik KB tabanli kural denetimi
 
-### Backend (nss-backend)
-- **Node.js & Express:** Hızlı ve ölçeklenebilir API katmanı.
-- **FortiGate Parser Engine:** Konfigürasyon satırlarını nesneye dönüştüren ve güvenlik algoritmalarını koşturan özel motor.
-- **PostgreSQL:** Analiz sonuçlarının ve cihaz bilgilerinin kalıcı olarak saklanması.
-- **Multer:** Güvenli dosya yükleme yönetimi.
+### 2) CVE Takibi
+- Kaynak bazli CVE toplama (FortiGuard, NVD, CISA KEV, ZDI, generic RSS/JSON)
+- Kaynak ekle/sil/guncelle/aktif-pasif
+- Senkron periyodu ayari (5-1440 dk)
+- CVE aciklamasi + cozum bilgisi saklama
 
-## 📦 Kurulum ve Çalıştırma
+### 3) Cihaz Yonetimi
+- API tabanli FortiGate cihaz ekleme/izleme
+- SNMP template yonetimi (v2c/v3)
+- SNMP canli takip (sysName, online/offline)
+- Hit count gecmisi ve performans metrikleri
 
-### Docker ile (Önerilen)
-Proje kök dizininde aşağıdaki komutu çalıştırarak tüm sistemi (DB, Backend, Frontend) ayağa kaldırabilirsiniz:
+### 4) Ayarlar
+- LDAP ayarlari
+- Sertifika ayarlari
+- Security KB yonetimi
+- CVE DB kaynak yonetimi
+
+## Hizli Baslangic (Docker)
+
 ```bash
-docker-compose up -d
+cd network-security-suite
+docker compose up -d --build
 ```
 
-### Manuel Kurulum
-1.  **Veritabanı:** PostgreSQL kurulumunu yapın ve `db/init.sql` dosyasını içe aktarın.
-2.  **Backend:**
-    ```bash
-    cd network-security-suite/backend
-    npm install
-    # .env dosyasını düzenleyin
-    node app.js
-    ```
-3.  **Frontend:**
-    ```bash
-    cd network-security-suite/frontend
-    npm install
-    npm start
-    ```
+Durum kontrolu:
+```bash
+docker compose ps
+docker logs -f nss-backend
+docker logs -f nss-frontend
+```
 
-## 📁 Proje Yapısı
+Durdurma:
+```bash
+docker compose down
+```
 
+## Gelistirme
+
+Backend:
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Frontend:
+```bash
+cd frontend
+npm install
+npm start
+```
+
+## API Ozeti
+Base URL: `http://localhost:5001/api`
+
+### Saglik
+- `GET /health`
+
+### Dosya/Analiz
+- `GET /uploaded-files`
+- `POST /upload-config`
+- `POST /parse-config`
+- `GET /analysis/:fileUid`
+- `GET /config-detail/:fileUid`
+
+### CVE
+- `GET /cve`
+- `GET /cve/unread-count`
+- `POST /cve/mark-read`
+- `POST /cve/sync`
+- `GET /cve/sources`
+- `POST /cve/sources`
+- `PUT /cve/sources/:id`
+- `DELETE /cve/sources/:id`
+- `GET /cve/sync-config`
+- `POST /cve/sync-config`
+
+### Ayarlar
+- `GET /settings/ldap`
+- `POST /settings/ldap`
+- `GET /settings/certs`
+- `POST /settings/certs`
+- `GET /security-kb`
+- `POST /security-kb`
+- `DELETE /security-kb/:id`
+
+### Cihaz/SNMP
+- `GET /snmp-templates`
+- `POST /snmp-templates`
+- `PUT /snmp-templates/:id`
+- `DELETE /snmp-templates/:id`
+- `GET /devices`
+- `POST /devices`
+- `PUT /devices/:id`
+- `DELETE /devices/:id`
+- `GET /devices/snmp-track`
+- `GET /devices/monitor`
+- `POST /devices/:id/scan-config`
+- `POST /devices/:id/fetch-hits`
+- `POST /devices/:id/collect-metrics`
+- `GET /devices/:id/hit-history`
+- `GET /metrics/latest`
+
+## Veritabani Notlari
+- Tablolarin bir kismi `db/init.sql` ile olusur.
+- Guncel tablo/kolon migrationlari backend acilisinda (`backend/app.js`) `CREATE TABLE IF NOT EXISTS` ve `ALTER TABLE IF NOT EXISTS` ile tamamlanir.
+
+## Onemli Konfigurasyonlar
+- Frontend API adresi: `docker-compose.yml` icinde `REACT_APP_API_URL`
+- Backend DB bilgisi: `docker-compose.yml` -> backend environment
+- CVE scheduler periyodu: `settings` tablosunda `cve_sync_config`
+
+## Sorun Giderme
+
+### `ERR_EMPTY_RESPONSE` / API ulasilamiyor
+```bash
+docker logs --tail 200 nss-backend
+docker compose restart backend frontend
+```
+
+### `Cannot find module 'net-snmp'`
+```bash
+docker compose exec backend npm install net-snmp
+docker compose restart backend
+```
+
+### Port cakismasi
+- 3001, 5001, 5433 portlarini kullanan baska stack/servis olmadigini kontrol edin.
+
+## Dizin Yapisi
 ```text
-C:\nss\network-security-suite\
-├── backend\
-│   ├── app.js                # API Entry Point & Express Server
-│   ├── fortigate-parser.js   # Analiz & Parsing Motoru (Core)
-│   ├── data\                 # Güvenlik Bilgi Tabanı (KB)
-│   └── scripts\              # Veri üretim betikleri
-├── db\
-│   ├── init.sql              # Veritabanı şeması (Policies, Devices, etc.)
-│   └── Dockerfile            # DB Container ayarı
-└── frontend\
-    ├── src\
-    │   ├── App.js            # Ana React Uygulaması (Dashboard & Raporlar)
-    │   └── App.css           # Modern Görsel Temalar
-    └── public\               # Statik dosyalar
+network-security-suite/
+  backend/
+    app.js
+    fortigate-parser.js
+    data/
+  frontend/
+    src/App.js
+    src/App.css
+  db/
+    init.sql
+  docker-compose.yml
 ```
 
-## 🛡 Güvenlik Denetimi Kapsamı
-Sistem, yüklenen konfigürasyonu aşağıdaki başlıklarda tarar:
-- **Global Ayarlar:** Parola politikaları, banner ayarları, servis erişimleri.
-- **Ağ Ayarları:** Güvensiz protokoller (HTTP, Telnet), SNMP güvenliği.
-- **Politika Analizi:** Kural çakışmaları, loglama eksikleri, kapsam zafiyetleri.
-- **Profil Analizi:** UTM servislerinin doğru yapılandırılması.
-
-## 📝 Lisans
-Bu proje özel mülkiyet altındadır ve sadece yetkili güvenlik denetimleri için geliştirilmiştir.
-
----
-*Developed by Gemini CLI Agent for Professional Network Security Audits.*
+## Lisans
+Repo icindeki lisans dosyasina bakin (`LICENSE`).
