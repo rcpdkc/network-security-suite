@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import { Shield, Home, Upload, Activity, AlertTriangle, Zap, CheckCircle2, FileJson, ArrowLeft, ArrowRight, Printer, Info, BarChart3, Clock, Database, ChevronRight, Terminal, Search, Lock, Cpu } from 'lucide-react';
+import { Shield, Home, Upload, Activity, AlertTriangle, Zap, CheckCircle2, FileJson, ArrowLeft, ArrowRight, Printer, Info, BarChart3, Clock, Database, ChevronRight, Terminal, Search, Lock, Cpu, Monitor } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Settings as SettingsIcon, Key, FileText, Plus, Save, Trash2, Globe, Server, FileCheck, Bell, RefreshCw, ChevronDown, ChevronUp, LinkIcon, X } from 'lucide-react';
+import { Settings as SettingsIcon, Key, FileText, Plus, Save, Trash2, Edit, Globe, Server, FileCheck, Bell, RefreshCw, ChevronDown, ChevronUp, LinkIcon, X } from 'lucide-react';
 import './App.css';
+import DebugMenu from './DebugMenu';
+
+const uuidv4 = () => {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+};
 
 const SYNC_INTERVAL_OPTIONS = [
   { value: 5, label: '5 dakika' },
@@ -152,17 +159,42 @@ const CVEView = ({ API_URL, onMarkRead }) => {
 
 // --- Settings View Component ---
 const SettingsView = ({ API_URL }) => {
-  const [activeTab, setActiveTab] = useState('cveDb'); // 'cveDb' | 'kb' | 'ldap' | 'certs'
+  const [activeTab, setActiveTab] = useState('sshTemplates'); // 'apiTemplates' | 'sshTemplates' | 'snmpTemplates' | 'cveDb' | 'kb' | 'switchKb' | 'ldap' | 'certs'
   const [kbRules, setKbRules] = useState([]);
+  const [switchKbRules, setSwitchKbRules] = useState([]);
   const [ldapConfig, setLdapConfig] = useState({ host: '', port: 389, baseDN: '', user: '', pass: '' });
   const [certs, setCerts] = useState([]);
-  const [loadedTabs, setLoadedTabs] = useState({ cveDb: false, kb: false, ldap: false, certs: false });
+  const [snmpTemplates, setSnmpTemplates] = useState([]);
+  const [sshTemplates, setSshTemplates] = useState([]);
+  const [apiTemplates, setApiTemplates] = useState([]);
+  const [customIcons, setCustomIcons] = useState([]);
+  const [loadedTabs, setLoadedTabs] = useState({ customIcons: false, apiTemplates: false, sshTemplates: false, snmpTemplates: false, cveDb: false, kb: false, switchKb: false, ldap: false, certs: false });
   const [editingRule, setEditingRule] = useState(null);
+  const [editingSwitchRule, setEditingSwitchRule] = useState(null);
+  const [editingSnmpTemplate, setEditingSnmpTemplate] = useState(null);
+  const [editingSshTemplate, setEditingSshTemplate] = useState(null);
+  const [editingApiTemplate, setEditingApiTemplate] = useState(null);
+  const [newIcon, setNewIcon] = useState({ name: '', data: '' });
   const [searchKB, setSearchKB] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [cveSources, setCveSources] = useState([]);
   const [editingSource, setEditingSource] = useState(null);
   const [cveSyncConfig, setCveSyncConfig] = useState({ interval_minutes: 60 });
+
+  const [snmpForm, setSnmpForm] = useState({
+    name: '', version: 'v2c', community: 'public',
+    security_name: '', security_level: 'noAuthNoPriv',
+    auth_protocol: 'SHA', auth_key: '',
+    priv_protocol: 'AES', priv_key: ''
+  });
+
+  const [sshForm, setSshForm] = useState({
+    name: '', username: '', password: '', port: 22
+  });
+
+  const [apiForm, setApiForm] = useState({
+    name: '', base_url: '', api_key: '', auth_type: 'Bearer'
+  });
 
   const toMultilineText = (value) => {
     if (Array.isArray(value)) return value.join('\n');
@@ -194,6 +226,100 @@ const SettingsView = ({ API_URL }) => {
     try {
       const res = await axios.get(`${API_URL}/security-kb`);
       setKbRules(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchSnmpTemplates = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/snmp-templates`);
+      setSnmpTemplates(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchSshTemplates = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/ssh-templates`);
+      setSshTemplates(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchApiTemplates = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api-templates`);
+      setApiTemplates(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleSaveApiTemplate = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingApiTemplate && editingApiTemplate.id) {
+        await axios.put(`${API_URL}/api-templates/${editingApiTemplate.id}`, apiForm);
+      } else {
+        await axios.post(`${API_URL}/api-templates`, apiForm);
+      }
+      setEditingApiTemplate(null);
+      fetchApiTemplates();
+      alert('API Template Kaydedildi');
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleDeleteApiTemplate = async (id) => {
+    if (!window.confirm('Template silinsin mi?')) return;
+    try {
+      await axios.delete(`${API_URL}/api-templates/${id}`);
+      fetchApiTemplates();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleSaveSnmpTemplate = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSnmpTemplate && editingSnmpTemplate.id) {
+        await axios.put(`${API_URL}/snmp-templates/${editingSnmpTemplate.id}`, snmpForm);
+      } else {
+        await axios.post(`${API_URL}/snmp-templates`, snmpForm);
+      }
+      setEditingSnmpTemplate(null);
+      fetchSnmpTemplates();
+      alert('SNMP Template Kaydedildi');
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleDeleteSnmpTemplate = async (id) => {
+    if (!window.confirm('Template silinsin mi?')) return;
+    try {
+      await axios.delete(`${API_URL}/snmp-templates/${id}`);
+      fetchSnmpTemplates();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleSaveSshTemplate = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSshTemplate && editingSshTemplate.id) {
+        await axios.put(`${API_URL}/ssh-templates/${editingSshTemplate.id}`, sshForm);
+      } else {
+        await axios.post(`${API_URL}/ssh-templates`, sshForm);
+      }
+      setEditingSshTemplate(null);
+      fetchSshTemplates();
+      alert('SSH Template Kaydedildi');
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleDeleteSshTemplate = async (id) => {
+    if (!window.confirm('Template silinsin mi?')) return;
+    try {
+      await axios.delete(`${API_URL}/ssh-templates/${id}`);
+      fetchSshTemplates();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const fetchSwitchKB = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/switch-security-kb`);
+      setSwitchKbRules(res.data);
     } catch (e) { console.error(e); }
   };
 
@@ -235,12 +361,38 @@ const SettingsView = ({ API_URL }) => {
       fetchKB().finally(() => setLoadedTabs((prev) => ({ ...prev, kb: true })));
       return;
     }
+    if (activeTab === 'switchKb' && !loadedTabs.switchKb) {
+      fetchSwitchKB().finally(() => setLoadedTabs((prev) => ({ ...prev, switchKb: true })));
+      return;
+    }
     if (activeTab === 'ldap' && !loadedTabs.ldap) {
       fetchLdap().finally(() => setLoadedTabs((prev) => ({ ...prev, ldap: true })));
       return;
     }
     if (activeTab === 'certs' && !loadedTabs.certs) {
       fetchCerts().finally(() => setLoadedTabs((prev) => ({ ...prev, certs: true })));
+      return;
+    }
+    if (activeTab === 'snmpTemplates' && !loadedTabs.snmpTemplates) {
+      fetchSnmpTemplates().finally(() => setLoadedTabs((prev) => ({ ...prev, snmpTemplates: true })));
+      return;
+    }
+    if (activeTab === 'sshTemplates' && !loadedTabs.sshTemplates) {
+      fetchSshTemplates().finally(() => setLoadedTabs((prev) => ({ ...prev, sshTemplates: true })));
+      return;
+    }
+    if (activeTab === 'apiTemplates' && !loadedTabs.apiTemplates) {
+      fetchApiTemplates().finally(() => setLoadedTabs((prev) => ({ ...prev, apiTemplates: true })));
+      return;
+    }
+    if (activeTab === 'customIcons' && !loadedTabs.customIcons) {
+      const fetchIcons = async () => {
+        try {
+          const res = await axios.get(`${API_URL}/icons`);
+          setCustomIcons(res.data);
+        } catch (e) { console.error(e); }
+      };
+      fetchIcons().finally(() => setLoadedTabs((prev) => ({ ...prev, customIcons: true })));
     }
   }, [activeTab, loadedTabs]);
 
@@ -272,6 +424,29 @@ const SettingsView = ({ API_URL }) => {
     try {
       await axios.delete(`${API_URL}/security-kb/${id}`);
       fetchKB();
+    } catch (e) { alert('Silme hatası!'); }
+  };
+
+  const handleSaveSwitchRule = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        ...editingSwitchRule,
+        recommendation_details: parseMultilineText(editingSwitchRule.recommendation_details),
+        reference_urls: parseMultilineText(editingSwitchRule.reference_urls)
+      };
+      await axios.post(`${API_URL}/switch-security-kb`, payload);
+      setEditingSwitchRule(null);
+      fetchSwitchKB();
+      alert('Switch kuralı kaydedildi');
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleDeleteSwitchRule = async (id, switchVendor = 'cisco', switchModel = 'all') => {
+    if (!window.confirm('Switch kuralını silmek istediğinize emin misiniz?')) return;
+    try {
+      await axios.delete(`${API_URL}/switch-security-kb/${id}`, { params: { vendor: switchVendor, model: switchModel } });
+      fetchSwitchKB();
     } catch (e) { alert('Silme hatası!'); }
   };
 
@@ -322,14 +497,408 @@ const SettingsView = ({ API_URL }) => {
     return matchesSearch && matchesCat;
   });
 
+  const filteredSwitchKB = switchKbRules.filter(r => {
+    const matchesSearch = r.name.toLowerCase().includes(searchKB.toLowerCase()) || r.id.toLowerCase().includes(searchKB.toLowerCase());
+    const matchesCat = categoryFilter === 'all' || r.category === categoryFilter;
+    return matchesSearch && matchesCat;
+  });
+
   return (
     <div className="settings-view fade-in">
       <div style={{display:'flex', gap:'20px', marginBottom:'30px', borderBottom:'1px solid #e2e8f0', paddingBottom:'15px', flexWrap:'wrap'}}>
+        <button onClick={() => setActiveTab('apiTemplates')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='apiTemplates'?'var(--primary)':'transparent', color: activeTab==='apiTemplates'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Globe size={18}/> API Templateleri</button>
+        <button onClick={() => setActiveTab('sshTemplates')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='sshTemplates'?'var(--primary)':'transparent', color: activeTab==='sshTemplates'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Terminal size={18}/> SSH Templateleri</button>
+        <button onClick={() => setActiveTab('snmpTemplates')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='snmpTemplates'?'var(--primary)':'transparent', color: activeTab==='snmpTemplates'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><SettingsIcon size={18}/> SNMP Templateleri</button>
         <button onClick={() => setActiveTab('cveDb')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='cveDb'?'var(--primary)':'transparent', color: activeTab==='cveDb'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><AlertTriangle size={18}/> CVE Veri Tabanı</button>
         <button onClick={() => setActiveTab('kb')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='kb'?'var(--primary)':'transparent', color: activeTab==='kb'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><FileCheck size={18}/> Güvenlik Bilgi Tabanı (KB)</button>
+        <button onClick={() => setActiveTab('switchKb')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='switchKb'?'var(--primary)':'transparent', color: activeTab==='switchKb'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Server size={18}/> Switch Bilgi Tabanı (KB)</button>
         <button onClick={() => setActiveTab('ldap')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='ldap'?'var(--primary)':'transparent', color: activeTab==='ldap'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Globe size={18}/> LDAP Bağlantısı</button>
         <button onClick={() => setActiveTab('certs')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='certs'?'var(--primary)':'transparent', color: activeTab==='certs'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Key size={18}/> Sertifika Yönetimi</button>
+        <button onClick={() => setActiveTab('customIcons')} style={{padding:'10px 20px', borderRadius:'10px', border:'none', background: activeTab==='customIcons'?'var(--primary)':'transparent', color: activeTab==='customIcons'?'white':'#64748b', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Activity size={18}/> İkon Yönetimi</button>
       </div>
+
+      {activeTab === 'customIcons' && (
+        <div className="icon-manager fade-in">
+          <div style={{display:'grid', gridTemplateColumns:'400px 1fr', gap:'30px'}}>
+            <div style={{background:'white', padding:'30px', borderRadius:'24px', border:'1px solid #e2e8f0', height:'fit-content'}}>
+              <h4 style={{fontSize:'1.1rem', fontWeight:'800', marginBottom:'20px'}}>Yeni İkon Yükle</h4>
+              <div style={{display:'grid', gap:'15px'}}>
+                <div>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>İkon Adı</label>
+                  <input type="text" value={newIcon.name} onChange={e => setNewIcon({...newIcon, name: e.target.value})} placeholder="Örn: Firewall-Red" style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+                </div>
+                <div style={{padding:'20px', border:'2px dashed #e2e8f0', borderRadius:'20px', textAlign:'center'}}>
+                  <input 
+                    type="file" 
+                    id="icon-up" 
+                    accept="image/*" 
+                    style={{display:'none'}} 
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onloadend = () => setNewIcon({...newIcon, data: reader.result});
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  {newIcon.data ? (
+                    <div style={{marginBottom:'15px'}}>
+                      <img src={newIcon.data} alt="Preview" style={{width:'64px', height:'64px', objectFit:'contain', borderRadius:'8px'}} />
+                    </div>
+                  ) : (
+                    <Activity size={40} style={{color:'#94a3b8', marginBottom:'10px'}}/>
+                  )}
+                  <label htmlFor="icon-up" style={{display:'block', background:'#f1f5f9', color:'#475569', padding:'8px 15px', borderRadius:'8px', fontSize:'13px', fontWeight:'700', cursor:'pointer'}}>Dosya Seç</label>
+                </div>
+                <button 
+                  onClick={async () => {
+                    if (!newIcon.name || !newIcon.data) return alert('İsim ve görsel gereklidir.');
+                    try {
+                      await axios.post(`${API_URL}/icons`, newIcon);
+                      setNewIcon({ name: '', data: '' });
+                      const res = await axios.get(`${API_URL}/icons`);
+                      setCustomIcons(res.data);
+                      alert('İkon yüklendi.');
+                    } catch (e) { alert('Yükleme hatası!'); }
+
+                  }}
+                  style={{background:'var(--primary)', color:'white', border:'none', padding:'12px', borderRadius:'12px', fontWeight:'700', cursor:'pointer'}}
+                >
+                  İkonu Kaydet
+                </button>
+              </div>
+            </div>
+
+            <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', padding:'30px'}}>
+              <h4 style={{fontSize:'1.1rem', fontWeight:'800', marginBottom:'20px'}}>Yüklü İkonlar</h4>
+              <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:'20px'}}>
+                {customIcons.map((icon) => (
+                  <div key={icon.id} style={{padding:'15px', border:'1px solid #f1f5f9', borderRadius:'15px', textAlign:'center', position:'relative'}} className="icon-card">
+                    <img src={icon.data} alt={icon.name} style={{width:'48px', height:'48px', objectFit:'contain', marginBottom:'10px'}} />
+                    <div style={{fontSize:'11px', fontWeight:'700', color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{icon.name}</div>
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm('İkonu silmek istediğinize emin misiniz?')) {
+                          await axios.delete(`${API_URL}/icons/${icon.id}`);
+                          const res = await axios.get(`${API_URL}/icons`);
+                          setCustomIcons(res.data);
+                        }
+                      }}
+                      style={{position:'absolute', top:'-5px', right:'-5px', background:'#fee2e2', color:'#ef4444', border:'none', width:'24px', height:'24px', borderRadius:'50%', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'}}
+                    >
+                      <Trash2 size={12}/>
+                    </button>
+                  </div>
+                ))}
+                {customIcons.length === 0 && <div style={{gridColumn:'1/-1', textAlign:'center', color:'#94a3b8', padding:'40px'}}>Henüz ikon yüklenmedi.</div>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'apiTemplates' && (
+        <div className="api-manager fade-in">
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px', gap:'15px'}}>
+            <div>
+              <h3 style={{margin:0, fontSize:'1.15rem', fontWeight:'800'}}>API Template Yönetimi</h3>
+              <p style={{margin:0, fontSize:'13px', color:'#64748b'}}>Cihazlarla API üzerinden haberleşmek için kullanılacak URL ve Key şablonlarını yönetin.</p>
+            </div>
+            <button 
+              onClick={() => {
+                setEditingApiTemplate({ id: '' });
+                setApiForm({ name: '', base_url: '', api_key: '', auth_type: 'Bearer' });
+              }}
+              style={{background:'var(--primary)', color:'white', border:'none', padding:'10px 20px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
+            >
+              <Plus size={18}/> Yeni Template Ekle
+            </button>
+          </div>
+
+          <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)'}}>
+            <table style={{width:'100%', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
+                <tr>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TEMPLATE ADI</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>BASE URL</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>AUTH TÜRÜ</th>
+                  <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {apiTemplates.map((t) => (
+                  <tr key={t.id} style={{borderBottom:'1px solid #f1f5f9'}}>
+                    <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b'}}>{t.name}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{color:'#475569', fontSize:'13px'}}>{t.base_url}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{background:'#f1f5f9', color:'#475569', padding:'4px 10px', borderRadius:'8px', fontSize:'11px', fontWeight:'800'}}>{t.auth_type}</span></td>
+                    <td style={{padding:'15px 25px', textAlign:'right'}}>
+                      <button onClick={() => { setEditingApiTemplate(t); setApiForm(t); }} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
+                      <button onClick={() => handleDeleteApiTemplate(t.id)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}><Trash2 size={14}/></button>
+                    </td>
+                  </tr>
+                ))}
+                {apiTemplates.length === 0 && <tr><td colSpan="4" style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>Henüz bir API template tanımlanmadı.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+
+          {editingApiTemplate && (
+            <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+              <div style={{background:'white', width:'600px', maxWidth:'96vw', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+                <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingApiTemplate.id ? 'API Template Düzenle' : 'Yeni API Template'}</h3>
+                <form onSubmit={handleSaveApiTemplate} style={{display:'grid', gap:'15px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Template Adı</label>
+                    <input type="text" value={apiForm.name} onChange={e => setApiForm({...apiForm, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  </div>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Base URL</label>
+                    <input type="text" value={apiForm.base_url} onChange={e => setApiForm({...apiForm, base_url: e.target.value})} placeholder="https://fortigate.domain.com/api/v2" style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  </div>
+                  <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                    <div>
+                      <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Auth Türü</label>
+                      <select value={apiForm.auth_type} onChange={e => setApiForm({...apiForm, auth_type: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
+                        <option value="Bearer">Bearer Token</option>
+                        <option value="ApiKey">API Key (X-API-KEY)</option>
+                        <option value="Custom">Custom Header</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>API Key / Token</label>
+                      <input type="password" value={apiForm.api_key} onChange={e => setApiForm({...apiForm, api_key: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                    </div>
+                  </div>
+
+                  <div style={{display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'10px'}}>
+                    <button type="button" onClick={() => setEditingApiTemplate(null)} style={{padding:'12px 25px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}}>İptal</button>
+                    <button type="submit" style={{padding:'12px 35px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'700', cursor:'pointer'}}>Kaydet</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'sshTemplates' && (
+        <div className="ssh-manager fade-in">
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px', gap:'15px'}}>
+            <div>
+              <h3 style={{margin:0, fontSize:'1.15rem', fontWeight:'800'}}>SSH Template Yönetimi</h3>
+              <p style={{margin:0, fontSize:'13px', color:'#64748b'}}>Cihazlara bağlanmak için kullanılacak SSH kullanıcı adı ve şifre şablonlarını yönetin.</p>
+            </div>
+            <button 
+              onClick={() => {
+                setEditingSshTemplate({ id: '' });
+                setSshForm({ name: '', username: '', password: '', port: 22 });
+              }}
+              style={{background:'var(--primary)', color:'white', border:'none', padding:'10px 20px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
+            >
+              <Plus size={18}/> Yeni Template Ekle
+            </button>
+          </div>
+
+          <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)'}}>
+            <table style={{width:'100%', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
+                <tr>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TEMPLATE ADI</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KULLANICI ADI</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>PORT</th>
+                  <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sshTemplates.map((t) => (
+                  <tr key={t.id} style={{borderBottom:'1px solid #f1f5f9'}}>
+                    <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b'}}>{t.name}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{color:'#475569', fontSize:'13px'}}>{t.username}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{color:'#64748b', fontSize:'13px'}}>{t.port}</span></td>
+                    <td style={{padding:'15px 25px', textAlign:'right'}}>
+                      <button onClick={() => { setEditingSshTemplate(t); setSshForm(t); }} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
+                      <button onClick={() => handleDeleteSshTemplate(t.id)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}><Trash2 size={14}/></button>
+                    </td>
+                  </tr>
+                ))}
+                {sshTemplates.length === 0 && <tr><td colSpan="4" style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>Henüz bir SSH template tanımlanmadı.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+
+          {editingSshTemplate && (
+            <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+              <div style={{background:'white', width:'500px', maxWidth:'96vw', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+                <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingSshTemplate.id ? 'SSH Template Düzenle' : 'Yeni SSH Template'}</h3>
+                <form onSubmit={handleSaveSshTemplate} style={{display:'grid', gap:'15px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Template Adı</label>
+                    <input type="text" value={sshForm.name} onChange={e => setSshForm({...sshForm, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  </div>
+                  <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                    <div>
+                      <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Kullanıcı Adı</label>
+                      <input type="text" value={sshForm.username} onChange={e => setSshForm({...sshForm, username: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                    </div>
+                    <div>
+                      <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Port</label>
+                      <input type="number" value={sshForm.port} onChange={e => setSshForm({...sshForm, port: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Şifre</label>
+                    <input type="password" value={sshForm.password} onChange={e => setSshForm({...sshForm, password: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  </div>
+
+                  <div style={{display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'10px'}}>
+                    <button type="button" onClick={() => setEditingSshTemplate(null)} style={{padding:'12px 25px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}}>İptal</button>
+                    <button type="submit" style={{padding:'12px 35px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'700', cursor:'pointer'}}>Kaydet</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'snmpTemplates' && (
+        <div className="snmp-manager fade-in">
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px', gap:'15px'}}>
+            <div>
+              <h3 style={{margin:0, fontSize:'1.15rem', fontWeight:'800'}}>SNMP Template Yönetimi</h3>
+              <p style={{margin:0, fontSize:'13px', color:'#64748b'}}>Cihazları izlemek için kullanılacak SNMP v1, v2c ve v3 şablonlarını yönetin.</p>
+            </div>
+            <button 
+              onClick={() => {
+                setEditingSnmpTemplate({ id: '' });
+                setSnmpForm({
+                  name: '', version: 'v2c', community: 'public',
+                  security_name: '', security_level: 'noAuthNoPriv',
+                  auth_protocol: 'SHA', auth_key: '',
+                  priv_protocol: 'AES', priv_key: ''
+                });
+              }}
+              style={{background:'var(--primary)', color:'white', border:'none', padding:'10px 20px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
+            >
+              <Plus size={18}/> Yeni Template Ekle
+            </button>
+          </div>
+
+          <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)'}}>
+            <table style={{width:'100%', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
+                <tr>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TEMPLATE ADI</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>VERSİYON</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>DETAYLAR</th>
+                  <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {snmpTemplates.map((t) => (
+                  <tr key={t.id} style={{borderBottom:'1px solid #f1f5f9'}}>
+                    <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b'}}>{t.name}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{background:'#f1f5f9', color:'#475569', padding:'4px 10px', borderRadius:'8px', fontSize:'11px', fontWeight:'800'}}>{t.version}</span></td>
+                    <td style={{padding:'15px 25px', fontSize:'12px', color:'#64748b'}}>
+                      {t.version === 'v2c' ? `Community: ${t.community}` : `User: ${t.security_name}, Level: ${t.security_level}`}
+                    </td>
+                    <td style={{padding:'15px 25px', textAlign:'right'}}>
+                      <button onClick={() => { setEditingSnmpTemplate(t); setSnmpForm(t); }} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
+                      <button onClick={() => handleDeleteSnmpTemplate(t.id)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}><Trash2 size={14}/></button>
+                    </td>
+                  </tr>
+                ))}
+                {snmpTemplates.length === 0 && <tr><td colSpan="4" style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>Henüz bir template tanımlanmadı.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+
+          {editingSnmpTemplate && (
+            <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+              <div style={{background:'white', width:'600px', maxWidth:'96vw', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+                <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingSnmpTemplate.id ? 'Template Düzenle' : 'Yeni SNMP Template'}</h3>
+                <form onSubmit={handleSaveSnmpTemplate} style={{display:'grid', gap:'15px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Template Adı</label>
+                    <input type="text" value={snmpForm.name} onChange={e => setSnmpForm({...snmpForm, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  </div>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SNMP Versiyon</label>
+                    <select value={snmpForm.version} onChange={e => setSnmpForm({...snmpForm, version: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
+                      <option value="v1">SNMP v1</option>
+                      <option value="v2c">SNMP v2c</option>
+                      <option value="v3">SNMP v3</option>
+                    </select>
+                  </div>
+
+                  {snmpForm.version !== 'v3' ? (
+                    <div>
+                      <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Community String</label>
+                      <input type="text" value={snmpForm.community} onChange={e => setSnmpForm({...snmpForm, community: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} placeholder="public" />
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                        <div>
+                          <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Security Name (User)</label>
+                          <input type="text" value={snmpForm.security_name} onChange={e => setSnmpForm({...snmpForm, security_name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+                        </div>
+                        <div>
+                          <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Security Level</label>
+                          <select value={snmpForm.security_level} onChange={e => setSnmpForm({...snmpForm, security_level: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
+                            <option value="noAuthNoPriv">noAuthNoPriv</option>
+                            <option value="authNoPriv">authNoPriv</option>
+                            <option value="authPriv">authPriv</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {snmpForm.security_level !== 'noAuthNoPriv' && (
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                          <div>
+                            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Auth Protocol</label>
+                            <select value={snmpForm.auth_protocol} onChange={e => setSnmpForm({...snmpForm, auth_protocol: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
+                              <option value="MD5">MD5</option>
+                              <option value="SHA">SHA</option>
+                              <option value="SHA256">SHA256</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Auth Key</label>
+                            <input type="password" value={snmpForm.auth_key} onChange={e => setSnmpForm({...snmpForm, auth_key: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+                          </div>
+                        </div>
+                      )}
+
+                      {snmpForm.security_level === 'authPriv' && (
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                          <div>
+                            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Priv Protocol</label>
+                            <select value={snmpForm.priv_protocol} onChange={e => setSnmpForm({...snmpForm, priv_protocol: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
+                              <option value="DES">DES</option>
+                              <option value="AES">AES</option>
+                              <option value="AES256">AES256</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Priv Key</label>
+                            <input type="password" value={snmpForm.priv_key} onChange={e => setSnmpForm({...snmpForm, priv_key: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div style={{display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'10px'}}>
+                    <button type="button" onClick={() => setEditingSnmpTemplate(null)} style={{padding:'12px 25px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}}>İptal</button>
+                    <button type="submit" style={{padding:'12px 35px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'700', cursor:'pointer'}}>Kaydet</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'cveDb' && (
         <div style={{display:'grid', gap:'20px'}}>
@@ -533,6 +1102,131 @@ const SettingsView = ({ API_URL }) => {
                     <td style={{padding:'15px 25px', textAlign:'right'}}>
                       <button onClick={()=>setEditingRule(prepareRuleForEdit(r))} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
                       <button onClick={()=>handleDeleteRule(r.id)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}><Trash2 size={14}/></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'switchKb' && (
+        <div className="kb-manager">
+          <div style={{display:'flex', justifyContent:'space-between', marginBottom:'20px', gap:'15px'}}>
+            <div style={{display:'flex', gap:'10px', flex:1}}>
+              <div style={{position:'relative', flex:1}}>
+                <Search size={18} style={{position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#94a3b8'}}/>
+                <input type="text" placeholder="Switch Kural Ara (ID veya İsim)..." value={searchKB} onChange={(e)=>setSearchKB(e.target.value)} style={{width:'100%', padding:'10px 40px', borderRadius:'12px', border:'1px solid #e2e8f0', outline:'none'}} />
+              </div>
+              <select value={categoryFilter} onChange={(e)=>setCategoryFilter(e.target.value)} style={{padding:'10px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white'}}>
+                <option value="all">Tüm Kategoriler</option>
+                <option value="CIS">CIS</option>
+                <option value="STIG">STIG</option>
+                <option value="BP">Best Practice</option>
+              </select>
+            </div>
+            <button onClick={() => setEditingSwitchRule({ id: '', name: '', switch_vendor: 'cisco', switch_model: 'all', category: 'BP', severity: 'MEDIUM', check_logic: '', remediation: '', cli_path: '', eval_path: '', eval_type: 'equal', eval_expected: '', recommendation_details: '', reference_urls: '' })} style={{background:'var(--primary)', color:'white', border:'none', padding:'10px 20px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}><Plus size={18}/> Yeni Switch Kuralı</button>
+          </div>
+
+          {editingSwitchRule && (
+            <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+              <div style={{background:'white', width:'800px', maxHeight:'90vh', overflowY:'auto', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+                <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingSwitchRule.created_at ? 'Switch Kuralını Düzenle' : 'Yeni Switch Kuralı Tanımla'}</h3>
+                <form onSubmit={handleSaveSwitchRule} style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>KURAL ID</label><input type="text" value={editingSwitchRule.id} onChange={e=>setEditingSwitchRule({...editingSwitchRule, id:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required /></div>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>KURAL ADI</label><input type="text" value={editingSwitchRule.name} onChange={e=>setEditingSwitchRule({...editingSwitchRule, name:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required /></div>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SWITCH VENDOR</label>
+                    <select 
+                      value={editingSwitchRule.switch_vendor || 'cisco'} 
+                      onChange={e=>setEditingSwitchRule({...editingSwitchRule, switch_vendor:e.target.value})} 
+                      style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}
+                    >
+                      <option value="cisco">Cisco</option>
+                      <option value="arista">Arista</option>
+                      <option value="huawei">Huawei</option>
+                    </select>
+                  </div>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SWITCH MODEL</label><input type="text" value={editingSwitchRule.switch_model || 'all'} onChange={e=>setEditingSwitchRule({...editingSwitchRule, switch_model:e.target.value})} placeholder="catalyst-9300" style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} /></div>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>KATEGORİ</label><select value={editingSwitchRule.category} onChange={e=>setEditingSwitchRule({...editingSwitchRule, category:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}><option value="CIS">CIS</option><option value="STIG">STIG</option><option value="BP">Best Practice</option></select></div>
+                  <div><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SEVERITY</label><select value={editingSwitchRule.severity} onChange={e=>setEditingSwitchRule({...editingSwitchRule, severity:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}><option value="LOW">LOW</option><option value="MEDIUM">MEDIUM</option><option value="HIGH">HIGH</option><option value="CRITICAL">CRITICAL</option></select></div>
+                  <div style={{gridColumn:'1/3'}}><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>KONTROL MANTIĞI (AÇIKLAMA)</label><textarea value={editingSwitchRule.check_logic} onChange={e=>setEditingSwitchRule({...editingSwitchRule, check_logic:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minHeight:'80px'}} /></div>
+                  <div style={{gridColumn:'1/3'}}><label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>ÇÖZÜM / REMEDIATION (CLI)</label><textarea value={editingSwitchRule.remediation} onChange={e=>setEditingSwitchRule({...editingSwitchRule, remediation:e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minHeight:'80px', fontFamily:'monospace'}} /></div>
+                  <div style={{gridColumn:'1/3'}}>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SWITCH ÇÖZÜM ADIMLARI (HER SATIR BİR ADIM)</label>
+                    <textarea
+                      value={editingSwitchRule.recommendation_details || ''}
+                      onChange={e=>setEditingSwitchRule({...editingSwitchRule, recommendation_details:e.target.value})}
+                      placeholder={'1) Switch arayuzunde ilgili menuye gidin\n2) Beklenen ayari aktif edin\n3) Dogrulamayi test edin'}
+                      style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minHeight:'90px'}}
+                    />
+                  </div>
+                  <div style={{gridColumn:'1/3'}}>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>REFERANS LINKLERI (HER SATIR BIR URL)</label>
+                    <textarea
+                      value={editingSwitchRule.reference_urls || ''}
+                      onChange={e=>setEditingSwitchRule({...editingSwitchRule, reference_urls:e.target.value})}
+                      placeholder={'https://docs.vendor.com/...\nhttps://www.cisecurity.org/...'}
+                      style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minHeight:'90px'}}
+                    />
+                  </div>
+
+                  <div style={{gridColumn:'1/3', background:'#f8fafc', padding:'15px', borderRadius:'15px', border:'1px solid #e2e8f0'}}>
+                    <h4 style={{fontSize:'13px', marginBottom:'15px', color:'#1e293b'}}>OTOMATİK ANALİZ PARAMETRELERİ</h4>
+                    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                      <div><label style={{fontSize:'11px', color:'#64748b'}}>CLI PATH</label><input type="text" value={editingSwitchRule.cli_path} onChange={e=>setEditingSwitchRule({...editingSwitchRule, cli_path:e.target.value})} placeholder="management" style={{width:'100%', padding:'10px', borderRadius:'8px', border:'1px solid #e2e8f0'}} /></div>
+                      <div><label style={{fontSize:'11px', color:'#64748b'}}>EVAL PATH</label><input type="text" value={editingSwitchRule.eval_path} onChange={e=>setEditingSwitchRule({...editingSwitchRule, eval_path:e.target.value})} placeholder="management.idle-timeout" style={{width:'100%', padding:'10px', borderRadius:'8px', border:'1px solid #e2e8f0'}} /></div>
+                      <div><label style={{fontSize:'11px', color:'#64748b'}}>EVAL TYPE</label><select value={editingSwitchRule.eval_type} onChange={e=>setEditingSwitchRule({...editingSwitchRule, eval_type:e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'8px', border:'1px solid #e2e8f0'}}><option value="equal">Equal</option><option value="max_num">Max Number</option><option value="min_num">Min Number</option><option value="not_contains">Not Contains</option></select></div>
+                      <div><label style={{fontSize:'11px', color:'#64748b'}}>EXPECTED VALUE</label><input type="text" value={editingSwitchRule.eval_expected} onChange={e=>setEditingSwitchRule({...editingSwitchRule, eval_expected:e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'8px', border:'1px solid #e2e8f0'}} /></div>
+                    </div>
+                  </div>
+
+                  <div style={{gridColumn:'1/3', display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'10px'}}>
+                    <button type="button" onClick={()=>setEditingSwitchRule(null)} style={{padding:'12px 25px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}}>İptal</button>
+                    <button type="submit" style={{padding:'12px 35px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'700', cursor:'pointer'}}>Değişiklikleri Kaydet</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden'}}>
+            <table style={{width:'100%', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
+                <tr>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KURAL ID</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KATEGORİ</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KURAL ADI / AÇIKLAMA</th>
+                  <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>SEVERITY</th>
+                  <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSwitchKB.map((r) => (
+                  <tr key={`${r.id}-${r.switch_vendor || 'generic'}-${r.switch_model || 'all'}`} style={{borderBottom:'1px solid #f1f5f9'}}>
+                    <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b', fontSize:'13px'}}>{r.id}</span></td>
+                    <td style={{padding:'15px 25px'}}><span style={{background: r.category==='STIG'?'#fef2f2':r.category==='CIS'?'#eff6ff':'#f0fdf4', color: r.category==='STIG'?'#ef4444':r.category==='CIS'?'#3b82f6':'#10b981', padding:'2px 8px', borderRadius:'6px', fontSize:'11px', fontWeight:'800'}}>{r.category}</span></td>
+                    <td style={{padding:'15px 25px'}}>
+                      <div style={{fontWeight:'700', color:'#1e293b', fontSize:'14px', marginBottom:'4px'}}>{r.name}</div>
+                      <div style={{fontSize:'12px', color:'#64748b', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'400px'}}>{r.check_logic}</div>
+                      <div style={{fontSize:'11px', color:'#475569', marginTop:'6px'}}>Vendor: {r.switch_vendor || 'cisco'} | Model: {r.switch_model || 'all'}</div>
+                      <div style={{display:'flex', gap:'8px', marginTop:'8px', flexWrap:'wrap'}}>
+                        {countListItems(r.recommendation_details) > 0 && (
+                          <span style={{display:'inline-flex', alignItems:'center', gap:'4px', background:'#eff6ff', color:'#1d4ed8', padding:'2px 8px', borderRadius:'999px', fontSize:'11px', fontWeight:'700'}}>
+                            <FileText size={12} /> {countListItems(r.recommendation_details)} adim
+                          </span>
+                        )}
+                        {countListItems(r.reference_urls) > 0 && (
+                          <span style={{display:'inline-flex', alignItems:'center', gap:'4px', background:'#ecfeff', color:'#0e7490', padding:'2px 8px', borderRadius:'999px', fontSize:'11px', fontWeight:'700'}}>
+                            <Globe size={12} /> {countListItems(r.reference_urls)} referans
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{padding:'15px 25px'}}><span className={`severity-pill sev-${r.severity.toLowerCase()}`} style={{fontSize:'10px', padding:'2px 8px'}}>{r.severity}</span></td>
+                    <td style={{padding:'15px 25px', textAlign:'right'}}>
+                      <button onClick={()=>setEditingSwitchRule(prepareRuleForEdit(r))} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
+                      <button onClick={()=>handleDeleteSwitchRule(r.id, r.switch_vendor || 'cisco', r.switch_model || 'all')} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}><Trash2 size={14}/></button>
                     </td>
                   </tr>
                 ))}
@@ -1277,6 +1971,1514 @@ const DeviceTracker = ({ API_URL }) => {
   );
 };
 
+const DeviceManagementView = ({ API_URL }) => {
+  const [devices, setDevices] = useState([]);
+  const [snmpTemplates, setSnmpTemplates] = useState([]);
+  const [sshTemplates, setSshTemplates] = useState([]);
+  const [apiTemplates, setApiTemplates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+  const [isTestSuccessful, setIsTestSuccessful] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  
+  const [form, setForm] = useState({
+    name: '',
+    ip_address: '',
+    connection_method: 'snmp_ssh', // 'snmp_ssh' | 'api'
+    snmp_template_id: '',
+    ssh_template_id: '',
+    api_template_id: '',
+    vdom: 'root'
+  });
+
+  const fetchAll = async () => {
+    try {
+      const [d, snmp, ssh, api] = await Promise.all([
+        axios.get(`${API_URL}/devices`),
+        axios.get(`${API_URL}/snmp-templates`),
+        axios.get(`${API_URL}/ssh-templates`),
+        axios.get(`${API_URL}/api-templates`)
+      ]);
+      setDevices(d.data);
+      setSnmpTemplates(snmp.data);
+      setSshTemplates(ssh.data);
+      setApiTemplates(api.data);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const handleTest = async () => {
+    setLoading(true);
+    setTestResult(null);
+    setIsTestSuccessful(false);
+    try {
+      const res = await axios.post(`${API_URL}/devices/test-connection`, form);
+      setTestResult({ success: true, message: res.data.message });
+      setIsTestSuccessful(true);
+      if (res.data.hostname && !form.name) {
+        setForm(prev => ({ ...prev, name: res.data.hostname }));
+      }
+    } catch (e) {
+      setTestResult({ success: false, message: e.response?.data?.error || e.message });
+      setIsTestSuccessful(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!isTestSuccessful) {
+      alert('Lütfen önce bağlantı testi yapın ve başarılı olduğundan emin olun.');
+      return;
+    }
+    try {
+      if (editingId) {
+        await axios.put(`${API_URL}/devices/${editingId}`, form);
+        alert('Cihaz başarıyla güncellendi.');
+      } else {
+        await axios.post(`${API_URL}/devices`, form);
+        alert('Cihaz başarıyla eklendi.');
+      }
+      setIsModalOpen(false);
+      setEditingId(null);
+      fetchAll();
+    } catch (e) {
+      alert('Hata: ' + (e.response?.data?.error || e.message));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Cihazı silmek istediğinize emin misiniz?')) return;
+    try {
+      await axios.delete(`${API_URL}/devices/${id}`);
+      fetchAll();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  return (
+    <div className="device-mgmt-view fade-in">
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px'}}>
+        <div>
+          <h2 style={{margin:0, fontSize:'1.5rem', fontWeight:'800', color:'#1e293b'}}>Cihaz Yönetimi</h2>
+          <p style={{margin:0, color:'#64748b'}}>Tüm ağ cihazlarını buradan ekleyebilir ve yönetebilirsiniz.</p>
+        </div>
+        <button 
+          onClick={() => {
+            setForm({ name: '', ip_address: '', connection_method: 'snmp_ssh', snmp_template_id: '', ssh_template_id: '', api_template_id: '', vdom: 'root' });
+            setTestResult(null);
+            setEditingId(null);
+            setIsTestSuccessful(false);
+            setIsModalOpen(true);
+          }}
+          style={{background:'var(--primary)', color:'white', border:'none', padding:'12px 24px', borderRadius:'14px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'10px'}}
+        >
+          <Plus size={20}/> Yeni Cihaz Ekle
+        </button>
+      </div>
+
+      <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)'}}>
+        <table style={{width:'100%', borderCollapse:'collapse'}}>
+          <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
+            <tr>
+              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>CİHAZ ADI</th>
+              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>IP ADRESİ</th>
+              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>BAĞLANTI METODU</th>
+              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TEMPLATELER</th>
+              <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
+            </tr>
+          </thead>
+          <tbody>
+            {devices.map(d => (
+              <tr key={d.id} style={{borderBottom:'1px solid #f1f5f9'}}>
+                <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b'}}>{d.name}</span></td>
+                <td style={{padding:'15px 25px'}}><span style={{color:'#475569', fontSize:'13px'}}>{d.ip_address}</span></td>
+                <td style={{padding:'15px 25px'}}>
+                  <span style={{background:'#f1f5f9', color:'#475569', padding:'4px 10px', borderRadius:'8px', fontSize:'11px', fontWeight:'800'}}>
+                    {d.connection_method === 'api' ? 'API (FortiGate)' : 'SNMP + SSH'}
+                  </span>
+                </td>
+                <td style={{padding:'15px 25px', fontSize:'12px', color:'#64748b'}}>
+                  {d.connection_method === 'api' 
+                    ? `API: ${d.api_template_name || 'N/A'}` 
+                    : `SNMP: ${d.snmp_template_name || 'N/A'}, SSH: ${d.ssh_template_name || 'N/A'}`}
+                </td>
+                <td style={{padding:'15px 25px', textAlign:'right'}}>
+                  <button onClick={() => {
+                    setForm({
+                      name: d.name,
+                      ip_address: d.ip_address,
+                      connection_method: d.connection_method || 'snmp_ssh',
+                      snmp_template_id: d.snmp_template_id || '',
+                      ssh_template_id: d.ssh_template_id || '',
+                      api_template_id: d.api_template_id || '',
+                      vdom: d.vdom || 'root'
+                    });
+                    setEditingId(d.id);
+                    setTestResult(null);
+                    setIsTestSuccessful(true); // Allow saving since it's an edit
+                    setIsModalOpen(true);
+                  }} style={{padding:'8px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
+                  <button onClick={() => handleDelete(d.id)} style={{padding:'8px', borderRadius:'10px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', cursor:'pointer'}}><Trash2 size={16}/></button>
+                </td>
+              </tr>
+            ))}
+            {devices.length === 0 && <tr><td colSpan="5" style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>Henüz bir cihaz eklenmedi.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+
+      {isModalOpen && (
+        <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+          <div style={{background:'white', width:'650px', maxWidth:'96vw', borderRadius:'24px', padding:'35px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+            <h3 style={{margin:'0 0 20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingId ? 'Cihaz Düzenle' : 'Yeni Cihaz Ekle'}</h3>
+            
+            <form onSubmit={handleSave} style={{display:'grid', gap:'20px'}}>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                <div>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>IP ADRESİ</label>
+                  <input type="text" value={form.ip_address} onChange={e => setForm({...form, ip_address: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} placeholder="192.168.1.1" required />
+                </div>
+                <div>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>CİHAZ ADI (OPSİYONEL)</label>
+                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} placeholder="Cihaz Adı" />
+                </div>
+              </div>
+
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', marginBottom:'10px', display:'block'}}>BAĞLANTI METODU</label>
+                <div style={{display:'flex', gap:'15px'}}>
+                  <button type="button" onClick={() => { setForm({...form, connection_method: 'snmp_ssh'}); setIsTestSuccessful(false); }} style={{flex:1, padding:'15px', borderRadius:'15px', border: form.connection_method==='snmp_ssh'?'2px solid var(--primary)':'2px solid #f1f5f9', background: form.connection_method==='snmp_ssh'?'#eff6ff':'white', cursor:'pointer', textAlign:'left'}}>
+                    <div style={{fontWeight:'800', fontSize:'14px', color: form.connection_method==='snmp_ssh'?'var(--primary)':'#1e293b'}}>SNMP + SSH</div>
+                    <div style={{fontSize:'11px', color:'#64748b', marginTop:'4px'}}>Switch ve Routerlar için ideal</div>
+                  </button>
+                  <button type="button" onClick={() => { setForm({...form, connection_method: 'api'}); setIsTestSuccessful(false); }} style={{flex:1, padding:'15px', borderRadius:'15px', border: form.connection_method==='api'?'2px solid var(--primary)':'2px solid #f1f5f9', background: form.connection_method==='api'?'#eff6ff':'white', cursor:'pointer', textAlign:'left'}}>
+                    <div style={{fontWeight:'800', fontSize:'14px', color: form.connection_method==='api'?'var(--primary)':'#1e293b'}}>API (REST)</div>
+                    <div style={{fontSize:'11px', color:'#64748b', marginTop:'4px'}}>FortiGate ve Modern Cihazlar için</div>
+                  </button>
+                </div>
+              </div>
+
+              {form.connection_method === 'api' ? (
+                <div style={{display:'grid', gap:'20px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>API TEMPLATE</label>
+                    <select value={form.api_template_id} onChange={e => { setForm({...form, api_template_id: e.target.value}); setIsTestSuccessful(false); }} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} required>
+                      <option value="">Seçiniz...</option>
+                      {apiTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SNMP TEMPLATE</label>
+                    <select value={form.snmp_template_id} onChange={e => { setForm({...form, snmp_template_id: e.target.value}); setIsTestSuccessful(false); }} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} required>
+                      <option value="">Seçiniz...</option>
+                      {snmpTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>SSH TEMPLATE</label>
+                    <select value={form.ssh_template_id} onChange={e => { setForm({...form, ssh_template_id: e.target.value}); setIsTestSuccessful(false); }} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} required>
+                      <option value="">Seçiniz...</option>
+                      {sshTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div style={{padding:'20px', borderRadius:'15px', background: testResult ? (testResult.success ? '#f0fdf4' : '#fef2f2') : '#f8fafc', border: testResult ? (testResult.success ? '1px solid #bbf7d0' : '1px solid #fecaca') : '1px solid #e2e8f0'}}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                  <div style={{fontSize:'13px', fontWeight:'700', color: testResult ? (testResult.success ? '#166534' : '#991b1b') : '#64748b'}}>
+                    {loading ? 'Bağlantı Test Ediliyor...' : (testResult ? testResult.message : 'Lütfen bağlantıyı test edin')}
+                  </div>
+                  <button type="button" onClick={handleTest} disabled={loading} style={{background: 'white', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '10px', fontSize: '12px', fontWeight: '800', cursor: 'pointer', display:'flex', alignItems:'center', gap: '6px'}}>
+                    <Activity size={14}/> Test Et
+                  </button>
+                </div>
+              </div>
+
+              <div style={{display:'flex', gap:'12px', marginTop:'10px'}}>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{flex:1, padding:'14px', borderRadius:'14px', border:'1px solid #e2e8f0', background:'white', fontWeight:'700', cursor:'pointer'}}>İptal</button>
+                <button type="submit" disabled={!isTestSuccessful} style={{flex:1, padding:'14px', borderRadius:'14px', border:'none', background: isTestSuccessful ? 'var(--primary)' : '#cbd5e1', color:'white', fontWeight:'800', cursor: isTestSuccessful ? 'pointer' : 'not-allowed'}}>Cihazı Kaydet</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+const NetworkScanView = ({ API_URL }) => {
+  const [snmpTemplates, setSnmpTemplates] = useState([]);
+  const [discovered, setDiscovered] = useState([]);
+  const [activeScan, setActiveScan] = useState(null);
+  const [scanHistory, setScanHistory] = useState([]);
+  const [selectedScanId, setSelectedScanId] = useState(null);
+  const [form, setForm] = useState({ ip_range: '', snmp_template_ids: [] });
+  const [loading, setLoading] = useState(false);
+  const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
+  const [scanLogs, setScanLogs] = useState([]);
+  const [activeScanId, setActiveScanId] = useState(null);
+
+  const addScanLog = (message, type = 'info', scanId = null) => {
+    const scanIdToUse = scanId || activeScanId;
+    setScanLogs(prev => [...prev, {
+      id: uuidv4(),
+      timestamp: new Date().toLocaleTimeString('tr-TR'),
+      message,
+      type,
+      scanId: scanIdToUse
+    }]);
+  };
+
+  const startScan = (scanName) => {
+    const newScanId = uuidv4();
+    setActiveScanId(newScanId);
+    addScanLog(`${scanName} başlatıldı`, 'info', newScanId);
+    return newScanId;
+  };
+
+  const stopScan = (scanId) => {
+    addScanLog('Tarama durduruldu', 'warning', scanId);
+  };
+
+  const completeScan = (scanId) => {
+    addScanLog('Tarama tamamlandı', 'success', scanId);
+  };
+
+  const clearScanLogs = () => {
+    setScanLogs([]);
+    setActiveScanId(null);
+  };
+
+  const pauseScan = async () => {
+    if (!activeScan) return;
+    try {
+      addScanLog('Tarama duraklat\u0131l\u0131yor...', 'info', activeScanId);
+      console.log('Pausing scan:', activeScan.id);
+      const response = await axios.post(`${API_URL}/network-scan/pause`, { scan_id: activeScan.id });
+      console.log('Pause response:', response.data);
+      setActiveScan(prev => ({ ...prev, status: 'paused' }));
+      addScanLog('Tarama başarıyla duraklat\u0131ld\u0131', 'warning', activeScanId);
+      // Immediate refetch
+      await fetchData();
+    } catch (e) {
+      console.error('Pause error:', e);
+      addScanLog(`Hata: Tarama durdurulamad\u0131 - ${e.message}`, 'error', activeScanId);
+    }
+  };
+
+  const resumeScan = async () => {
+    if (!activeScan) return;
+    try {
+      addScanLog('Tarama devam ettiriliyor...', 'info', activeScanId);
+      console.log('Resuming scan:', activeScan.id);
+      const response = await axios.post(`${API_URL}/network-scan/resume`, { scan_id: activeScan.id });
+      console.log('Resume response:', response.data);
+      setActiveScan(prev => ({ ...prev, status: 'scanning' }));
+      addScanLog('Tarama başarıyla devam etirildi', 'success', activeScanId);
+      // Immediate refetch
+      await fetchData();
+    } catch (e) {
+      console.error('Resume error:', e);
+      addScanLog(`Hata: Tarama devam ettirilemedi - ${e.message}`, 'error', activeScanId);
+    }
+  };
+
+  const cancelScan = async () => {
+    if (!activeScan) return;
+    try {
+      addScanLog('Tarama iptal ediliyor...', 'error', activeScanId);
+      console.log('Cancelling scan:', activeScan.id);
+      const response = await axios.post(`${API_URL}/network-scan/cancel`, { scan_id: activeScan.id });
+      console.log('Cancel response:', response.data);
+      setActiveScan(null);
+      clearScanLogs();
+      addScanLog('Tarama iptal edildi', 'error', activeScanId);
+      // Immediate refetch
+      await fetchData();
+    } catch (e) {
+      console.error('Cancel error:', e);
+      addScanLog(`Hata: Tarama iptal edilemedi - ${e.message}`, 'error', activeScanId);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const [tpls, disc, active, history] = await Promise.all([
+        axios.get(`${API_URL}/snmp-templates`),
+        axios.get(`${API_URL}/network-scan/discovered`),
+        axios.get(`${API_URL}/network-scan/active`),
+        axios.get(`${API_URL}/network-scan/history`)
+      ]);
+      setSnmpTemplates(tpls.data);
+      setDiscovered(disc.data);
+      if (active.data) {
+        console.log('Active scan:', active.data);
+      }
+      setActiveScan(active.data);
+      setScanHistory(history.data || []);
+    } catch (e) { 
+      console.error('FetchData error:', e.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Monitor scan completion
+  useEffect(() => {
+    if (activeScan && activeScanId) {
+      if (activeScan.status === 'completed') {
+        addScanLog(`Tarama tamamlandı. ${activeScan.progress_current} cihaz bulundu.`, 'success', activeScanId);
+      } else if (activeScan.status === 'error') {
+        addScanLog('Tarama sırasında hata oluştu', 'error', activeScanId);
+      } else if (activeScan.status === 'cancelled') {
+        addScanLog('Tarama iptal edildi', 'warning', activeScanId);
+      }
+    }
+  }, [activeScan?.status]);
+
+  const handleStartScan = async (e) => {
+    e.preventDefault();
+    if (form.snmp_template_ids.length === 0) {
+      alert('Lütfen en az bir SNMP template seçin.');
+      return;
+    }
+    const scanId = startScan('Ağ Taraması');
+    addScanLog(`IP Aralığı: ${form.ip_range}`, 'info', scanId);
+    addScanLog(`Seçili SNMP Templateler: ${form.snmp_template_ids.length} adet`, 'info', scanId);
+    setLoading(true);
+    try {
+      addScanLog('API\'ye tarama isteği gönderiliyor...', 'info', scanId);
+      await axios.post(`${API_URL}/network-scan`, form);
+      addScanLog('Tarama başarıyla başlatıldı, IP\'ler taranıyor...', 'success', scanId);
+      fetchData();
+    } catch (e) { 
+      addScanLog(`Hata: ${e.message}`, 'error', scanId);
+      alert('Tarama başlatılamadı!'); 
+    }
+    finally { setLoading(false); }
+  };
+
+  const handleAddDevice = async (id) => {
+    try {
+      addScanLog(`Cihaz ekleniyor (ID: ${id})...`, 'info');
+      const res = await axios.post(`${API_URL}/network-scan/add-discovered`, { id });
+      if (res.data.success) {
+        addScanLog('Cihaz başarıyla eklendi', 'success');
+        fetchData();
+        alert('Cihaz başarıyla eklendi.');
+      }
+    } catch (e) {
+      console.error('Add device error:', e);
+      const errorMsg = e.response?.data?.error || 'Cihaz eklenemedi';
+      const details = e.response?.data?.details ? ` (${e.response.data.details})` : '';
+      const code = e.response?.data?.code ? ` [Hata Kodu: ${e.response.data.code}]` : '';
+      addScanLog(`Hata: ${errorMsg}${details}${code}`, 'error');
+      alert(`Hata: ${errorMsg}${details}`);
+    }
+  };
+  const toggleTemplate = (id) => {
+    setForm(prev => {
+      const ids = prev.snmp_template_ids.includes(id)
+        ? prev.snmp_template_ids.filter(i => i !== id)
+        : [...prev.snmp_template_ids, id];
+      return { ...prev, snmp_template_ids: ids };
+    });
+  };
+
+  return (
+    <div className="network-scan-view fade-in" style={{ padding: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '30px' }}>
+        {/* Sol Panel: Tarama Kontrolü */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <div style={{ background: 'white', borderRadius: '24px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '12px', color: '#0369a1' }}>
+                <Search size={24} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Yeni Tarama</h3>
+            </div>
+            
+            <form onSubmit={handleStartScan} style={{ display: 'grid', gap: '20px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginBottom: '8px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>IP Aralığı veya Tekil IP</label>
+                <input 
+                  type="text" 
+                  value={form.ip_range} 
+                  onChange={e => setForm({...form, ip_range: e.target.value})} 
+                  placeholder="Örn: 192.168.1.1-50" 
+                  style={{ width: '100%', padding: '14px', borderRadius: '14px', border: '1px solid #e2e8f0', fontSize: '14px', outline: 'none' }} 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginBottom: '10px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SNMP Şablonları</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+                  {snmpTemplates.map(t => (
+                    <label key={t.id} style={{ 
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '12px', 
+                      background: form.snmp_template_ids.includes(t.id) ? '#f0f9ff' : '#f8fafc', 
+                      border: form.snmp_template_ids.includes(t.id) ? '1px solid #bae6fd' : '1px solid #e2e8f0', 
+                      cursor: 'pointer'
+                    }}>
+                      <input type="checkbox" checked={form.snmp_template_ids.includes(t.id)} onChange={() => toggleTemplate(t.id)} />
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{t.name}</span>
+                        <span style={{ fontSize: '11px', color: '#64748b' }}>{t.version}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  type="submit" 
+                  disabled={loading || (activeScan && activeScan.status === 'scanning')} 
+                  style={{ 
+                    flex: 1, background: 'var(--primary)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', 
+                    fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    opacity: (loading || (activeScan && activeScan.status === 'scanning')) ? 0.7 : 1
+                  }}
+                >
+                  {(activeScan && activeScan.status === 'scanning') ? 'Tarama Yapılıyor...' : 'Taramayı Başlat'}
+                </button>
+                
+                <button 
+                  type="button" 
+                  onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)} 
+                  style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px', width: '54px', position: 'relative' }}
+                >
+                  <Terminal size={22} color="#64748b" />
+                  {scanLogs.length > 0 && (
+                    <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '10px', fontWeight: '900', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white' }}>
+                      {scanLogs.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {activeScan && (activeScan.status === 'scanning' || activeScan.status === 'paused') && (
+              <div style={{ marginTop: '25px', padding: '20px', borderRadius: '20px', background: activeScan.status === 'paused' ? '#fffbeb' : '#f0f9ff', border: activeScan.status === 'paused' ? '1px solid #fde68a' : '1px solid #bae6fd' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '800', color: activeScan.status === 'paused' ? '#92400e' : '#0369a1', textTransform: 'uppercase' }}>
+                      {activeScan.status === 'paused' ? 'DURAKLATILDI' : 'TARANIYOR...'}
+                    </span>
+                    <span style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', marginTop: '2px' }}>{activeScan.progress_current} / {activeScan.progress_total}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {activeScan.status === 'scanning' ? (
+                      <button onClick={pauseScan} style={{ background: 'white', border: '1px solid #f59e0b', color: '#f59e0b', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><Clock size={16} /></button>
+                    ) : (
+                      <button onClick={resumeScan} style={{ background: 'white', border: '1px solid #10b981', color: '#10b981', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><RefreshCw size={16} /></button>
+                    )}
+                    <button onClick={cancelScan} style={{ background: 'white', border: '1px solid #ef4444', color: '#ef4444', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><X size={16} /></button>
+                  </div>
+                </div>
+                <div style={{ height: '10px', background: activeScan.status === 'paused' ? '#fef3c7' : '#e0f2fe', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', background: activeScan.status === 'paused' ? '#f59e0b' : 'var(--primary)', width: `${(activeScan.progress_current / activeScan.progress_total) * 100}%`, transition: 'width 0.4s ease' }}></div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div style={{ padding: '20px 25px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>Son Taramalar</h3>
+            </div>
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {scanHistory.map(scan => (
+                <div key={scan.id} style={{ padding: '16px 25px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b' }}>{scan.ip_range}</div>
+                    <div style={{ fontSize: '10px', color: '#64748b' }}>{new Date(scan.updated_at).toLocaleString('tr-TR')}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '12px', fontWeight: '800', color: scan.status === 'completed' ? '#059669' : '#991b1b' }}>{scan.discovered_count} Bulunan</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sağ Panel: Bulunan Cihazlar */}
+        <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)' }}>
+          <div style={{ padding: '25px 30px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Tespit Edilen Cihazlar</h3>
+            <div style={{ background: 'var(--primary)', color: 'white', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '800' }}>
+              {discovered.length} Cihaz Bulundu
+            </div>
+          </div>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <tr>
+                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>IP ADRESİ</th>
+                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>CİHAZ ADI</th>
+                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>ŞABLON</th>
+                  <th style={{ padding: '18px 30px', textAlign: 'center', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>İŞLEM</th>
+                </tr>
+              </thead>
+              <tbody>
+                {discovered.map(d => (
+                  <tr key={d.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '20px 30px' }}><span style={{ fontWeight: '800', color: '#1e293b' }}>{d.ip_address}</span></td>
+                    <td style={{ padding: '20px 30px' }}><span style={{ color: '#475569', fontSize: '14px', fontWeight: '600' }}>{d.hostname}</span></td>
+                    <td style={{ padding: '20px 30px' }}>
+                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '800' }}>
+                        {d.template_name}
+                      </span>
+                    </td>
+                    <td style={{ padding: '20px 30px', textAlign: 'center' }}>
+                      <button 
+                        onClick={() => handleAddDevice(d.id)} 
+                        title="Cihazı Envantere Ekle"
+                        style={{
+                          background: 'white', border: '2px solid var(--primary)', color: 'var(--primary)', 
+                          width: '42px', height: '42px', borderRadius: '14px', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = 'white'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--primary)'; }}
+                      >
+                        <Plus size={24} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {isDebugMenuOpen && (
+        <DebugMenu
+          isOpen={isDebugMenuOpen}
+          onClose={() => setIsDebugMenuOpen(false)}
+          scanLogs={scanLogs}
+          onStopScan={(scanId) => stopScan(scanId)}
+          onClearLogs={clearScanLogs}
+        />
+      )}
+    </div>
+  );
+};
+
+const TopologyView = ({ API_URL }) => {
+  const [topologies, setTopologies] = useState([]);
+  const [currentTopo, setCurrentTopo] = useState(null); // When null, show list
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [devices, setDevices] = useState([]);
+  const [customIcons, setCustomIcons] = useState([]);
+  const [tool, setTool] = useState('move'); // 'move', 'device', 'box', 'text', 'cable', 'delete'
+  const [isDeviceModalOpen, setIsModalOpen] = useState(false);
+  const [isNodeEditModalOpen, setIsNodeEditModalOpen] = useState(false);
+  const [editingNode, setEditingNode] = useState(null);
+  const [pendingNode, setPendingNode] = useState(null);
+  const [cableStart, setCableStart] = useState(null);
+  const [draggingNodeId, setDraggingNodeId] = useState(null);
+  const [resizingNodeId, setResizingNodeId] = useState(null);
+  const [resizeDir, setResizeDir] = useState(null); // 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se'
+  const [draggingWaypoint, setDraggingWaypoint] = useState(null); // { edgeId, index }
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState(null);
+  const svgRef = useRef(null);
+
+  const startEditNode = (id) => {
+    const node = nodes.find(n => n.id === id);
+    if (node) {
+      setEditingNode(node);
+      setIsNodeEditModalOpen(true);
+    }
+    setContextMenu(null);
+  };
+
+  const handleBgMouseDown = (e) => {
+    if (e.button === 1 || ((tool === 'move' || tool === 'select') && !draggingNodeId)) {
+      setIsPanning(true);
+      setLastMousePos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const onEdgeClick = (id, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (tool === 'delete') {
+      setEdges(edges.filter(edge => edge.id !== id));
+      return;
+    }
+    if (tool === 'cable' || tool === 'move' || tool === 'select') {
+      const { x, y } = getCoords(e);
+      setEdges(edges.map(edge => {
+        if (edge.id === id) {
+          return { ...edge, waypoints: [...(edge.waypoints || []), { x, y }] };
+        }
+        return edge;
+      }));
+    }
+  };
+
+  const onWaypointMouseDown = (edgeId, index, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    setDraggingWaypoint({ edgeId, index });
+  };
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
+
+  const fetchTopologies = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/topologies`);
+      setTopologies(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchDevices = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/devices`);
+      setDevices(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchIcons = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/icons`);
+      setCustomIcons(res.data);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => {
+    fetchTopologies();
+    fetchDevices();
+    fetchIcons();
+  }, [API_URL]);
+
+  const handleCreateTopo = async () => {
+    const name = prompt('Topoloji adı:');
+    if (!name) return;
+    try {
+      const res = await axios.post(`${API_URL}/topologies`, { name });
+      fetchTopologies();
+      openTopo(res.data);
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleRenameTopo = async (id, oldName, e) => {
+    e.stopPropagation();
+    const newName = prompt('Yeni topoloji adı:', oldName);
+    if (!newName || newName === oldName) return;
+    try {
+      await axios.put(`${API_URL}/topologies/${id}`, { name: newName });
+      fetchTopologies();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const openTopo = async (topo) => {
+    try {
+      const res = await axios.get(`${API_URL}/topologies/${topo.id}`);
+      setCurrentTopo(res.data);
+      setNodes(res.data.nodes || []);
+      setEdges(res.data.edges || []);
+      setTransform({ x: 0, y: 0, k: 1 });
+    } catch (e) { alert('Topoloji açılamadı!'); }
+  };
+
+  const deleteTopo = async (id, e) => {
+    e.stopPropagation();
+    if (!window.confirm('Bu topolojiyi silmek istediğinize emin misiniz?')) return;
+    try {
+      await axios.delete(`${API_URL}/topologies/${id}`);
+      fetchTopologies();
+    } catch (e) { alert('Hata!'); }
+  };
+
+  const handleManualSave = async () => {
+    if (!currentTopo) return;
+    try {
+      await axios.put(`${API_URL}/topologies/${currentTopo.id}`, { nodes, edges });
+      alert('Topoloji kaydedildi.');
+      fetchTopologies();
+    } catch (e) { alert('Kaydetme hatası!'); }
+  };
+
+  const getCoords = (e) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
+    const rect = svg.getBoundingClientRect();
+    const clientX = e.clientX !== undefined ? e.clientX : (e.x !== undefined ? e.x : 0);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.y !== undefined ? e.y : 0);
+    const x = (clientX - rect.left - transform.x) / transform.k;
+    const y = (clientY - rect.top - transform.y) / transform.k;
+    return { x, y };
+  };
+
+  const handleSvgClick = (e) => {
+    // If we were resizing, any click should exit resize mode
+    if (resizingNodeId) {
+      setResizingNodeId(null);
+      return;
+    }
+    
+    if (tool === 'move' || tool === 'select' || tool === 'cable' || tool === 'delete' || isPanning || draggingNodeId) return;
+    const { x, y } = getCoords(e);
+
+    if (tool === 'device') {
+      setPendingNode({ x, y, type: 'device' });
+      setIsModalOpen(true);
+    } else if (tool === 'box') {
+      setNodes([...nodes, { id: uuidv4(), x, y, type: 'box', label: 'Yeni Alan', width: 100, height: 60 }]);
+    } else if (tool === 'text') {
+      const label = prompt('Yazı girin:');
+      if (label) setNodes([...nodes, { id: uuidv4(), x, y, type: 'text', label }]);
+    }
+  };
+
+  const onNodeClick = (id, e) => {
+    e.stopPropagation();
+    
+    if (resizingNodeId) {
+      setResizingNodeId(null);
+      return;
+    }
+
+    if (tool === 'delete') {
+      setNodes(nodes.filter(n => n.id !== id));
+      setEdges(edges.filter(edge => edge.from !== id && edge.to !== id));
+    } else if (tool === 'cable') {
+      setLastMousePos({ x: e.clientX, y: e.clientY });
+      if (!cableStart) setCableStart(id);
+      else if (cableStart !== id) {
+        setEdges([...edges, { id: uuidv4(), from: cableStart, to: id, waypoints: [] }]);
+        setCableStart(null);
+      }
+    }
+  };
+
+  const onNodeContextMenu = (id, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const node = nodes.find(n => n.id === id);
+    setContextMenu({ x: e.clientX, y: e.clientY, nodeId: id, type: 'node', nodeType: node?.type });
+  };
+
+  const onEdgeContextMenu = (id, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, edgeId: id, type: 'edge' });
+  };
+
+  const bringToFront = (id) => {
+    const node = nodes.find(n => n.id === id);
+    if (node) {
+      setNodes([...nodes.filter(n => n.id !== id), node]);
+    }
+    setContextMenu(null);
+  };
+
+  const sendToBack = (id) => {
+    const node = nodes.find(n => n.id === id);
+    if (node) {
+      setNodes([node, ...nodes.filter(n => n.id !== id)]);
+    }
+    setContextMenu(null);
+  };
+
+  const deleteNode = (id) => {
+    setNodes(nodes.filter(n => n.id !== id));
+    setEdges(edges.filter(edge => edge.from !== id && edge.to !== id));
+    setContextMenu(null);
+  };
+
+  const resetEdge = (id) => {
+    setEdges(edges.map(e => e.id === id ? { ...e, waypoints: [] } : e));
+    setContextMenu(null);
+  };
+
+  const deleteEdge = (id) => {
+    setEdges(edges.filter(e => e.id !== id));
+    setContextMenu(null);
+  };
+
+  const startResize = (id) => {
+    setResizingNodeId(id);
+    setContextMenu(null);
+  };
+
+  const onNodeMouseEnter = (id) => {
+    if (cableStart) setHoveredNodeId(id);
+  };
+
+  const onNodeMouseLeave = () => {
+    setHoveredNodeId(null);
+  };
+
+  const onMouseDown = (id, e) => {
+    e.stopPropagation();
+    if (tool === 'cable') {
+      if (!cableStart) setCableStart(id);
+      setLastMousePos({ x: e.clientX, y: e.clientY });
+      return;
+    }
+    if (tool !== 'move' && tool !== 'select') return;
+    const node = nodes.find(n => n.id === id);
+    if (node) {
+      const { x, y } = getCoords(e);
+      setDragOffset({ x: x - node.x, y: y - node.y });
+      setDraggingNodeId(id);
+    }
+  };
+
+  const handleMouseUp = (e) => {
+    if (tool === 'cable' && cableStart && hoveredNodeId && cableStart !== hoveredNodeId) {
+      setEdges([...edges, { id: uuidv4(), from: cableStart, to: hoveredNodeId, waypoints: [] }]);
+      setCableStart(null);
+    } else if (tool !== 'cable') {
+      setCableStart(null);
+    }
+    // Note: if tool is 'cable' but we didn't land on a node, we keep cableStart for click-to-connect mode
+    
+    setDraggingNodeId(null);
+    setDraggingWaypoint(null);
+    setResizeDir(null);
+    setIsPanning(false);
+  };
+
+  const onMouseMove = (e) => {
+    setLastMousePos({ x: e.clientX, y: e.clientY });
+
+    if (draggingNodeId) {
+      const { x, y } = getCoords(e);
+      setNodes(prev => prev.map(n => n.id === draggingNodeId ? { ...n, x: x - dragOffset.x, y: y - dragOffset.y } : n));
+      return;
+    }
+
+    if (resizingNodeId && resizeDir) {
+      const { x, y } = getCoords(e);
+      setNodes(prev => prev.map(n => {
+        if (n.id !== resizingNodeId) return n;
+        
+        let newX = n.x;
+        let newY = n.y;
+        let newW = n.width || 120;
+        let newH = n.height || 80;
+
+        if (resizeDir.includes('e')) newW = Math.max(20, x - n.x + (n.width || 120) / 2);
+        if (resizeDir.includes('s')) newH = Math.max(20, y - n.y + (n.height || 80) / 2);
+        if (resizeDir.includes('w')) {
+          const deltaX = x - (n.x - (n.width || 120) / 2);
+          newW = Math.max(20, (n.width || 120) - deltaX);
+          newX = n.x + deltaX / 2;
+        }
+        if (resizeDir.includes('n')) {
+          const deltaY = y - (n.y - (n.height || 80) / 2);
+          newH = Math.max(20, (n.height || 80) - deltaY);
+          newY = n.y + deltaY / 2;
+        }
+
+        return { ...n, x: newX, y: newY, width: newW, height: newH };
+      }));
+      return;
+    }
+
+    if (draggingWaypoint) {
+      const { x, y } = getCoords(e);
+      setEdges(prev => prev.map(edge => {
+        if (edge.id === draggingWaypoint.edgeId) {
+          const newWaypoints = [...(edge.waypoints || [])];
+          newWaypoints[draggingWaypoint.index] = { x, y };
+          return { ...edge, waypoints: newWaypoints };
+        }
+        return edge;
+      }));
+      return;
+    }
+
+    if (isPanning) {
+      const dx = e.clientX - lastMousePos.x;
+      const dy = e.clientY - lastMousePos.y;
+      setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+      setLastMousePos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 1.1 : 0.9;
+    const newK = Math.min(Math.max(transform.k * delta, 0.1), 5);
+    const rect = svgRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const newX = mouseX - (mouseX - transform.x) * (newK / transform.k);
+    const newY = mouseY - (mouseY - transform.y) * (newK / transform.k);
+    setTransform({ x: newX, y: newY, k: newK });
+  };
+
+  const updateNodeSettings = (id, updates) => {
+    setNodes(nodes.map(n => n.id === id ? { ...n, ...updates } : n));
+    setIsNodeEditModalOpen(false);
+    setEditingNode(null);
+  };
+
+  if (!currentTopo) {
+    return (
+      <div className="topo-list-view fade-in">
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px'}}>
+          <div>
+            <h2 style={{margin:0, fontSize:'1.5rem', fontWeight:'800'}}>Topoloji Yönetimi</h2>
+            <p style={{margin:0, color:'#64748b'}}>Ağ yapılarınızı görsel olarak tasarlayın ve yönetin.</p>
+          </div>
+          <button onClick={handleCreateTopo} style={{background:'var(--primary)', color:'white', border:'none', padding:'12px 24px', borderRadius:'14px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'10px'}}><Plus size={20}/> Yeni Topoloji Oluştur</button>
+        </div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:'20px'}}>
+          {topologies.map(t => (
+            <div key={t.id} onClick={() => openTopo(t)} style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'20px', padding:'20px', cursor:'pointer', transition:'all 0.2s', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)'}} onMouseOver={e=>e.currentTarget.style.borderColor='var(--primary)'} onMouseOut={e=>e.currentTarget.style.borderColor='#e2e8f0'}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'15px'}}>
+                <h3 style={{margin:0, fontSize:'1.1rem', fontWeight:'800'}}>{t.name}</h3>
+                <div style={{display:'flex', gap:'5px'}}>
+                  <button onClick={(e) => handleRenameTopo(t.id, t.name, e)} style={{padding:'6px', borderRadius:'8px', border:'none', background:'#f1f5f9', color:'#475569', cursor:'pointer'}} title="Yeniden Adlandır"><Edit size={16}/></button>
+                  <button onClick={(e) => deleteTopo(t.id, e)} style={{padding:'6px', borderRadius:'8px', border:'none', background:'#fef2f2', color:'#ef4444', cursor:'pointer'}} title="Sil"><Trash2 size={16}/></button>
+                </div>
+              </div>
+              <div style={{fontSize:'12px', color:'#64748b'}}>Son Güncelleme: {new Date(t.updated_at).toLocaleString()}</div>
+            </div>
+          ))}
+          {topologies.length === 0 && <div style={{gridColumn:'1/-1', textAlign:'center', padding:'60px', color:'#94a3b8'}}>Henüz bir topoloji oluşturulmadı.</div>}
+        </div>
+      </div>
+    );
+  }
+
+  const containerStyle = isFullScreen ? { position:'fixed', top:0, left:0, width:'100vw', height:'100vh', zIndex:2000, background:'#f8fafc', display:'flex', flexDirection:'column' } : { height:'calc(100vh - 180px)', display:'flex', flexDirection:'column' };
+
+  return (
+    <div className="topology-editor fade-in" style={containerStyle}>
+      <div style={{background:'white', padding:'12px 25px', borderRadius:isFullScreen?0:'20px', border:'1px solid #e2e8f0', marginBottom:isFullScreen?0:'15px', display:'flex', justifyContent:'space-between', alignItems:'center', boxShadow:'0 4px 6px -1px rgba(0,0,0,0.05)', zIndex:10}}>
+        <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+          <button onClick={() => setCurrentTopo(null)} style={{marginRight:'10px', padding:'8px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}} title="Geri Dön"><ArrowLeft size={18}/></button>
+          <div style={{height:'24px', width:'1px', background:'#e2e8f0', marginRight:'10px'}}></div>
+          <button onClick={() => setTool('move')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='move'?'2px solid var(--primary)':'1px solid #e2e8f0', background: tool==='move'?'#eff6ff':'white', cursor:'pointer', fontWeight:'700'}} title="Sürükleme Modu"><Activity size={16}/> Sürükle</button>
+          <button onClick={() => setTool('device')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='device'?'2px solid var(--primary)':'1px solid #e2e8f0', background: tool==='device'?'#eff6ff':'white', cursor:'pointer', fontWeight:'700'}} title="Cihaz Ekle"><Server size={16}/> Cihaz</button>
+          <button onClick={() => setTool('cable')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='cable'?'2px solid var(--primary)':'1px solid #e2e8f0', background: tool==='cable'?'#eff6ff':'white', cursor:'pointer', fontWeight:'700'}} title="Kablo Çek"><LinkIcon size={16}/> Kablo</button>
+          <button onClick={() => setTool('box')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='box'?'2px solid var(--primary)':'1px solid #e2e8f0', background: tool==='box'?'#eff6ff':'white', cursor:'pointer', fontWeight:'700'}} title="Alan/Kutu"><Plus size={16}/> Kutu</button>
+          <button onClick={() => setTool('text')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='text'?'2px solid var(--primary)':'1px solid #e2e8f0', background: tool==='text'?'#eff6ff':'white', cursor:'pointer', fontWeight:'700'}} title="Yazı"><Plus size={16}/> Yazı</button>
+          <button onClick={() => setTool('delete')} style={{padding:'8px 12px', borderRadius:'10px', border: tool==='delete'?'2px solid #ef4444':'1px solid #e2e8f0', background: tool==='delete'?'#fef2f2':'white', cursor:'pointer', fontWeight:'700', color:tool==='delete'?'#ef4444':'#64748b'}} title="Silme Modu"><Trash2 size={16}/> Sil</button>
+        </div>
+        <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+          <span 
+            onClick={() => handleRenameTopo(currentTopo.id, currentTopo.name, { stopPropagation: () => {} })}
+            style={{fontSize:'13px', fontWeight:'800', color:'#1e293b', cursor:'pointer', borderBottom:'1px dashed #cbd5e1'}}
+            title="Yeniden Adlandır"
+          >
+            {currentTopo.name}
+          </span>
+          <div style={{height:'24px', width:'1px', background:'#e2e8f0'}}></div>
+          <button onClick={handleManualSave} style={{padding:'8px 20px', borderRadius:'10px', border:'none', background:'var(--primary)', color:'white', cursor:'pointer', fontWeight:'700', display:'flex', alignItems:'center', gap:'8px'}}><Save size={16}/> Kaydet</button>
+          <button onClick={() => setIsFullScreen(!isFullScreen)} style={{padding:'8px 12px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}} title="Tam Ekran"><Monitor size={16}/></button>
+        </div>
+      </div>
+
+      <div style={{flex:1, background:'#f1f5f9', borderRadius:isFullScreen?0:'24px', border:isFullScreen?'none':'2px dashed #e2e8f0', position:'relative', overflow:'hidden'}} onMouseMove={onMouseMove} onMouseUp={handleMouseUp} onMouseDown={handleBgMouseDown} onWheel={handleWheel}>
+        <svg ref={svgRef} width="100%" height="100%" onClick={handleSvgClick} style={{cursor: isPanning ? 'grabbing' : (tool==='move'?'default': tool==='delete'?'no-drop' : 'crosshair'), background: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: `${20 * transform.k}px ${20 * transform.k}px`, backgroundPosition: `${transform.x}px ${transform.y}px`}}>
+          <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`}>
+            {edges.map(edge => {
+              const fromNode = nodes.find(n => n.id === edge.from);
+              const toNode = nodes.find(n => n.id === edge.to);
+              if (!fromNode || !toNode) return null;
+              
+              const points = [
+                { x: fromNode.x, y: fromNode.y },
+                ...(edge.waypoints || []),
+                { x: toNode.x, y: toNode.y }
+              ];
+              
+              const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ');
+              
+              return (
+                <g key={edge.id}>
+                  <polyline 
+                    points={polylinePoints} 
+                    fill="none"
+                    stroke={tool==='delete'?'#ef4444':'#94a3b8'} 
+                    strokeWidth={10 / transform.k} 
+                    strokeOpacity={tool==='delete'?0.5:0} 
+                    style={{cursor:tool==='delete'?'pointer':'default', pointerEvents:'stroke'}} 
+                    onClick={(e) => onEdgeClick(edge.id, e)}
+                    onContextMenu={(e) => onEdgeContextMenu(edge.id, e)}
+                  />
+                  <polyline 
+                    points={polylinePoints} 
+                    fill="none"
+                    stroke={tool==='delete'?'#ef4444':'#94a3b8'} 
+                    strokeWidth={4 / transform.k} 
+                    strokeOpacity={tool==='delete'?0.5:1} 
+                    pointerEvents="none"
+                  />
+                  {(tool === 'move' || tool === 'select' || tool === 'cable') && (edge.waypoints || []).map((wp, idx) => (
+                    <circle 
+                      key={`${edge.id}-wp-${idx}`}
+                      cx={wp.x} 
+                      cy={wp.y} 
+                      r={6 / transform.k} 
+                      fill="white" 
+                      stroke="var(--primary)" 
+                      strokeWidth={2 / transform.k} 
+                      style={{cursor:'move'}}
+                      onMouseDown={(e) => onWaypointMouseDown(edge.id, idx, e)}
+                    />
+                  ))}
+                </g>
+              );
+            })}
+
+            {cableStart && (() => {
+              const startNode = nodes.find(n => n.id === cableStart);
+              if (!startNode) return null;
+              const { x, y } = getCoords(lastMousePos); // We need mouse pos in SVG coords
+              return (
+                <line 
+                  x1={startNode.x} y1={startNode.y} 
+                  x2={x} y2={y} 
+                  stroke="var(--primary)" 
+                  strokeWidth={2 / transform.k} 
+                  strokeDasharray="5,5" 
+                  pointerEvents="none" 
+                />
+              );
+            })()}
+
+            {nodes.map(node => {
+              const customIcon = customIcons.find(icon => icon.id === node.customIconId);
+              const isSelected = editingNode && editingNode.id === node.id;
+              
+              return (
+                <g key={node.id} transform={`translate(${node.x}, ${node.y})`} onMouseDown={(e) => onMouseDown(node.id, e)} onClick={(e) => onNodeClick(node.id, e)} onContextMenu={(e) => onNodeContextMenu(node.id, e)} style={{cursor: tool==='move'?'move':'pointer', userSelect:'none'}}>
+                  {node.type === 'device' && (
+                    <>
+                      <circle r="35" fill="white" stroke={tool==='delete'?'#ef4444':(isSelected || cableStart===node.id ?'var(--primary)':'#e2e8f0')} strokeWidth={isSelected?3:2} style={{transition:'all 0.2s'}} />
+                      {customIcon ? (
+                        <image href={customIcon.data} x="-22" y="-22" width="44" height="44" />
+                      ) : (
+                        <Server size={28} x="-14" y="-14" style={{color:tool==='delete'?'#ef4444':'var(--primary)'}} />
+                      )}
+                      <text y="50" textAnchor="middle" style={{fontSize:'12px', fontWeight:'800', fill:'#1e293b'}}>{node.overriddenLabel || node.label}</text>
+                      {node.overriddenLabel && <text y="64" textAnchor="middle" style={{fontSize:'10px', fill:'#94a3b8', fontWeight:'600'}}>({node.label})</text>}
+                    </>
+                  )}
+                  {node.type === 'box' && (() => {
+                    const w = node.width || 120;
+                    const h = node.height || 80;
+                    const isResizing = resizingNodeId === node.id;
+                    const isEditing = editingNode && editingNode.id === node.id;
+                    const handleSize = 8 / transform.k;
+                    
+                    const handles = [
+                      { dir: 'nw', x: -w/2, y: -h/2 }, { dir: 'n', x: 0, y: -h/2 }, { dir: 'ne', x: w/2, y: -h/2 },
+                      { dir: 'e', x: w/2, y: 0 }, { dir: 'se', x: w/2, y: h/2 }, { dir: 's', x: 0, y: h/2 },
+                      { dir: 'sw', x: -w/2, y: h/2 }, { dir: 'w', x: -w/2, y: 0 }
+                    ];
+
+                    const labelY = node.labelPosition === 'top' ? -h/2 + 15 : (node.labelPosition === 'bottom' ? h/2 - 10 : 0);
+                    const labelWeight = node.labelPosition === 'middle' ? '700' : '800';
+                    const labelSize = node.labelPosition === 'middle' ? 13 : 14;
+
+                    return (
+                      <>
+                        <rect x={-w/2} y={-h/2} width={w} height={h} rx="12" fill="rgba(255,255,255,0.6)" stroke={tool==='delete'?'#ef4444':((isResizing || isEditing)?'var(--primary)':'#e2e8f0')} strokeWidth={(isResizing || isEditing)?2:1} />
+                        {node.label && (
+                          <text 
+                            x="0" 
+                            y={labelY} 
+                            textAnchor="middle" 
+                            dominantBaseline="middle" 
+                            style={{
+                              fontSize:`${labelSize}px`, 
+                              fontWeight:labelWeight, 
+                              fill:'#1e293b', 
+                              pointerEvents:'none',
+                              textShadow: node.labelPosition !== 'middle' ? '0 1px 2px rgba(255,255,255,0.8)' : 'none'
+                            }}
+                          >
+                            {node.label}
+                          </text>
+                        )}
+                        {isResizing && (tool === 'move' || tool === 'select') && handles.map(hd => (
+                          <rect 
+                            key={hd.dir}
+                            x={hd.x - handleSize/2} y={hd.y - handleSize/2} 
+                            width={handleSize} height={handleSize} 
+                            fill="white" stroke="var(--primary)" strokeWidth={1/transform.k}
+                            style={{cursor: `${hd.dir}-resize` }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              setResizingNodeId(node.id);
+                              setResizeDir(hd.dir);
+                            }}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()}
+                  {node.type === 'text' && (
+                    <text 
+                      textAnchor="middle" 
+                      dominantBaseline="middle" 
+                      style={{
+                        fontSize: `${(node.fontSize || 16)}px`, 
+                        fontFamily: node.fontFamily || 'inherit',
+                        fontWeight: '900', 
+                        fill: tool==='delete' ? '#ef4444' : '#0f172a'
+                      }}
+                    >
+                      {node.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
+
+      {isDeviceModalOpen && (
+        <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:3000}}>
+          <div style={{background:'white', width:'400px', borderRadius:'24px', padding:'30px'}}>
+            <h3 style={{marginBottom:'20px'}}>Cihaz Seçin</h3>
+            <div style={{maxHeight:'300px', overflowY:'auto', display:'flex', flexDirection:'column', gap:'10px'}}>
+              {devices.map(d => (
+                <div key={d.id} onClick={() => {
+                  setNodes([...nodes, { id: uuidv4(), x: pendingNode.x, y: pendingNode.y, type: 'device', deviceId: d.id, label: d.name, ip: d.ip_address }]);
+                  setIsModalOpen(false);
+                }} style={{padding:'12px 15px', borderRadius:'12px', border:'1px solid #e2e8f0', cursor:'pointer', display:'flex', justifyContent:'space-between'}}>
+                  <span style={{fontWeight:'700'}}>{d.name}</span>
+                  <span style={{fontSize:'12px', color:'#64748b'}}>{d.ip_address}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setIsModalOpen(false)} style={{width:'100%', marginTop:'20px', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer'}}>İptal</button>
+          </div>
+        </div>
+      )}
+
+      {isNodeEditModalOpen && editingNode && (
+        <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:3000}}>
+          <div style={{background:'white', width:'450px', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.5)'}}>
+            <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingNode.type === 'text' ? 'Yazı Özellikleri' : (editingNode.type === 'box' ? 'Kutu Özellikleri' : 'Cihaz Özellikleri')}</h3>
+            <div style={{display:'grid', gap:'20px'}}>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>{editingNode.type === 'text' ? 'Yazı İçeriği' : (editingNode.type === 'box' ? 'Kutu Başlığı' : 'Görünen Ad (Override)')}</label>
+                <input 
+                  type="text" 
+                  value={editingNode.type === 'text' ? (editingNode.label || '') : (editingNode.type === 'box' ? (editingNode.label || '') : (editingNode.overriddenLabel || ''))} 
+                  onChange={e => editingNode.type === 'text' || editingNode.type === 'box' ? setEditingNode({...editingNode, label: e.target.value}) : setEditingNode({...editingNode, overriddenLabel: e.target.value})} 
+                  placeholder={editingNode.label}
+                  style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} 
+                />
+                {editingNode.type === 'device' && <p style={{fontSize:'11px', color:'#94a3b8', marginTop:'5px'}}>Gerçek Ad: {editingNode.label}</p>}
+              </div>
+
+              {editingNode.type === 'box' && (
+                <div>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Başlık Konumu</label>
+                  <div style={{display:'flex', gap:'10px', marginTop:'8px'}}>
+                    {[
+                      { id: 'top', label: 'Üst' },
+                      { id: 'middle', label: 'Orta' },
+                      { id: 'bottom', label: 'Alt' }
+                    ].map(pos => (
+                      <button 
+                        key={pos.id}
+                        onClick={() => setEditingNode({...editingNode, labelPosition: pos.id})}
+                        style={{
+                          flex:1, padding:'10px', borderRadius:'10px', border: editingNode.labelPosition === pos.id ? '2px solid var(--primary)' : '1px solid #e2e8f0',
+                          background: editingNode.labelPosition === pos.id ? '#eff6ff' : 'white', fontWeight:'700', fontSize:'12px', cursor:'pointer'
+                        }}
+                      >
+                        {pos.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {editingNode.type === 'text' && (
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Yazı Boyutu (px)</label>
+                    <input 
+                      type="number" 
+                      value={editingNode.fontSize || 16} 
+                      onChange={e => setEditingNode({...editingNode, fontSize: parseInt(e.target.value) || 16})} 
+                      style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} 
+                    />
+                  </div>
+                  <div>
+                    <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Yazı Tipi</label>
+                    <select 
+                      value={editingNode.fontFamily || 'inherit'} 
+                      onChange={e => setEditingNode({...editingNode, fontFamily: e.target.value})} 
+                      style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white'}}
+                    >
+                      <option value="inherit">Varsayılan</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Verdana">Verdana</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {editingNode.type === 'device' && (
+                <div>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>Özel İkon</label>
+                  <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(60px, 1fr))', gap:'10px', marginTop:'10px', maxHeight:'150px', overflowY:'auto', padding:'10px', border:'1px solid #f1f5f9', borderRadius:'12px'}}>
+                    <div 
+                      onClick={() => setEditingNode({...editingNode, customIconId: null})}
+                      style={{padding:'10px', borderRadius:'10px', border: !editingNode.customIconId?'2px solid var(--primary)':'1px solid #e2e8f0', cursor:'pointer', textAlign:'center'}}
+                    >
+                      <Server size={24} color="#94a3b8" />
+                    </div>
+                    {customIcons.map(icon => (
+                      <div 
+                        key={icon.id}
+                        onClick={() => setEditingNode({...editingNode, customIconId: icon.id})}
+                        style={{padding:'10px', borderRadius:'10px', border: editingNode.customIconId===icon.id?'2px solid var(--primary)':'1px solid #e2e8f0', cursor:'pointer', textAlign:'center'}}
+                      >
+                        <img src={icon.data} alt={icon.name} style={{width:'32px', height:'32px', objectFit:'contain'}} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
+                <button onClick={() => setIsNodeEditModalOpen(false)} style={{flex:1, padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', fontWeight:'700', cursor:'pointer'}}>İptal</button>
+                <button 
+                  onClick={() => {
+                    const updates = editingNode.type === 'text' 
+                      ? { label: editingNode.label, fontSize: editingNode.fontSize, fontFamily: editingNode.fontFamily }
+                      : (editingNode.type === 'box' ? { label: editingNode.label } : { overriddenLabel: editingNode.overriddenLabel, customIconId: editingNode.customIconId });
+                    updateNodeSettings(editingNode.id, updates);
+                  }} 
+                  style={{flex:1, padding:'12px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'700', cursor:'pointer'}}
+                >
+                  Uygula
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {contextMenu && (
+        <div style={{position:'fixed', top:contextMenu.y, left:contextMenu.x, background:'white', border:'1px solid #e2e8f0', borderRadius:'12px', padding:'8px', boxShadow:'0 10px 15px -3px rgba(0,0,0,0.1)', zIndex:4000, minWidth:'180px'}}>
+          {contextMenu.type === 'node' ? (
+            <>
+              <button onClick={() => startEditNode(contextMenu.nodeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#1e293b'}} onMouseOver={e=>e.currentTarget.style.background='#f1f5f9'} onMouseOut={e=>e.currentTarget.style.background='none'}><Edit size={16}/> Düzenle</button>
+              {contextMenu.nodeType === 'box' && (
+                <button onClick={() => startResize(contextMenu.nodeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#1e293b'}} onMouseOver={e=>e.currentTarget.style.background='#f1f5f9'} onMouseOut={e=>e.currentTarget.style.background='none'}><Plus size={16}/> Boyutlandır</button>
+              )}
+              <button onClick={() => bringToFront(contextMenu.nodeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#1e293b'}} onMouseOver={e=>e.currentTarget.style.background='#f1f5f9'} onMouseOut={e=>e.currentTarget.style.background='none'}><ChevronUp size={16}/> Öne Getir</button>
+              <button onClick={() => sendToBack(contextMenu.nodeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#1e293b'}} onMouseOver={e=>e.currentTarget.style.background='#f1f5f9'} onMouseOut={e=>e.currentTarget.style.background='none'}><ChevronDown size={16}/> Geriye Götür</button>
+              <div style={{height:'1px', background:'#f1f5f9', margin:'4px 0'}}></div>
+              <button onClick={() => deleteNode(contextMenu.nodeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#ef4444'}} onMouseOver={e=>e.currentTarget.style.background='#fef2f2'} onMouseOut={e=>e.currentTarget.style.background='none'}><Trash2 size={16}/> Sil</button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => resetEdge(contextMenu.edgeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#1e293b'}} onMouseOver={e=>e.currentTarget.style.background='#f1f5f9'} onMouseOut={e=>e.currentTarget.style.background='none'}><RefreshCw size={16}/> Sıfırla (Noktaları Sil)</button>
+              <div style={{height:'1px', background:'#f1f5f9', margin:'4px 0'}}></div>
+              <button onClick={() => deleteEdge(contextMenu.edgeId)} style={{display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 15px', border:'none', background:'none', cursor:'pointer', borderRadius:'8px', fontSize:'13px', fontWeight:'600', color:'#ef4444'}} onMouseOver={e=>e.currentTarget.style.background='#fef2f2'} onMouseOut={e=>e.currentTarget.style.background='none'}><Trash2 size={16}/> Kabloyu Sil</button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- Switch Analysis View ---
+const SwitchAnalysisView = ({ API_URL, onStartAnalysis, devices = [] }) => {
+  const [vendor, setVendor] = useState('cisco');
+  const [method, setMethod] = useState('file'); // 'file' | 'ssh'
+  const [sshForm, setSshForm] = useState({ host: '', port: '22', username: '', password: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleDeviceSelect = (e) => {
+    const devId = e.target.value;
+    if (!devId) {
+      setSshForm({ host: '', port: '22', username: '', password: '' });
+      return;
+    }
+    const dev = devices.find(d => String(d.id) === devId);
+    if (dev) {
+      setSshForm({
+        ...sshForm,
+        host: dev.ip_address || '',
+      });
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('vendor', vendor);
+    formData.append('model', 'generic');
+
+    try {
+      const res = await axios.post(`${API_URL}/switch-scan/file`, formData);
+      onStartAnalysis(res.data.fileUid);
+    } catch (err) {
+      alert('Dosya yukleme hatasi: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSshScan = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/switch-scan/ssh`, { ...sshForm, vendor, model: 'generic' });
+      onStartAnalysis(res.data.fileUid);
+    } catch (err) {
+      alert('SSH Tarama hatasi: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="switch-analysis-view fade-in">
+      <div style={{background:'white', padding:'30px', borderRadius:'24px', border:'1px solid #e2e8f0', boxShadow:'0 10px 15px -3px rgba(0,0,0,0.05)'}}>
+        <h3 style={{fontSize:'1.25rem', fontWeight:'800', marginBottom:'20px'}}>Switch Güvenlik Analizi</h3>
+        
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'30px'}}>
+          {/* Step 1: Vendor Selection */}
+          <div style={{borderRight:'1px solid #e2e8f0', paddingRight:'30px'}}>
+            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'10px'}}>1. MARKA (VENDOR) SEÇİN</label>
+            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px'}}>
+              {[
+                { id: 'cisco', name: 'Cisco', icon: <Server size={20}/> },
+                { id: 'arista', name: 'Arista', icon: <Zap size={20}/> },
+                { id: 'huawei', name: 'Huawei', icon: <Activity size={20}/> }
+              ].map((v) => (
+                <div 
+                  key={v.id} 
+                  onClick={() => setVendor(v.id)}
+                  style={{
+                    padding:'15px', borderRadius:'15px', border:`2px solid ${vendor === v.id ? 'var(--primary)' : '#f1f5f9'}`,
+                    background: vendor === v.id ? '#eff6ff' : 'white', cursor:'pointer', textAlign:'center', transition:'all 0.2s'
+                  }}
+                >
+                  <div style={{color: vendor === v.id ? 'var(--primary)' : '#94a3b8', marginBottom:'8px'}}>{v.icon}</div>
+                  <div style={{fontSize:'13px', fontWeight:'700', color: vendor === v.id ? '#1e40af' : '#475569'}}>{v.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 2: Method Selection */}
+          <div>
+            <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'10px'}}>2. TARAMA YÖNTEMİ</label>
+            <div style={{display:'flex', gap:'10px', marginBottom:'20px'}}>
+              <button 
+                onClick={() => setMethod('file')}
+                style={{
+                  flex:1, padding:'12px', borderRadius:'12px', border:'none', 
+                  background: method === 'file' ? '#0f172a' : '#f1f5f9', color: method === 'file' ? 'white' : '#64748b',
+                  fontWeight:'700', cursor:'pointer'
+                }}
+              >
+                <FileText size={18} style={{verticalAlign:'middle', marginRight:'8px'}}/> Dosyadan (.conf, .txt)
+              </button>
+              <button 
+                onClick={() => setMethod('ssh')}
+                style={{
+                  flex:1, padding:'12px', borderRadius:'12px', border:'none', 
+                  background: method === 'ssh' ? '#0f172a' : '#f1f5f9', color: method === 'ssh' ? 'white' : '#64748b',
+                  fontWeight:'700', cursor:'pointer'
+                }}
+              >
+                <Terminal size={18} style={{verticalAlign:'middle', marginRight:'8px'}}/> Canlı SSH Bağlantısı
+              </button>
+            </div>
+
+            {method === 'file' ? (
+              <div style={{padding:'20px', border:'2px dashed #e2e8f0', borderRadius:'15px', textAlign:'center'}}>
+                <Upload size={32} style={{color:'#94a3b8', marginBottom:'10px'}}/>
+                <p style={{fontSize:'13px', color:'#64748b', marginBottom:'15px'}}>Seçilen <strong>{vendor.toUpperCase()}</strong> marka switch için konfigürasyon dosyasını yükleyin.</p>
+                <input type="file" id="sw-up" onChange={handleFileChange} style={{display:'none'}} disabled={loading} />
+                <label htmlFor="sw-up" style={{background:'var(--primary)', color:'white', padding:'10px 20px', borderRadius:'10px', fontWeight:'700', cursor:'pointer', opacity: loading ? 0.6 : 1}}>
+                  {loading ? 'Yükleniyor...' : 'Dosya Seç ve Analiz Et'}
+                </label>
+              </div>
+            ) : (
+              <div style={{display:'grid', gap:'15px'}}>
+                <div>
+                  <label style={{fontSize:'11px', fontWeight:'700', color:'#64748b', marginBottom:'5px', display:'block'}}>KAYITLI CİHAZLARDAN SEÇİN</label>
+                  <select 
+                    onChange={handleDeviceSelect}
+                    style={{width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', fontSize:'14px'}}
+                  >
+                    <option value="">-- Cihaz Seçin (Opsiyonel) --</option>
+                    {devices.map(d => (
+                      <option key={d.id} value={d.id}>{d.name || d.ip_address} ({d.ip_address})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{height:'1px', background:'#f1f5f9', margin:'5px 0'}}></div>
+
+                <form onSubmit={handleSshScan} style={{display:'grid', gap:'12px'}}>
+                  <div style={{display:'grid', gridTemplateColumns:'2fr 1fr', gap:'10px'}}>
+                    <input type="text" placeholder="IP Adresi" value={sshForm.host} onChange={e => setSshForm({...sshForm, host: e.target.value})} style={{padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                    <input type="text" placeholder="Port (22)" value={sshForm.port} onChange={e => setSshForm({...sshForm, port: e.target.value})} style={{padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+                  </div>
+                  <input type="text" placeholder="Kullanıcı Adı" value={sshForm.username} onChange={e => setSshForm({...sshForm, username: e.target.value})} style={{padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  <input type="password" placeholder="Şifre" value={sshForm.password} onChange={e => setSshForm({...sshForm, password: e.target.value})} style={{padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+                  <button type="submit" disabled={loading} style={{background:'var(--primary)', color:'white', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'700', cursor:'pointer', opacity: loading ? 0.6 : 1}}>
+                    {loading ? 'Bağlanıyor ve Config Çekiliyor...' : 'Bağlan ve Tara'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Dashboard Component ---
 function Dashboard() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -1284,8 +3486,10 @@ function Dashboard() {
   const [progress, setProgress] = useState(0);
   const [currentView, setCurrentView] = useState('recent'); // 'recent' | 'devices' | 'monitor' | 'hitcounts' | 'performance'
   const [devices, setDevices] = useState([]);
+  const [snmpDevices, setSnmpDevices] = useState([]);
   const [newDevice, setNewDevice] = useState({ name: '', ip_address: '', api_key: '', vdom: 'root' });
   const [editingDevice, setEditingDevice] = useState(null);
+  const [isAddDeviceModalOpen, setIsAddDeviceModalOpen] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [lastMonitorCheck, setLastMonitorCheck] = useState(null);
   const [autoRefreshInterval, setAutoRefreshInterval] = useState(60); // saniye cinsinden
@@ -1293,7 +3497,41 @@ function Dashboard() {
   const [selectedScanDeviceId, setSelectedScanDeviceId] = useState('');
   const [isDeviceScanLoading, setIsDeviceScanLoading] = useState(false);
   const [unreadCVE, setUnreadCVE] = useState(0);
+  const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
+  const [scanLogs, setScanLogs] = useState([]);
+  const [activeScanId, setActiveScanId] = useState(null);
   const devicesRef = useRef([]);
+
+  const addScanLog = (message, type = 'info', scanId = null) => {
+    const scanIdToUse = scanId || activeScanId;
+    setScanLogs(prev => [...prev, {
+      id: uuidv4(),
+      timestamp: new Date().toLocaleTimeString('tr-TR'),
+      message,
+      type, // 'info' | 'success' | 'error' | 'warning'
+      scanId: scanIdToUse
+    }]);
+  };
+
+  const startScan = (scanName) => {
+    const newScanId = uuidv4();
+    setActiveScanId(newScanId);
+    addScanLog(`${scanName} taraması başlatıldı`, 'info', newScanId);
+    return newScanId;
+  };
+
+  const stopScan = (scanId) => {
+    addScanLog('Tarama durduruldu', 'warning', scanId);
+  };
+
+  const completeScan = (scanId) => {
+    addScanLog('Tarama tamamlandı', 'success', scanId);
+  };
+
+  const clearScanLogs = () => {
+    setScanLogs([]);
+    setActiveScanId(null);
+  };
 
   const fetchUnreadCVE = async () => {
     try {
@@ -1323,11 +3561,18 @@ function Dashboard() {
     } catch (err) { console.error(err); }
   };
 
+  const fetchSnmpDevices = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/devices?snmp=true`);
+      setSnmpDevices(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   const monitorDevices = async () => {
     setIsMonitoring(true);
     try {
       await axios.get(`${API_URL}/devices/monitor`);
-      await fetchDevices();
+      await Promise.all([fetchDevices(), fetchSnmpDevices()]);
       setLastMonitorCheck(new Date());
     } catch (err) { console.error('Monitor error:', err); }
     finally { setIsMonitoring(false); }
@@ -1336,6 +3581,7 @@ function Dashboard() {
   useEffect(() => { 
     fetchFiles(); 
     fetchDevices();
+    fetchSnmpDevices();
     fetchUnreadCVE();
     
     // Initial monitor check
@@ -1376,8 +3622,11 @@ function Dashboard() {
   }, [autoRefreshInterval]);
 
   const simulateAnalysis = async (fileUid) => {
+    const scanId = startScan('Konfigürasyon Analizi');
     setIsAnalyzing(true);
     setProgress(0);
+    addScanLog(`Dosya UID: ${fileUid}`, 'info', scanId);
+    
     const duration = 10000; 
     const interval = 100;
     const step = 100 / (duration / interval);
@@ -1389,19 +3638,32 @@ function Dashboard() {
     }, interval);
 
     try {
+      addScanLog('Konfigürasyon ayrıştırılıyor...', 'info', scanId);
       await axios.post(`${API_URL}/parse-config`, { fileUid });
       setProgress(100);
+      addScanLog('Analiz başarıyla tamamlandı', 'success', scanId);
+      completeScan(scanId);
       setTimeout(() => { setIsAnalyzing(false); fetchFiles(); }, 500);
-    } catch (err) { clearInterval(timer); setIsAnalyzing(false); alert('Analiz hatası!'); }
+    } catch (err) { 
+      clearInterval(timer); 
+      setIsAnalyzing(false); 
+      addScanLog(`Analiz hatası: ${err.message}`, 'error', scanId);
+      alert('Analiz hatası!'); 
+    }
   };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]; if (!file) return;
+    addScanLog(`Dosya yükleniyor: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`, 'info');
     const formData = new FormData(); formData.append('file', file);
     try {
       const res = await axios.post(`${API_URL}/upload-config`, formData);
+      addScanLog(`Dosya başarıyla yüklendi`, 'success');
       simulateAnalysis(res.data.fileUid);
-    } catch (err) { alert('Yükleme hatası!'); }
+    } catch (err) { 
+      addScanLog(`Yükleme hatası: ${err.message}`, 'error');
+      alert('Yükleme hatası!'); 
+    }
   };
 
   const handleDeviceApiScan = async () => {
@@ -1410,21 +3672,27 @@ function Dashboard() {
       return;
     }
 
+    const scanId = startScan('Cihaz API Taraması');
+    const selectedDevice = devices.find(d => d.id === selectedScanDeviceId);
+    addScanLog(`Cihaz: ${selectedDevice?.name || selectedDevice?.ip_address}`, 'info', scanId);
+
     try {
       setIsDeviceScanLoading(true);
+      addScanLog(`${selectedDevice?.ip_address} adresine bağlanılıyor...`, 'info', scanId);
       const res = await axios.post(`${API_URL}/devices/${selectedScanDeviceId}/scan-config`);
       if (!res.data?.fileUid) throw new Error('Config dosyasi olusturulamadi.');
+      addScanLog('Konfigürasyon başarıyla alındı', 'success', scanId);
       await simulateAnalysis(res.data.fileUid);
     } catch (err) {
       const errMsg = err?.response?.data?.error || 'Cihaz config cekme hatasi!';
       const errDetails = err?.response?.data?.details || '';
       const errSuggestion = err?.response?.data?.suggestion || '';
       const isOffline = err?.response?.status === 503 || err?.response?.data?.deviceStatus === 'offline';
-      const isPermission = err?.response?.status === 403;
+      addScanLog(`Tarama hatası: ${errMsg}`, 'error', scanId);
       
       if (isOffline) {
         alert('⚠️ Cihaz Offline\n\nSeçili cihaz şu anda erişilebilir değil. Config çekebilmek için:\n• Cihazın açık ve ağda olduğundan emin olun\n• Monitoring sayfasından cihaz durumunu kontrol edin\n• API erişim ayarlarını doğrulayın');
-      } else if (isPermission) {
+      } else if (err?.response?.status === 403) {
         alert(`🔒 API Yetki Hatası\n\n${errMsg}\n\n${errSuggestion || 'API token için gerekli yetkiler eksik. FortiGate üzerinde API token ayarlarını kontrol edin.'}\n\nAlternatif: Config dosyasını manuel olarak indirip Upload sayfasından yükleyebilirsiniz.`);
       } else {
         alert(`❌ Hata\n\n${errMsg}${errDetails ? '\n\n' + errDetails : ''}`);
@@ -1439,6 +3707,7 @@ function Dashboard() {
     try {
       await axios.post(`${API_URL}/devices`, newDevice);
       setNewDevice({ name: '', ip_address: '', api_key: '', vdom: 'root' });
+      setIsAddDeviceModalOpen(false);
       fetchDevices();
     } catch (err) { alert('Cihaz ekleme hatası!'); }
   };
@@ -1470,15 +3739,72 @@ function Dashboard() {
   return (
     <div className="app-layout">
       {isAnalyzing && <CircularLoader progress={progress} />}
+      <DebugMenu 
+        isOpen={isDebugMenuOpen} 
+        onClose={() => setIsDebugMenuOpen(false)} 
+        scanLogs={scanLogs} 
+        onStopScan={stopScan}
+        onClearLogs={clearScanLogs}
+      />
+      
+      {/* Cihaz Ekleme Modalı */}
+      {isAddDeviceModalOpen && (
+        <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000}}>
+          <div style={{background:'white', width:'500px', maxWidth:'96vw', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
+              <h3 style={{margin:0, fontSize:'1.25rem', fontWeight:'800'}}>Yeni FortiGate Cihazı Ekle</h3>
+              <button onClick={() => setIsAddDeviceModalOpen(false)} style={{background:'none', border:'none', cursor:'pointer', color:'#64748b'}}><X size={24}/></button>
+            </div>
+            <form onSubmit={handleAddDevice} style={{display:'grid', gap:'15px'}}>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>CİHAZ ADI (OPSİYONEL)</label>
+                <input type="text" placeholder="Örn: FW-Merkez" value={newDevice.name} onChange={e => setNewDevice({...newDevice, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+              </div>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>IP ADRESİ</label>
+                <input type="text" placeholder="10.0.0.1" value={newDevice.ip_address} onChange={e => setNewDevice({...newDevice, ip_address: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+              </div>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>API KEY (TOKEN)</label>
+                <input type="password" placeholder="FortiGate API Token" value={newDevice.api_key} onChange={e => setNewDevice({...newDevice, api_key: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required />
+              </div>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>VDOM</label>
+                <input type="text" placeholder="root" value={newDevice.vdom} onChange={e => setNewDevice({...newDevice, vdom: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0'}} />
+              </div>
+              <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
+                <button type="button" onClick={() => setIsAddDeviceModalOpen(false)} style={{flex:1, padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', fontWeight:'700', cursor:'pointer'}}>İptal</button>
+                <button type="submit" style={{flex:2, background:'var(--primary)', color:'white', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'700', cursor:'pointer'}}>Cihazı Kaydet</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <aside className="app-sidebar">
         <div className="sidebar-brand"><Shield size={32} style={{color:'#818cf8'}} /><h2>NSS ENGINE</h2></div>
         <nav className="sidebar-nav">
           <div className={`nav-item ${currentView === 'recent' ? 'active' : ''}`} onClick={() => setCurrentView('recent')} style={{cursor:'pointer'}}><Home size={20} /><span>Ana Panel</span></div>
-          <div className={`nav-item ${currentView === 'devices' ? 'active' : ''}`} onClick={() => setCurrentView('devices')} style={{cursor:'pointer'}}><Database size={20} /><span>Cihazlar</span></div>
-          <div className={`nav-item ${currentView === 'monitor' ? 'active' : ''}`} onClick={() => setCurrentView('monitor')} style={{cursor:'pointer'}}><Activity size={20} /><span>Monitor</span></div>
-          <div className={`nav-item ${currentView === 'deviceTracker' ? 'active' : ''}`} onClick={() => setCurrentView('deviceTracker')} style={{cursor:'pointer'}}><Server size={20} /><span>Cihaz Takibi</span></div>
-          <div className={`nav-item ${currentView === 'hitcounts' ? 'active' : ''}`} onClick={() => setCurrentView('hitcounts')} style={{cursor:'pointer'}}><BarChart3 size={20} /><span>HitCount Analizi</span></div>
-          <div className={`nav-item ${currentView === 'cve' ? 'active' : ''}`} onClick={() => setCurrentView('cve')} style={{cursor:'pointer', position:'relative'}}><AlertTriangle size={20} /><span>CVE Takibi</span>{unreadCVE > 0 && <span style={{position:'absolute', top:'10px', right:'15px', width:'8px', height:'8px', background:'#ef4444', borderRadius:'50%', border:'2px solid #1e293b'}}></span>}</div>
+          <div className={`nav-item ${currentView === 'deviceMgmt' ? 'active' : ''}`} onClick={() => setCurrentView('deviceMgmt')} style={{cursor:'pointer'}}><Monitor size={20} /><span>Cihaz Yönetimi</span></div>
+          <div className={`nav-item ${currentView === 'networkScan' ? 'active' : ''}`} onClick={() => setCurrentView('networkScan')} style={{cursor:'pointer'}}><Search size={20} /><span>Ağ Tarama</span></div>
+          <div className={`nav-item ${currentView === 'topology' ? 'active' : ''}`} onClick={() => setCurrentView('topology')} style={{cursor:'pointer'}}><Activity size={20} /><span>Topoloji</span></div>
+
+          <div className="nav-group">            <div className={`nav-item ${currentView === 'firewallAnalysis' || currentView === 'hitcounts' ? 'active' : ''}`} onClick={() => setCurrentView('firewallAnalysis')} style={{cursor:'pointer'}}>
+              <Shield size={20} /><span>Firewall Analizi</span>
+            </div>
+            {(currentView === 'firewallAnalysis' || currentView === 'hitcounts') && (
+              <div className="sub-menu" style={{paddingLeft: '35px', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '5px', marginBottom: '10px'}}>
+                <div className={`nav-item sub ${currentView === 'firewallAnalysis' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setCurrentView('firewallAnalysis'); }} style={{fontSize: '13px', padding: '8px 12px', cursor:'pointer', opacity: currentView === 'firewallAnalysis' ? 1 : 0.7, background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', color: currentView === 'firewallAnalysis' ? 'white' : '#94a3b8'}}>
+                  <Zap size={16} /> <span>Güvenlik Analizi</span>
+                </div>
+                <div className={`nav-item sub ${currentView === 'hitcounts' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setCurrentView('hitcounts'); }} style={{fontSize: '13px', padding: '8px 12px', cursor:'pointer', opacity: currentView === 'hitcounts' ? 1 : 0.7, background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', color: currentView === 'hitcounts' ? 'white' : '#94a3b8'}}>
+                  <BarChart3 size={16} /> <span>Hit Count Analizi</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={`nav-item ${currentView === 'switchAnalysis' ? 'active' : ''}`} onClick={() => setCurrentView('switchAnalysis')} style={{cursor:'pointer'}}><Monitor size={20} /><span>Switch Güvenlik Analizi</span></div>          <div className={`nav-item ${currentView === 'cve' ? 'active' : ''}`} onClick={() => setCurrentView('cve')} style={{cursor:'pointer', position:'relative'}}><AlertTriangle size={20} /><span>CVE Takibi</span>{unreadCVE > 0 && <span style={{position:'absolute', top:'10px', right:'15px', width:'8px', height:'8px', background:'#ef4444', borderRadius:'50%', border:'2px solid #1e293b'}}></span>}</div>
           <div className={`nav-item ${currentView === 'performance' ? 'active' : ''}`} onClick={() => setCurrentView('performance')} style={{cursor:'pointer'}}><Cpu size={20} /><span>Performans</span></div>
           <div className={`nav-item ${currentView === 'settings' ? 'active' : ''}`} onClick={() => setCurrentView('settings')} style={{cursor:'pointer'}}><SettingsIcon size={20} /><span>Ayarlar</span></div>
         </nav>
@@ -1490,8 +3816,12 @@ function Dashboard() {
       </aside>
       <div className="app-main">
         <header className="app-topbar">
-          <div className="welcome-msg"><h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'devices' ? 'Cihaz Yönetimi' : currentView === 'monitor' ? 'Cihaz Monitor' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : 'Sistem Ayarları'}</h1><p>{currentView === 'recent' ? 'Sistem yapılandırma analizleri' : currentView === 'devices' ? 'API üzerinden FortiGate cihazlarını bağlayın' : currentView === 'monitor' ? 'Eklenen cihazların acik/kapali durumunu izleyin' : currentView === 'hitcounts' ? 'Politika hit count trendi ve gecmis analizi' : currentView === 'performance' ? 'CPU, Memory, VPN, Interface, HA Status, Certificates' : currentView === 'cve' ? 'Güncel Fortinet PSIRT ve CVE duyuruları' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p></div>
+          <div className="welcome-msg"><h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'firewallAnalysis' ? 'Firewall Güvenlik Analizi' : currentView === 'deviceMgmt' ? 'Cihaz Yönetimi' : currentView === 'monitor' ? 'Cihaz Monitor' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : currentView === 'switchAnalysis' ? 'Switch Güvenlik Analizi' : 'Sistem Ayarları'}</h1><p>{currentView === 'recent' ? 'Son analiz raporları ve sistem özeti' : currentView === 'firewallAnalysis' ? 'Dosya yükleyerek veya API üzerinden cihaz tarayarak güvenlik analizi başlatın' : currentView === 'deviceMgmt' ? 'Ağ cihazlarınızı merkezi olarak ekleyin ve yönetin' : currentView === 'monitor' ? 'Eklenen cihazların acik/kapali durumunu izleyin' : currentView === 'hitcounts' ? 'Politika hit count trendi ve gecmis analizi' : currentView === 'performance' ? 'CPU, Memory, VPN, Interface, HA Status, Certificates' : currentView === 'cve' ? 'Güncel Fortinet PSIRT ve CVE duyuruları' : currentView === 'switchAnalysis' ? 'Switch konfigürasyonlarını analiz edin' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p></div>
           <div style={{display:'flex', alignItems:'center', gap:'20px'}}>
+            <button onClick={() => setIsDebugMenuOpen(true)} style={{position:'relative', cursor:'pointer', color:'#64748b', background:'none', border:'none', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.3s', borderRadius:'8px'}} className="debug-button" title="Debug Menüsünü Aç">
+              <Terminal size={20} />
+              {scanLogs.length > 0 && <span style={{position:'absolute', top:'0px', right:'0px', background:'#6366f1', color:'white', fontSize:'9px', fontWeight:'800', padding:'1px 4px', borderRadius:'8px', minWidth:'16px', textAlign:'center', boxShadow:'0 4px 10px rgba(99,102,241,0.4)'}}>{scanLogs.length}</span>}
+            </button>
             <div onClick={() => setCurrentView('cve')} style={{position:'relative', cursor:'pointer', color: unreadCVE > 0 ? '#ef4444' : '#64748b', transition:'all 0.3s'}} className={unreadCVE > 0 ? 'pulse' : ''}>
               <Bell size={24} />
               {unreadCVE > 0 && <span style={{position:'absolute', top:'-5px', right:'-5px', background:'#ef4444', color:'white', fontSize:'10px', fontWeight:'800', padding:'2px 6px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(239,68,68,0.4)'}}>{unreadCVE}</span>}
@@ -1501,20 +3831,34 @@ function Dashboard() {
         </header>
         <div className="content-area">
           {currentView === 'recent' ? (
-            <div className="recent-view fade-in">
-              <div className="hero-upload-card" style={{display:'grid', gap:'16px'}}>
+            <div className="recent-view fade-in" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', textAlign:'center', color:'#64748b'}}>
+              <div style={{background:'#f8fafc', padding:'40px', borderRadius:'30px', border:'1px solid #e2e8f0', maxWidth:'500px'}}>
+                <Shield size={60} style={{color:'#818cf8', marginBottom:'20px', opacity:0.5}} />
+                <h2 style={{color:'#1e293b', marginBottom:'10px', fontWeight:'800'}}>NSS ENGINE Hoş Geldiniz</h2>
+                <p>Güvenlik analizlerini başlatmak ve raporları yönetmek için yan menüdeki <strong>Firewall Güvenlik Analizi</strong> sekmesini kullanabilirsiniz.</p>
+              </div>
+            </div>
+          ) : currentView === 'deviceMgmt' ? (
+            <DeviceManagementView API_URL={API_URL} />
+          ) : currentView === 'networkScan' ? (
+            <NetworkScanView API_URL={API_URL} />
+          ) : currentView === 'topology' ? (
+            <TopologyView API_URL={API_URL} />
+          ) : currentView === 'firewallAnalysis' ? (
+            <div className="firewall-analysis-view fade-in">
+              <div className="hero-upload-card" style={{display:'grid', gap:'16px', marginBottom:'40px'}}>
                 {!scanSource && (
                   <>
                     <div className="hero-text">
-                      <h2>Analiz Yontemi Secin</h2>
-                      <p>Sayfa acilisinda analiz kaynagini secin: dosyadan yukleme veya API ile cihazin config yedegini alip tarama.</p>
+                      <h2>Analiz Yöntemi Seçin</h2>
+                      <p>Sistem yapılandırmasını nasıl analiz etmek istersiniz? Config dosyasını yükleyebilir veya ekli bir cihazdan otomatik çekebilirsiniz.</p>
                     </div>
                     <div style={{display:'flex', gap:'12px', flexWrap:'wrap'}}>
-                      <button onClick={() => setScanSource('file')} style={{background:'var(--primary)', color:'white', border:'none', padding:'12px 18px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'8px'}}>
-                        <Upload size={18}/> 1) Dosyadan Tarama
+                      <button onClick={() => setScanSource('file')} style={{background:'var(--primary)', color:'white', border:'none', padding:'15px 25px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'10px'}}>
+                        <Upload size={20}/> 1) Config Dosyası Yükle
                       </button>
-                      <button onClick={() => setScanSource('deviceApi')} style={{background:'#0f172a', color:'white', border:'none', padding:'12px 18px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'8px'}}>
-                        <Server size={18}/> 2) API ile Cihazdan Tarama
+                      <button onClick={() => setScanSource('deviceApi')} style={{background:'#0f172a', color:'white', border:'none', padding:'15px 25px', borderRadius:'12px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'10px'}}>
+                        <Server size={20}/> 2) API ile Cihazdan Çek
                       </button>
                     </div>
                   </>
@@ -1522,36 +3866,37 @@ function Dashboard() {
 
                 {scanSource === 'file' && (
                   <>
-                    <div className="hero-text"><h2>Dosyadan Tarama</h2><p>FortiGate konfig dosyasini yukleyin, otomatik analiz baslasin.</p></div>
+                    <div className="hero-text"><h2>Dosyadan Tarama</h2><p>FortiGate konfigürasyon (.conf) dosyasını yükleyin, otomatik güvenlik analizi başlasın.</p></div>
                     <div style={{display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap'}}>
                       <input type="file" id="hero-up" onChange={handleFileUpload} style={{display:'none'}} />
-                      <label htmlFor="hero-up" className="upload-btn-lg"><Upload size={24} /><span>DOSYA SEÇİN</span></label>
-                      <button onClick={() => setScanSource(null)} style={{padding:'10px 14px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', fontWeight:'700'}}>Yontemi Degistir</button>
+                      <label htmlFor="hero-up" className="upload-btn-lg"><Upload size={24} /><span>DOSYA SEÇİN VE ANALİZ ET</span></label>
+                      <button onClick={() => setScanSource(null)} style={{padding:'12px 18px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', fontWeight:'700'}}>Yöntemi Değiştir</button>
                     </div>
                   </>
                 )}
 
                 {scanSource === 'deviceApi' && (
                   <>
-                    <div className="hero-text"><h2>API ile Cihazdan Tarama</h2><p>Bagli cihazdan config yedegini alip otomatik analiz baslatin.</p></div>
+                    <div className="hero-text"><h2>API ile Cihazdan Tarama</h2><p>Bağlı olan FortiGate cihazınızdan güncel konfigürasyonu çekerek analizi başlatın.</p></div>
                     <div style={{display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap'}}>
-                      <select value={selectedScanDeviceId} onChange={(e) => setSelectedScanDeviceId(e.target.value)} style={{padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minWidth:'280px', background:'white'}}>
-                        {devices.length === 0 && <option value="">Cihaz bulunamadi</option>}
-                        {devices.map((d) => (
+                      <select value={selectedScanDeviceId} onChange={(e) => setSelectedScanDeviceId(e.target.value)} style={{padding:'12px', borderRadius:'10px', border:'1px solid #e2e8f0', minWidth:'320px', background:'white', fontSize:'14px'}}>
+                        {devices.filter(d => d.connection_method === 'api').length === 0 && <option value="">API destekli cihaz bulunamadı</option>}
+                        {devices.filter(d => d.connection_method === 'api').map((d) => (
                           <option key={d.id} value={d.id}>{d.name || d.ip_address} ({d.ip_address})</option>
                         ))}
                       </select>
-                      <button onClick={handleDeviceApiScan} disabled={isDeviceScanLoading || devices.length === 0} style={{background:'var(--primary)', color:'white', border:'none', padding:'12px 16px', borderRadius:'10px', fontWeight:'700', cursor: isDeviceScanLoading ? 'not-allowed' : 'pointer', opacity: isDeviceScanLoading ? 0.7 : 1}}>
-                        {isDeviceScanLoading ? 'Config Cekiliyor...' : 'API ile Tara'}
+                      <button onClick={handleDeviceApiScan} disabled={isDeviceScanLoading || devices.filter(d => d.connection_method === 'api').length === 0} style={{background:'var(--primary)', color:'white', border:'none', padding:'13px 25px', borderRadius:'12px', fontWeight:'700', cursor: isDeviceScanLoading ? 'not-allowed' : 'pointer', opacity: isDeviceScanLoading ? 0.7 : 1}}>
+                        {isDeviceScanLoading ? 'Konfigürasyon Çekiliyor...' : 'Analizi Başlat'}
                       </button>
-                      <button onClick={() => setScanSource(null)} style={{padding:'10px 14px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', fontWeight:'700'}}>Yontemi Degistir</button>
+                      <button onClick={() => setScanSource(null)} style={{padding:'12px 18px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', fontWeight:'700'}}>Yöntemi Değiştir</button>
                     </div>
-                    {devices.length === 0 && <p style={{margin:'4px 0 0', color:'#ef4444', fontSize:'12px'}}>Bu secenek icin once Cihazlar ekranindan en az bir cihaz ekleyin.</p>}
+                    {devices.filter(d => d.connection_method === 'api').length === 0 && <p style={{margin:'10px 0 0', color:'#ef4444', fontSize:'13px', fontWeight:'600'}}>Bu özellik için önce "Cihaz Yönetimi" menüsünden <strong>API (REST)</strong> yöntemiyle bir cihaz eklemelisiniz.</p>}
                   </>
                 )}
               </div>
-              <div className="recent-reports-section">
-                <div className="section-header"><h3>Son Raporlar</h3></div>
+
+              <div className="recent-reports-section" style={{marginTop: 0}}>
+                <div className="section-header"><h3>Son Analiz Raporları</h3></div>
                 <div className="report-list">
                   {uploadedFiles.map((f, idx) => (
                     <div key={`${f.id ?? f.file_uid ?? f.file_name ?? 'file'}-${idx}`} className="report-mini-card fade-in">
@@ -1570,50 +3915,8 @@ function Dashboard() {
                 </div>
               </div>
             </div>
-          ) : currentView === 'devices' ? (
-            <div className="devices-view fade-in">
-              <div style={{background:'white', padding:'30px', borderRadius:'24px', border:'1px solid #e2e8f0', marginBottom:'30px'}}>
-                <h3 style={{marginBottom:'20px', fontSize:'1.25rem', fontWeight:'800'}}>{editingDevice ? 'Cihazı Düzenle' : 'Yeni Cihaz Ekle'}</h3>
-                <form onSubmit={editingDevice ? handleUpdateDevice : handleAddDevice} style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr auto auto', gap:'15px', alignItems:'end'}}>
-                  <div><label style={{fontSize:'11px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>CİHAZ ADI (OPSİYONEL)</label><input type="text" placeholder="FW-01" value={editingDevice ? editingDevice.name : newDevice.name} onChange={e => editingDevice ? setEditingDevice({...editingDevice, name: e.target.value}) : setNewDevice({...newDevice, name: e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} /></div>
-                  <div><label style={{fontSize:'11px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>IP ADRESİ</label><input type="text" placeholder="1.1.1.1" value={editingDevice ? editingDevice.ip_address : newDevice.ip_address} onChange={e => editingDevice ? setEditingDevice({...editingDevice, ip_address: e.target.value}) : setNewDevice({...newDevice, ip_address: e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required /></div>
-                  <div><label style={{fontSize:'11px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>API KEY</label><input type="password" placeholder="Token" value={editingDevice ? editingDevice.api_key : newDevice.api_key} onChange={e => editingDevice ? setEditingDevice({...editingDevice, api_key: e.target.value}) : setNewDevice({...newDevice, api_key: e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} required={!editingDevice} /></div>
-                  <div><label style={{fontSize:'11px', fontWeight:'700', color:'#64748b', display:'block', marginBottom:'5px'}}>VDOM</label><input type="text" placeholder="root" value={editingDevice ? editingDevice.vdom : newDevice.vdom} onChange={e => editingDevice ? setEditingDevice({...editingDevice, vdom: e.target.value}) : setNewDevice({...newDevice, vdom: e.target.value})} style={{width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e2e8f0'}} /></div>
-                  <button type="submit" style={{background: editingDevice ? '#10b981' : 'var(--primary)', color:'white', border:'none', padding:'12px 25px', borderRadius:'10px', fontWeight:'700', cursor:'pointer'}}>{editingDevice ? 'Güncelle' : 'Kaydet'}</button>
-                  {editingDevice && <button type="button" onClick={() => setEditingDevice(null)} style={{background:'#94a3b8', color:'white', border:'none', padding:'12px 25px', borderRadius:'10px', fontWeight:'700', cursor:'pointer'}}>İptal</button>}
-                </form>
-              </div>
-
-              <div style={{background:'white', borderRadius:'24px', border:'1px solid #e2e8f0', overflow:'hidden'}}>
-                <table style={{width:'100%', borderCollapse:'collapse'}}>
-                  <thead style={{background:'#f8fafc', borderBottom:'1px solid #e2e8f0'}}>
-                    <tr>
-                      <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>CİHAZ</th>
-                      <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>IP / VDOM</th>
-                      <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>DURUM</th>
-                      <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>SON SENK.</th>
-                      <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {devices.map((d, idx) => (
-                      <tr key={`${d.id ?? d.ip_address ?? 'device-row'}-${idx}`} style={{borderBottom:'1px solid #f1f5f9'}}>
-                        <td style={{padding:'15px 25px'}}><div style={{fontWeight:'700', color:'#1e293b'}}>{d.name}</div></td>
-                        <td style={{padding:'15px 25px'}}><div style={{fontSize:'13px', color:'#475569'}}>{d.ip_address} <span style={{fontSize:'11px', background:'#f1f5f9', padding:'2px 6px', borderRadius:'4px', marginLeft:'5px'}}>{d.vdom}</span></div></td>
-                        <td style={{padding:'15px 25px'}}><span className="badge" style={{background:'#f1f5f9', color:'#64748b'}}>{d.status}</span></td>
-                        <td style={{padding:'15px 25px'}}><div style={{fontSize:'12px', color:'#94a3b8'}}>{d.last_sync ? new Date(d.last_sync).toLocaleString() : 'Hiç senkronize edilmedi'}</div></td>
-                        <td style={{padding:'15px 25px', textAlign:'right'}}>
-                          <button onClick={() => setEditingDevice(d)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', marginRight:'10px', cursor:'pointer'}}>Düzenle</button>
-                          <button onClick={() => alert('API senkronizasyonu yakında aktif edilecek.')} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #e2e8f0', background:'white', fontSize:'12px', fontWeight:'700', marginRight:'10px', cursor:'pointer'}}>Senkronize Et</button>
-                          <button onClick={() => handleDeleteDevice(d.id)} style={{padding:'6px 12px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}>Sil</button>
-                        </td>
-                      </tr>
-                    ))}
-                    {devices.length === 0 && <tr><td colSpan="5" style={{padding:'40px', textAlign:'center', color:'#64748b'}}>Henüz bir cihaz eklenmedi.</td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          ) : currentView === 'switchAnalysis' ? (
+            <SwitchAnalysisView API_URL={API_URL} onStartAnalysis={simulateAnalysis} devices={devices.filter(d => d.connection_method === 'snmp_ssh')} />
           ) : currentView === 'monitor' ? (
             <div className="monitor-view fade-in">
               <div style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'24px', padding:'24px', marginBottom:'20px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'20px', flexWrap:'wrap'}}>
@@ -1621,7 +3924,6 @@ function Dashboard() {
                   <h3 style={{margin:'0 0 6px', fontSize:'1.15rem', fontWeight:'800', color:'#0f172a'}}>CIHAZ MONITORU</h3>
                   <p style={{margin:0, fontSize:'13px', color:'#64748b'}}>
                     Son kontrol: {lastMonitorCheck ? lastMonitorCheck.toLocaleString() : 'Henuz yapilmadi'}
-                    {autoRefreshInterval > 0 && <span style={{marginLeft:'10px', color:'#10b981'}}>• Otomatik yenileme: {autoRefreshInterval}s</span>}
                   </p>
                 </div>
                 <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
@@ -1634,9 +3936,8 @@ function Dashboard() {
                     <option value="15">15 saniye</option>
                     <option value="30">30 saniye</option>
                     <option value="60">60 saniye</option>
-                    <option value="120">2 dakika</option>
                   </select>
-                  <button type="button" onClick={monitorDevices} disabled={isMonitoring} style={{background:'var(--primary)', color:'white', border:'none', padding:'11px 18px', borderRadius:'10px', fontWeight:'700', cursor: isMonitoring ? 'not-allowed' : 'pointer', opacity: isMonitoring ? 0.7 : 1}}>
+                  <button type="button" onClick={monitorDevices} disabled={isMonitoring} style={{background:'#0f172a', color:'white', border:'none', padding:'11px 18px', borderRadius:'10px', fontWeight:'700', cursor: isMonitoring ? 'not-allowed' : 'pointer', opacity: isMonitoring ? 0.7 : 1}}>
                     {isMonitoring ? 'Kontrol Ediliyor...' : 'Simdi Kontrol Et'}
                   </button>
                 </div>
@@ -1647,7 +3948,6 @@ function Dashboard() {
                   const isOnline = d.status === 'online';
                   return (
                     <div key={`${d.id ?? d.ip_address ?? 'monitor-device'}-${idx}`} style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'18px', padding:'18px', boxShadow:'0 10px 20px rgba(15,23,42,0.04)'}}>
-                      <div style={{fontSize:'11px', fontWeight:'800', color:'#64748b', letterSpacing:'0.4px', marginBottom:'10px'}}>CIHAZ MONITORU</div>
                       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px'}}>
                         <strong style={{fontSize:'14px', color:'#0f172a'}}>{d.name || d.ip_address || 'Isimsiz Cihaz'}</strong>
                         <span style={{fontSize:'11px', fontWeight:'700', padding:'4px 8px', borderRadius:'999px', background:isOnline ? '#dcfce7' : '#fee2e2', color:isOnline ? '#166534' : '#991b1b'}}>
@@ -1656,9 +3956,6 @@ function Dashboard() {
                       </div>
                       <div style={{fontSize:'13px', color:'#334155', marginBottom:'8px'}}>{d.ip_address || '-'}</div>
                       <div style={{fontSize:'12px', color:'#64748b'}}>VDOM: {d.vdom || 'root'}</div>
-                      <div style={{fontSize:'12px', color:'#94a3b8', marginTop:'8px'}}>
-                        Son senk.: {d.last_sync ? new Date(d.last_sync).toLocaleString() : 'Hic senkronize edilmedi'}
-                      </div>
                     </div>
                   );
                 })}
@@ -1666,16 +3963,16 @@ function Dashboard() {
 
               {devices.length === 0 && <div style={{marginTop:'20px', background:'white', border:'1px solid #e2e8f0', borderRadius:'16px', padding:'24px', textAlign:'center', color:'#64748b'}}>Monitor icin once cihaz ekleyin.</div>}
             </div>
-          ) : currentView === 'deviceTracker' ? (
-            <DeviceTracker API_URL={API_URL} />
           ) : currentView === 'hitcounts' ? (
             <HitCountView devices={devices} API_URL={API_URL} autoRefreshInterval={autoRefreshInterval} />
           ) : currentView === 'performance' ? (
             <PerformanceView devices={devices} API_URL={API_URL} autoRefreshInterval={autoRefreshInterval} />
           ) : currentView === 'cve' ? (
             <CVEView API_URL={API_URL} onMarkRead={markCVEAsRead} />
-          ) : (
+          ) : currentView === 'settings' ? (
             <SettingsView API_URL={API_URL} />
+          ) : (
+            <div style={{padding:'40px', textAlign:'center', color:'#64748b'}}>Sayfa bulunamadı.</div>
           )}
         </div>
       </div>
@@ -1882,6 +4179,61 @@ const PerformanceView = ({ devices, API_URL, autoRefreshInterval }) => {
 };
 
 // --- Report Page ---
+const SwitchAnalysisCard = ({ finding }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className={`analysis-detail-card ${isExpanded ? 'is-expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="analysis-card-header">
+        <div className="policy-meta">
+          <span className={`badge ${finding.passed ? 'badge-success' : 'badge-danger'}`} style={{marginRight:'10px'}}>
+            {finding.passed ? 'BAŞARILI' : 'İHLAL'}
+          </span>
+          <span className="policy-id">ID: {finding.rule_id}</span>
+          <h4 className="policy-name">{finding.name}</h4>
+        </div>
+        <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
+          <span style={{fontSize:'11px', fontWeight:'800', padding:'4px 10px', borderRadius:'8px', background: finding.severity==='CRITICAL'?'#fee2e2':finding.severity==='HIGH'?'#ffedd5':'#f1f5f9', color: finding.severity==='CRITICAL'?'#ef4444':finding.severity==='HIGH'?'#f59e0b':'#64748b'}}>{finding.severity}</span>
+          <div className="expand-icon"><ChevronRight size={20} /></div>
+        </div>
+      </div>
+      
+      {isExpanded && (
+        <div className="analysis-card-body fade-in">
+          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px', marginBottom:'20px'}}>
+            <div className="detail-col">
+              <label>Kontrol Mantığı</label>
+              <div className="detail-box" style={{fontSize:'13px', color:'#475569'}}>{finding.check_logic}</div>
+            </div>
+            <div className="detail-col">
+              <label>Tespit Edilen Değer</label>
+              <div className="detail-box" style={{fontFamily:'monospace', fontSize:'13px', color: finding.passed ? '#166534' : '#991b1b', background: finding.passed ? '#f0fdf4' : '#fef2f2'}}>
+                {finding.found_line || 'Kayıt bulunamadı'}
+              </div>
+            </div>
+          </div>
+
+          {!finding.passed && (
+            <div className="risks-section">
+              <label>Çözüm Önerisi (Remediation)</label>
+              <div style={{background:'#f8fafc', padding:'15px', borderRadius:'12px', border:'1px solid #e2e8f0', marginBottom:'15px'}}>
+                <div style={{fontFamily:'monospace', fontSize:'13px', color:'#1e293b', marginBottom:'10px'}}>{finding.remediation}</div>
+              </div>
+              {finding.details && finding.details.length > 0 && (
+                <div style={{fontSize:'13px', color:'#64748b'}}>
+                  <ul style={{paddingLeft:'20px', margin:0}}>
+                    {finding.details.map((d, i) => <li key={i} style={{marginBottom:'4px'}}>{d}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function ReportPage() {
   const { uid } = useParams(); const navigate = useNavigate();
   const [data, setData] = useState(null); const [loading, setLoading] = useState(true);
@@ -1897,7 +4249,7 @@ function ReportPage() {
         const start = Date.now();
         const r = await axios.get(`${API_URL}/config-detail/${uid}`);
         const elapsed = Date.now() - start;
-        const delay = Math.max(0, 3000 - elapsed);
+        const delay = Math.max(0, 2000 - elapsed);
         
         setTimeout(() => {
           setData(r.data);
@@ -1915,6 +4267,7 @@ function ReportPage() {
   if (!data || !data.file) return <div className="error-screen"><h2>Hata!</h2><button onClick={()=>navigate('/')}>Geri</button></div>;
 
   const { file } = data; const analysis = file.analysis_data || {}; const summary = file.summary_data || {};
+  const isSwitch = analysis.config_type === 'switch';
   const stigScore = analysis.stig_score ?? 0; const cisScore = analysis.cis_score ?? 0; const bpScore = analysis.bp_score ?? 0;
 
   return (
@@ -1923,24 +4276,30 @@ function ReportPage() {
         <div className="report-sidebar-header">
           <div className="back-btn" onClick={()=>navigate('/')}><ArrowLeft size={18}/><span>Dashboard'a Dön</span></div>
           <div className="device-info-compact">
-            <label>Cihaz Analizi</label>
-            <span>{summary.device_name || 'FortiGate'}</span>
+            <label>{isSwitch ? 'Switch Analizi' : 'FortiGate Analizi'}</label>
+            <span>{summary.device_name || (isSwitch ? 'Switch' : 'FortiGate')}</span>
           </div>
         </div>
         <nav className="report-nav">
-          <button className={`report-nav-item ${activeTab==='summary'?'active':''}`} onClick={()=>setActiveTab('summary')}><Info size={18}/><span>Cihaz Özeti</span></button>
-          <button className={`report-nav-item ${activeTab==='interface'?'active':''}`} onClick={()=>setActiveTab('interface')}><ArrowRight size={18}/><span>Arayüz Analizi</span></button>
-          <button className={`report-nav-item ${activeTab==='ip_analysis'?'active':''}`} onClick={()=>setActiveTab('ip_analysis')}><Database size={18}/><span>IP Analizi</span></button>
-          <button className={`report-nav-item ${activeTab==='compliance'?'active':''}`} onClick={()=>setActiveTab('compliance')}><Shield size={18}/><span>Sıkılaştırma Denetimi</span></button>
-          <button className={`report-nav-item ${activeTab==='analysis'?'active':''}`} onClick={()=>setActiveTab('analysis')}><Search size={18}/><span>Geniş Erişim Analizi</span></button>
-          <button className={`report-nav-item ${activeTab==='profiles'?'active':''}`} onClick={()=>setActiveTab('profiles')}><Activity size={18}/><span>Güvenlik Profil Tespiti</span></button>
-          <button className={`report-nav-item ${activeTab==='shadow'?'active':''}`} onClick={()=>setActiveTab('shadow')}><Zap size={18}/><span>Shadow Analizi</span></button>
+          <button className={`report-nav-item ${activeTab==='summary'?'active':''}`} onClick={()=>setActiveTab('summary')}><Info size={18}/><span>{isSwitch ? 'Cihaz Özeti' : 'Cihaz Özeti'}</span></button>
+          {!isSwitch ? (
+            <>
+              <button className={`report-nav-item ${activeTab==='interface'?'active':''}`} onClick={()=>setActiveTab('interface')}><ArrowRight size={18}/><span>Arayüz Analizi</span></button>
+              <button className={`report-nav-item ${activeTab==='ip_analysis'?'active':''}`} onClick={()=>setActiveTab('ip_analysis')}><Database size={18}/><span>IP Analizi</span></button>
+              <button className={`report-nav-item ${activeTab==='compliance'?'active':''}`} onClick={()=>setActiveTab('compliance')}><Shield size={18}/><span>Sıkılaştırma Denetimi</span></button>
+              <button className={`report-nav-item ${activeTab==='analysis'?'active':''}`} onClick={()=>setActiveTab('analysis')}><Search size={18}/><span>Geniş Erişim Analizi</span></button>
+              <button className={`report-nav-item ${activeTab==='profiles'?'active':''}`} onClick={()=>setActiveTab('profiles')}><Activity size={18}/><span>Güvenlik Profil Tespiti</span></button>
+              <button className={`report-nav-item ${activeTab==='shadow'?'active':''}`} onClick={()=>setActiveTab('shadow')}><Zap size={18}/><span>Shadow Analizi</span></button>
+            </>
+          ) : (
+            <button className={`report-nav-item ${activeTab==='findings'?'active':''}`} onClick={()=>setActiveTab('findings')}><Shield size={18}/><span>Güvenlik Bulguları</span></button>
+          )}
         </nav>
       </aside>
 
       <div className="app-main">
         <header className="app-topbar">
-          <h2 className="page-title">Denetim Raporu</h2>
+          <h2 className="page-title">{isSwitch ? 'Switch Güvenlik Raporu' : 'FortiGate Denetim Raporu'}</h2>
           <div style={{display:'flex', gap:'10px'}}>
             <button className="btn-secondary" onClick={()=>{
               window.print();
@@ -1957,20 +4316,20 @@ function ReportPage() {
                     <div style={{position:'relative', zIndex:2}}>
                       <div style={{display:'flex', alignItems:'center', gap:'15px', marginBottom:'20px'}}>
                         <div style={{background:'rgba(255,255,255,0.1)', padding:'12px', borderRadius:'14px', backdropFilter:'blur(10px)'}}>
-                          <Shield size={32} style={{color:'#818cf8'}}/>
+                          <Shield size={32} style={{color: isSwitch ? '#10b981' : '#818cf8'}}/>
                         </div>
                         <div>
-                          <h1 style={{fontSize:'2rem', fontWeight:'800', marginBottom:'4px'}}>{summary.device_name || 'FortiGate'}</h1>
-                          <p style={{opacity:0.6, fontSize:'0.9rem', letterSpacing:'1px', textTransform:'uppercase'}}>Sistem Özet Raporu</p>
+                          <h1 style={{fontSize:'2rem', fontWeight:'800', marginBottom:'4px'}}>{summary.device_name || (isSwitch ? 'Switch' : 'FortiGate')}</h1>
+                          <p style={{opacity:0.6, fontSize:'0.9rem', letterSpacing:'1px', textTransform:'uppercase'}}>{isSwitch ? 'Switch Güvenlik Özeti' : 'Sistem Özet Raporu'}</p>
                         </div>
                       </div>
                       <div style={{display:'flex', gap:'40px', borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'30px'}}>
                         <div>
-                          <label style={{fontSize:'10px', color:'#94a3b8', fontWeight:'800', textTransform:'uppercase', display:'block', marginBottom:'5px'}}>Model</label>
-                          <span style={{fontSize:'1.1rem', fontWeight:'700'}}>{summary.model}</span>
+                          <label style={{fontSize:'10px', color:'#94a3b8', fontWeight:'800', textTransform:'uppercase', display:'block', marginBottom:'5px'}}>Vendor / Model</label>
+                          <span style={{fontSize:'1.1rem', fontWeight:'700'}}>{isSwitch ? `${summary.vendor} ${summary.model}` : summary.model}</span>
                         </div>
                         <div>
-                          <label style={{fontSize:'10px', color:'#94a3b8', fontWeight:'800', textTransform:'uppercase', display:'block', marginBottom:'5px'}}>Firmware</label>
+                          <label style={{fontSize:'10px', color:'#94a3b8', fontWeight:'800', textTransform:'uppercase', display:'block', marginBottom:'5px'}}>Versiyon</label>
                           <span style={{fontSize:'1.1rem', fontWeight:'700'}}>{summary.version}</span>
                         </div>
                         <div>
@@ -1979,27 +4338,55 @@ function ReportPage() {
                         </div>
                       </div>
                     </div>
-                    <div style={{position:'absolute', top:'-20%', right:'-10%', width:'400px', height:'400px', background:'var(--primary)', filter:'blur(120px)', opacity:0.15, borderRadius:'50%'}}></div>
+                    <div style={{position:'absolute', top:'-20%', right:'-10%', width:'400px', height:'400px', background: isSwitch ? '#10b981' : 'var(--primary)', filter:'blur(120px)', opacity:0.15, borderRadius:'50%'}}></div>
                   </div>
 
-                  <h3 className="section-subtitle">SİSTEM METRİKLERİ</h3>
+                  <h3 className="section-subtitle">{isSwitch ? 'GÜVENLİK SKORU' : 'SİSTEM METRİKLERİ'}</h3>
                   <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'20px', marginBottom:'40px'}}>
-                    {[
-                      { label: 'Toplam Politika', val: summary.total_rules, icon: <Terminal size={22}/>, color: '#6366f1' },
-                      { label: 'Sanal Domain (VDOM)', val: summary.total_vdom, icon: <Database size={22}/>, color: '#10b981' },
-                      { label: 'Arayüz Sayısı', val: summary.total_interface, icon: <Activity size={22}/>, color: '#f59e0b' },
-                      { label: 'VPN Tünelleri', val: summary.total_ipsec, icon: <Lock size={22}/>, color: '#ec4899' }
-                    ].map((m, i) => (
-                      <div key={i} style={{background:'white', padding:'25px', borderRadius:'20px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:'20px', transition:'transform 0.2s', cursor:'default'}}>
-                        <div style={{background: `${m.color}15`, color: m.color, padding:'12px', borderRadius:'14px'}}>
-                          {m.icon}
+                    {isSwitch ? (
+                      <>
+                        <div style={{background:'white', padding:'25px', borderRadius:'20px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:'20px'}}>
+                          <div style={{background: '#6366f115', color: '#6366f1', padding:'12px', borderRadius:'14px'}}><Shield size={22}/></div>
+                          <div>
+                            <div style={{fontSize:'0.75rem', color:'#64748b', fontWeight:'700', textTransform:'uppercase', marginBottom:'4px'}}>Genel Skor</div>
+                            <div style={{fontSize:'1.5rem', fontWeight:'800', color:'#1e293b'}}>{summary.score}%</div>
+                          </div>
                         </div>
-                        <div>
-                          <div style={{fontSize:'0.75rem', color:'#64748b', fontWeight:'700', textTransform:'uppercase', marginBottom:'4px'}}>{m.label}</div>
-                          <div style={{fontSize:'1.5rem', fontWeight:'800', color:'#1e293b'}}>{m.val || 0}</div>
+                        <div style={{background:'white', padding:'25px', borderRadius:'20px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:'20px'}}>
+                          <div style={{background: '#10b98115', color: '#10b981', padding:'12px', borderRadius:'14px'}}><CheckCircle2 size={22}/></div>
+                          <div>
+                            <div style={{fontSize:'0.75rem', color:'#64748b', fontWeight:'700', textTransform:'uppercase', marginBottom:'4px'}}>Başarılı</div>
+                            <div style={{fontSize:'1.5rem', fontWeight:'800', color:'#10b981'}}>{summary.passed}</div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                        <div style={{background:'white', padding:'25px', borderRadius:'20px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:'20px'}}>
+                          <div style={{background: '#ef444415', color: '#ef4444', padding:'12px', borderRadius:'14px'}}><AlertTriangle size={22}/></div>
+                          <div>
+                            <div style={{fontSize:'0.75rem', color:'#64748b', fontWeight:'700', textTransform:'uppercase', marginBottom:'4px'}}>İhlal Sayısı</div>
+                            <div style={{fontSize:'1.5rem', fontWeight:'800', color:'#ef4444'}}>{summary.failed}</div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {[
+                          { label: 'Toplam Politika', val: summary.total_rules, icon: <Terminal size={22}/>, color: '#6366f1' },
+                          { label: 'Sanal Domain (VDOM)', val: summary.total_vdom, icon: <Database size={22}/>, color: '#10b981' },
+                          { label: 'Arayüz Sayısı', val: summary.total_interface, icon: <Activity size={22}/>, color: '#f59e0b' },
+                          { label: 'VPN Tünelleri', val: summary.total_ipsec, icon: <Lock size={22}/>, color: '#ec4899' }
+                        ].map((m, i) => (
+                          <div key={i} style={{background:'white', padding:'25px', borderRadius:'20px', border:'1px solid #e2e8f0', display:'flex', alignItems:'center', gap:'20px', transition:'transform 0.2s', cursor:'default'}}>
+                            <div style={{background: `${m.color}15`, color: m.color, padding:'12px', borderRadius:'14px'}}>
+                              {m.icon}
+                            </div>
+                            <div>
+                              <div style={{fontSize:'0.75rem', color:'#64748b', fontWeight:'700', textTransform:'uppercase', marginBottom:'4px'}}>{m.label}</div>
+                              <div style={{fontSize:'1.5rem', fontWeight:'800', color:'#1e293b'}}>{m.val || 0}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </div>
 
                   <h3 className="section-subtitle">YAPILANDIRMA DETAYLARI</h3>
@@ -2008,13 +4395,14 @@ function ReportPage() {
                       <tbody>
                         {[
                           ['Cihaz Hostname', summary.device_name],
-                          ['İşletim Sistemi', `FortiOS ${summary.version}`],
+                          ['Cihaz Türü', isSwitch ? 'Network Switch' : 'FortiGate Firewall'],
+                          ['Marka (Vendor)', isSwitch ? summary.vendor : 'Fortinet'],
+                          ['İşletim Sistemi', isSwitch ? summary.version : `FortiOS ${summary.version}`],
                           ['Analiz Edilen Dosya', file.file_name],
                           ['Dosya Boyutu', (file.file_size / 1024).toFixed(2) + ' KB'],
-                          ['Benzersiz UID', file.file_uid],
                           ['Rapor Durumu', 'Tamamlandı']
                         ].map(([label, val], i) => (
-                          <tr key={i} style={{borderBottom: i === 5 ? 'none' : '1px solid #f1f5f9'}}>
+                          <tr key={i} style={{borderBottom: i === 6 ? 'none' : '1px solid #f1f5f9'}}>
                             <td style={{padding:'18px 30px', fontSize:'13px', color:'#64748b', fontWeight:'700', background:'#f8fafc', width:'30%', textTransform:'uppercase', letterSpacing:'0.5px'}}>{label}</td>
                             <td style={{padding:'18px 30px', fontSize:'14px', color:'#1e293b', fontWeight:'700'}}>{val}</td>
                           </tr>
@@ -2025,7 +4413,20 @@ function ReportPage() {
                 </div>
               )}
 
-              {activeTab === 'interface' && (
+              {isSwitch && activeTab === 'findings' && (
+                <div className="fade-in">
+                  <h3 className="section-subtitle">GÜVENLİK BULGULARI VE DENETİM</h3>
+                  <p style={{color:'#64748b', fontSize:'14px', marginBottom:'25px'}}>Sistem konfigürasyonu üzerinde yapılan otomatik denetimlerin sonuçları aşağıdadır.</p>
+                  <div style={{display:'grid', gap:'15px'}}>
+                    {analysis.list?.map((f, i) => <SwitchAnalysisCard key={i} finding={f} />)}
+                    {(!analysis.list || analysis.list.length === 0) && (
+                      <div className="no-findings">Analiz edilecek kural bulunamadı.</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {!isSwitch && activeTab === 'interface' && (
                 <div className="fade-in">
                   <h3 className="section-subtitle">ARAYÜZ ETKİLEŞİM ANALİZİ</h3>
                   <p style={{color:'#64748b', fontSize:'14px', marginBottom:'25px'}}>Aşağıdaki liste, konfigürasyondaki politikaların hangi arayüzler arasında yoğunlaştığını göstermektedir. Bu, ağ trafiği akışını anlamak için kritiktir.</p>
@@ -2332,3 +4733,4 @@ function ReportPage() {
 
 function App() { return (<Router><Routes><Route path="/" element={<Dashboard />} /><Route path="/report/:uid" element={<ReportPage />} /></Routes></Router>); }
 export default App;
+

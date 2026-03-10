@@ -1,6 +1,6 @@
 {
   "name": "nss-backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Network Security Suite Backend API",
   "main": "app.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "net-snmp": "^3.26.1",
     "pg": "^8.11.3",
     "rss-parser": "^3.13.0",
+    "ssh2": "^1.17.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

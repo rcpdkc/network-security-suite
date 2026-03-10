@@ -11,7 +11,9 @@ const axios = require('axios');
 const https = require('https');
 const RSSParser = require('rss-parser');
 const snmp = require('net-snmp');
+const { Client: SSHClient } = require('ssh2');
 const FortiGateParser = require('./fortigate-parser');
+const SwitchParser = require('./switch-parser');
 
 const app = express();
 // ... rest of initial declarations
@@ -95,6 +97,7 @@ let isDbReady = false;
 let securityKB = [];
 const KB_METADATA_PATH = path.join(__dirname, 'data', 'security_kb_metadata.json');
 const KB_LEGACY_PATH = path.join(__dirname, 'data', 'security_kb.json');
+const SWITCH_KB_METADATA_PATH = path.join(__dirname, 'data', 'switch_security_kb_metadata.json');
 
 const readJsonArrayFile = (filePath) => {
   if (!fs.existsSync(filePath)) return [];
@@ -178,13 +181,78 @@ const initDB = async () => {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    await pool.query(`CREATE TABLE IF NOT EXISTS ssh_templates (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      port INTEGER DEFAULT 22,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS api_templates (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      base_url VARCHAR(255) NOT NULL,
+      api_key VARCHAR(255),
+      auth_type VARCHAR(50) DEFAULT 'Bearer',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS network_scans (
+      id SERIAL PRIMARY KEY,
+      ip_range VARCHAR(255) NOT NULL,
+      snmp_template_ids INTEGER[] NOT NULL,
+      status VARCHAR(50) DEFAULT 'idle',
+      progress_current INTEGER DEFAULT 0,
+      progress_total INTEGER DEFAULT 0,
+      discovered_count INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Ensure columns exist (for existing tables)
+    await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS discovered_count INTEGER DEFAULT 0`);
+    await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS discovered_devices (
+      id SERIAL PRIMARY KEY,
+      scan_id INTEGER REFERENCES network_scans(id) ON DELETE CASCADE,
+      ip_address VARCHAR(255) NOT NULL,
+      hostname VARCHAR(255),
+      snmp_template_id INTEGER REFERENCES snmp_templates(id),
+      status VARCHAR(50) DEFAULT 'discovered', -- 'discovered', 'added'
+      discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS topologies (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) DEFAULT 'Main Topology',
+      nodes JSONB DEFAULT '[]',
+      edges JSONB DEFAULT '[]',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS custom_icons (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      data TEXT NOT NULL, -- base64 data
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     await pool.query(`CREATE TABLE IF NOT EXISTS devices (
       id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       ip_address VARCHAR(255) NOT NULL UNIQUE,
       api_key TEXT,
       vdom VARCHAR(100) DEFAULT 'root',
+      connection_method VARCHAR(50) DEFAULT 'snmp_ssh', -- 'api' or 'snmp_ssh'
       snmp_template_id INTEGER REFERENCES snmp_templates(id) ON DELETE SET NULL,
+      ssh_template_id INTEGER REFERENCES ssh_templates(id) ON DELETE SET NULL,
+      api_template_id INTEGER REFERENCES api_templates(id) ON DELETE SET NULL,
       manual_snmp_config JSONB,
       status VARCHAR(50) DEFAULT 'unknown',
       last_sync TIMESTAMP,
@@ -193,12 +261,24 @@ const initDB = async () => {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Check if snmp_template_id column exists, add if not (for existing databases)
+    // Check if columns exist, add if not (for existing databases)
     try {
-      await pool.query(`ALTER TABLE devices ADD COLUMN IF NOT EXISTS snmp_template_id INTEGER REFERENCES snmp_templates(id) ON DELETE SET NULL`);
-      await pool.query(`ALTER TABLE devices ADD COLUMN IF NOT EXISTS manual_snmp_config JSONB`);
-      await pool.query(`ALTER TABLE devices ADD COLUMN IF NOT EXISTS metadata JSONB`);
-    } catch (e) { /* ignore if already exists */ }
+      const cols = [
+        { name: 'connection_method', type: 'VARCHAR(50) DEFAULT \'snmp_ssh\'' },
+        { name: 'snmp_template_id', type: 'INTEGER REFERENCES snmp_templates(id) ON DELETE SET NULL' },
+        { name: 'ssh_template_id', type: 'INTEGER REFERENCES ssh_templates(id) ON DELETE SET NULL' },
+        { name: 'api_template_id', type: 'INTEGER REFERENCES api_templates(id) ON DELETE SET NULL' },
+        { name: 'manual_snmp_config', type: 'JSONB' },
+        { name: 'metadata', type: 'JSONB' },
+        { name: 'vdom', type: 'VARCHAR(100) DEFAULT \'root\'' },
+        { name: 'api_key', type: 'TEXT' },
+        { name: 'created_at', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' },
+        { name: 'updated_at', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' }
+      ];
+      for (const col of cols) {
+        await pool.query(`ALTER TABLE devices ADD COLUMN IF NOT EXISTS ${col.name} ${col.type}`);
+      }
+    } catch (e) { console.log('Migration note:', e.message); }
 
     await pool.query(`CREATE TABLE IF NOT EXISTS security_rules (
       id VARCHAR(50) PRIMARY KEY,
@@ -214,6 +294,17 @@ const initDB = async () => {
       default_val TEXT,
       is_custom BOOLEAN DEFAULT false,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS switch_security_rules (
+      id SERIAL PRIMARY KEY,
+      rule_id VARCHAR(120) NOT NULL,
+      switch_vendor VARCHAR(120) NOT NULL DEFAULT 'generic',
+      switch_model VARCHAR(120) NOT NULL DEFAULT 'all',
+      rule_data JSONB NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(rule_id, switch_vendor, switch_model)
     )`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS settings (
@@ -279,6 +370,8 @@ const initDB = async () => {
 
     console.log('✓ Tablolar OK');
     await loadSecurityKB();
+    await seedSwitchSecurityKBIfEmpty();
+    await seedDefaultSnmpTemplates();
     await ensureDefaultCveSources();
     await loadCveSyncConfig();
     scheduleCveSync();
@@ -873,6 +966,78 @@ app.delete('/api/security-kb/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get('/api/switch-security-kb', async (req, res) => {
+  try {
+    const vendor = String(req.query.vendor || '').trim();
+    const model = String(req.query.model || '').trim();
+
+    let sql = 'SELECT rule_id, switch_vendor, switch_model, rule_data FROM switch_security_rules';
+    const params = [];
+    const where = [];
+
+    if (vendor) {
+      params.push(vendor, 'generic');
+      where.push(`(switch_vendor = $${params.length - 1} OR switch_vendor = $${params.length})`);
+    }
+
+    if (model) {
+      params.push(model, 'all');
+      where.push(`(switch_model = $${params.length - 1} OR switch_model = $${params.length})`);
+    }
+
+    if (where.length > 0) sql += ` WHERE ${where.join(' AND ')}`;
+    sql += ' ORDER BY switch_vendor ASC, switch_model ASC, rule_id ASC';
+
+    const rows = await pool.query(sql, params);
+    const kb = rows.rows.map((r) => ({
+      ...(r.rule_data || {}),
+      id: r.rule_id,
+      switch_vendor: r.switch_vendor,
+      switch_model: r.switch_model
+    }));
+    res.json(kb);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/switch-security-kb', async (req, res) => {
+  try {
+    const rule = req.body;
+    if (!rule?.id) return res.status(400).json({ error: 'Kural id zorunludur.' });
+
+    const switchVendor = String(rule.switch_vendor || 'generic').trim() || 'generic';
+    const switchModel = String(rule.switch_model || 'all').trim() || 'all';
+
+    await pool.query(
+      `INSERT INTO switch_security_rules (rule_id, switch_vendor, switch_model, rule_data, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (rule_id, switch_vendor, switch_model)
+       DO UPDATE SET rule_data = EXCLUDED.rule_data, updated_at = NOW()`,
+      [
+        String(rule.id),
+        switchVendor,
+        switchModel,
+        JSON.stringify({ ...rule, switch_vendor: switchVendor, switch_model: switchModel })
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/switch-security-kb/:id', async (req, res) => {
+  try {
+    const vendor = String(req.query.vendor || '').trim() || 'generic';
+    const model = String(req.query.model || '').trim() || 'all';
+
+    const deleted = await pool.query(
+      'DELETE FROM switch_security_rules WHERE rule_id = $1 AND switch_vendor = $2 AND switch_model = $3 RETURNING id',
+      [String(req.params.id), vendor, model]
+    );
+    if (deleted.rows.length === 0) return res.status(404).json({ error: 'Kural bulunamadi.' });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 const getFGT = async (ip, key) => {
   try {
     const url = `https://${ip}/api/v2/monitor/system/status?access_token=${key}`;
@@ -1104,6 +1269,9 @@ app.get('/api/metrics/latest', async (req, res) => {
 });
 
 // File Management
+const storage = multer.memoryStorage();
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+
 app.get('/api/uploaded-files', async (req, res) => {
   try {
     const r = await pool.query('SELECT file_uid, file_name, file_size, parse_status, created_at FROM uploaded_files ORDER BY id DESC');
@@ -1111,8 +1279,61 @@ app.get('/api/uploaded-files', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+app.post('/api/switch-scan/file', upload.single('file'), async (req, res) => {
+  try {
+    const { vendor, model } = req.body;
+    if (!req.file) return res.status(400).send('Dosya yok');
+    const uid = uuidv4();
+    const content = req.file.buffer.toString('utf-8');
+    const metadata = JSON.stringify({ vendor, model, config_type: 'switch' });
+    await pool.query('INSERT INTO uploaded_files (file_uid, file_name, file_content, file_size, upload_status, config_metadata) VALUES ($1, $2, $3, $4, $5, $6)', [uid, req.file.originalname, content, req.file.size, 'uploaded', metadata]);
+    res.json({ fileUid: uid });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/switch-scan/ssh', async (req, res) => {
+  const { host, port, username, password, vendor, model } = req.body;
+  if (!host || !username || !password || !vendor) {
+    return res.status(400).json({ error: 'Eksik bilgiler (host, username, password, vendor zorunludur)' });
+  }
+
+  const conn = new SSHClient();
+  let configContent = '';
+
+  const command = (vendor === 'huawei') ? 'display current-configuration' : 'show running-config';
+
+  conn.on('ready', () => {
+    conn.exec(command, (err, stream) => {
+      if (err) {
+        conn.end();
+        return res.status(500).json({ error: 'SSH Komut Hatasi: ' + err.message });
+      }
+      stream.on('data', (data) => {
+        configContent += data.toString();
+      }).on('close', async () => {
+        conn.end();
+        try {
+          const uid = uuidv4();
+          const fileName = `${host}-${vendor}-ssh-config.txt`;
+          const metadata = JSON.stringify({ vendor, model, config_type: 'switch', host });
+          await pool.query('INSERT INTO uploaded_files (file_uid, file_name, file_content, file_size, upload_status, config_metadata) VALUES ($1, $2, $3, $4, $5, $6)', 
+            [uid, fileName, configContent, Buffer.byteLength(configContent, 'utf-8'), 'ssh_collected', metadata]);
+          res.json({ fileUid: uid });
+        } catch (e) {
+          res.status(500).json({ error: 'Veritabani Kayit Hatasi: ' + e.message });
+        }
+      });
+    });
+  }).on('error', (err) => {
+    res.status(500).json({ error: 'SSH Baglanti Hatasi: ' + err.message });
+  }).connect({
+    host,
+    port: port || 22,
+    username,
+    password,
+    readyTimeout: 20000
+  });
+});
 
 app.post('/api/upload-config', upload.single('file'), async (req, res) => {
   try {
@@ -1124,27 +1345,79 @@ app.post('/api/upload-config', upload.single('file'), async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+function detectConfigType(content) {
+  if (content.includes('#config-version') || content.includes('config system global')) {
+    return 'fortigate';
+  }
+  // Generic switch detection (Cisco, HP, etc.)
+  if (content.toLowerCase().includes('hostname ') && (content.toLowerCase().includes('interface ') || content.toLowerCase().includes('version '))) {
+    return 'switch';
+  }
+  return 'fortigate';
+}
+
 app.post('/api/parse-config', async (req, res) => {
   try {
     const { fileUid } = req.body;
     const r = await pool.query('SELECT file_content, config_metadata FROM uploaded_files WHERE file_uid = $1', [fileUid]);
     if (r.rows.length === 0) return res.status(404).send('Dosya yok');
     
-    const parser = new FortiGateParser(r.rows[0].file_content);
-    parser.parse();
+    const content = r.rows[0].file_content;
+    const configType = detectConfigType(content);
     
-    // Get device name from metadata if available
-    let deviceNameOverride = null;
-    if (r.rows[0].config_metadata) {
-      try {
-        const metadata = JSON.parse(r.rows[0].config_metadata);
-        deviceNameOverride = metadata.device_name;
-      } catch (e) { /* ignore */ }
+    let summaryData, finalData;
+
+    if (configType === 'fortigate') {
+      const parser = new FortiGateParser(content);
+      parser.parse();
+      
+      let deviceNameOverride = null;
+      if (r.rows[0].config_metadata) {
+        try {
+          const metadata = JSON.parse(r.rows[0].config_metadata);
+          deviceNameOverride = metadata.device_name;
+        } catch (e) { /* ignore */ }
+      }
+      
+      summaryData = parser.getSummary(deviceNameOverride);
+      const analysis = parser.analyzePolicies(securityKB);
+      finalData = { ...analysis, summary: summaryData, config_type: 'fortigate' };
+    } else {
+      // Switch analysis
+      const parser = new SwitchParser(content);
+      const deviceInfo = parser.getDeviceInfo();
+      
+      const rulesRows = await pool.query(
+        'SELECT rule_id, rule_data FROM switch_security_rules WHERE switch_vendor = $1 OR switch_vendor = $2',
+        [deviceInfo.vendor, 'generic']
+      );
+      
+      const rules = rulesRows.rows.map(row => ({
+        ...row.rule_data,
+        id: row.rule_id
+      }));
+
+      let rulesToUse = rules;
+      if (rulesToUse.length === 0) {
+        const switchKBMetadata = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'switch_security_kb_metadata.json'), 'utf8'));
+        rulesToUse = switchKBMetadata;
+      }
+
+      const analysis = parser.analyze(rulesToUse);
+      summaryData = {
+        device_name: deviceInfo.device_name,
+        model: deviceInfo.model,
+        version: deviceInfo.version,
+        vendor: deviceInfo.vendor,
+        ...analysis.summary
+      };
+      finalData = { 
+        list: analysis.findings, 
+        summary: summaryData, 
+        config_type: 'switch' 
+      };
     }
     
-    const summaryData = parser.getSummary(deviceNameOverride);
-    const analysis = parser.analyzePolicies(securityKB);
-    const finalData = { ...analysis, summary: summaryData };
     await pool.query('UPDATE uploaded_files SET parse_status = $1, summary_data = $2, analysis_data = $3, updated_at = NOW() WHERE file_uid = $4', ['parsed', JSON.stringify(summaryData), JSON.stringify(finalData), fileUid]);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1176,6 +1449,85 @@ const loadSecurityKB = async () => {
     const sourcePath = fs.existsSync(KB_METADATA_PATH) ? KB_METADATA_PATH : KB_LEGACY_PATH;
     securityKB = readJsonArrayFile(sourcePath);
   } catch (err) { console.error('! KB yukleme hatasi:', err.message); }
+};
+
+const seedSwitchSecurityKBIfEmpty = async () => {
+  try {
+    const countRes = await pool.query('SELECT COUNT(*)::int AS count FROM switch_security_rules');
+    const count = Number(countRes.rows[0]?.count || 0);
+    if (count > 0) return;
+
+    const seed = readJsonArrayFile(SWITCH_KB_METADATA_PATH);
+    for (const rule of seed) {
+      if (!rule?.id) continue;
+      const switchVendor = String(rule.switch_vendor || 'generic').trim() || 'generic';
+      const switchModel = String(rule.switch_model || 'all').trim() || 'all';
+      await pool.query(
+        `INSERT INTO switch_security_rules (rule_id, switch_vendor, switch_model, rule_data, updated_at)
+         VALUES ($1, $2, $3, $4, NOW())
+         ON CONFLICT (rule_id, switch_vendor, switch_model)
+         DO UPDATE SET rule_data = EXCLUDED.rule_data, updated_at = NOW()`,
+        [String(rule.id), switchVendor, switchModel, JSON.stringify({ ...rule, switch_vendor: switchVendor, switch_model: switchModel })]
+      );
+    }
+  } catch (err) {
+    console.error('! Switch KB seed hatasi:', err.message);
+  }
+};
+
+const seedDefaultSnmpTemplates = async () => {
+  try {
+    const countRes = await pool.query('SELECT COUNT(*)::int AS count FROM snmp_templates');
+    const count = Number(countRes.rows[0]?.count || 0);
+    if (count > 0) return;
+
+    const defaultTemplates = [
+      {
+        name: 'SNMP v2c (Default)',
+        version: 'v2c',
+        community: 'public',
+        security_name: null,
+        security_level: null,
+        auth_protocol: null,
+        auth_key: null,
+        priv_protocol: null,
+        priv_key: null
+      },
+      {
+        name: 'SNMP v3 (NoAuth)',
+        version: 'v3',
+        community: null,
+        security_name: 'admin',
+        security_level: 'noAuthNoPriv',
+        auth_protocol: 'SHA',
+        auth_key: null,
+        priv_protocol: 'AES',
+        priv_key: null
+      },
+      {
+        name: 'SNMP v3 (Auth)',
+        version: 'v3',
+        community: null,
+        security_name: 'admin',
+        security_level: 'authNoPriv',
+        auth_protocol: 'SHA',
+        auth_key: 'password123',
+        priv_protocol: 'AES',
+        priv_key: null
+      }
+    ];
+
+    for (const tpl of defaultTemplates) {
+      await pool.query(
+        `INSERT INTO snmp_templates (name, version, community, security_name, security_level, auth_protocol, auth_key, priv_protocol, priv_key)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [tpl.name, tpl.version, tpl.community, tpl.security_name, tpl.security_level, tpl.auth_protocol, tpl.auth_key, tpl.priv_protocol, tpl.priv_key]
+      );
+    }
+    console.log('✓ Varsayılan SNMP Template\'leri oluşturuldu');
+  } catch (err) {
+    console.error('! SNMP Template seed hatası:', err.message);
+  }
 };
 
 // --- SNMP Template API ---
@@ -1218,6 +1570,144 @@ app.delete('/api/snmp-templates/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// --- SSH Template API ---
+app.get('/api/ssh-templates', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM ssh_templates ORDER BY name ASC');
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/ssh-templates', async (req, res) => {
+  try {
+    const { name, username, password, port } = req.body;
+    const r = await pool.query(
+      `INSERT INTO ssh_templates (name, username, password, port)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, username, password, port || 22]
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/ssh-templates/:id', async (req, res) => {
+  try {
+    const { name, username, password, port } = req.body;
+    const r = await pool.query(
+      `UPDATE ssh_templates
+       SET name=$1, username=$2, password=$3, port=$4, updated_at=NOW()
+       WHERE id=$5 RETURNING *`,
+      [name, username, password, port || 22, req.params.id]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/ssh-templates/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM ssh_templates WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- API Template API ---
+app.get('/api/api-templates', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM api_templates ORDER BY name ASC');
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/api-templates', async (req, res) => {
+  try {
+    const { name, base_url, api_key, auth_type } = req.body;
+    const r = await pool.query(
+      `INSERT INTO api_templates (name, base_url, api_key, auth_type)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, base_url, api_key, auth_type || 'Bearer']
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/api-templates/:id', async (req, res) => {
+  try {
+    const { name, base_url, api_key, auth_type } = req.body;
+    const r = await pool.query(
+      `UPDATE api_templates
+       SET name=$1, base_url=$2, api_key=$3, auth_type=$4, updated_at=NOW()
+       WHERE id=$5 RETURNING *`,
+      [name, base_url, api_key, auth_type || 'Bearer', req.params.id]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/api-templates/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM api_templates WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- Connection Test API ---
+app.post('/api/devices/test-connection', async (req, res) => {
+  const { connection_method, ip_address, api_template_id, snmp_template_id, ssh_template_id } = req.body;
+  
+  try {
+    if (connection_method === 'api') {
+      const tplRes = await pool.query('SELECT * FROM api_templates WHERE id = $1', [api_template_id]);
+      if (tplRes.rows.length === 0) throw new Error('API Template bulunamadı');
+      const tpl = tplRes.rows[0];
+      
+      const url = `${tpl.base_url}/monitor/system/status?access_token=${tpl.api_key}`;
+      const response = await axios.get(url, { 
+        timeout: 5000, 
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }) 
+      });
+      
+      const hostname = response.data?.results?.hostname || 'Cihaz';
+      return res.json({ success: true, message: `API Bağlantısı Başarılı: ${hostname}`, hostname });
+    } else {
+      // SNMP + SSH Test
+      const snmpTplRes = await pool.query('SELECT * FROM snmp_templates WHERE id = $1', [snmp_template_id]);
+      if (snmpTplRes.rows.length === 0) throw new Error('SNMP Template bulunamadı');
+      const snmpTpl = snmpTplRes.rows[0];
+
+      const snmpInfo = await checkSnmpStatus(ip_address, snmpTpl);
+      if (snmpInfo.status === 'offline') {
+        throw new Error(`SNMP Hatası: ${snmpInfo.error || 'Cihaza ulaşılamadı'}`);
+      }
+
+      const sshTplRes = await pool.query('SELECT * FROM ssh_templates WHERE id = $1', [ssh_template_id]);
+      if (sshTplRes.rows.length === 0) throw new Error('SSH Template bulunamadı');
+      const sshTpl = sshTplRes.rows[0];
+
+      // Quick SSH Check
+      await new Promise((resolve, reject) => {
+        const conn = new SSHClient();
+        conn.on('ready', () => { conn.end(); resolve(); })
+            .on('error', (err) => { reject(new Error(`SSH Hatası: ${err.message}`)); })
+            .connect({
+              host: ip_address,
+              port: sshTpl.port || 22,
+              username: sshTpl.username,
+              password: sshTpl.password,
+              readyTimeout: 5000
+            });
+      });
+
+      return res.json({ 
+        success: true, 
+        message: 'SNMP ve SSH Bağlantısı Başarılı', 
+        hostname: snmpInfo.sysName || 'Cihaz' 
+      });
+    }
+  } catch (e) {
+    res.status(400).json({ success: false, error: e.message });
+  }
+});
+
 // --- Updated Device API ---
 app.get('/api/devices', async (req, res) => {
   try {
@@ -1225,18 +1715,21 @@ app.get('/api/devices', async (req, res) => {
     const isApiOnly = req.query.api === 'true';
     
     let query = `
-      SELECT d.*, t.name as template_name 
+      SELECT d.*, 
+             st.name as snmp_template_name,
+             ssht.name as ssh_template_name,
+             at.name as api_template_name
       FROM devices d 
-      LEFT JOIN snmp_templates t ON d.snmp_template_id = t.id
+      LEFT JOIN snmp_templates st ON d.snmp_template_id = st.id
+      LEFT JOIN ssh_templates ssht ON d.ssh_template_id = ssht.id
+      LEFT JOIN api_templates at ON d.api_template_id = at.id
     `;
     
     let conditions = [];
     if (isSnmpOnly) {
-      // SADECE SNMP yapılandırması olanlar
       conditions.push(`(d.snmp_template_id IS NOT NULL OR d.manual_snmp_config IS NOT NULL)`);
     } else if (isApiOnly) {
-      // SADECE API (FortiGate) olanlar (api_key dolu olanlar)
-      conditions.push(`(d.api_key IS NOT NULL AND d.api_key != '')`);
+      conditions.push(`(d.connection_method = 'api' OR d.api_key IS NOT NULL)`);
     }
     
     if (conditions.length > 0) {
@@ -1251,35 +1744,13 @@ app.get('/api/devices', async (req, res) => {
 
 app.post('/api/devices', async (req, res) => {
   try {
-    const { name, ip_address, snmp_template_id, manual_snmp_config, api_key, vdom } = req.body;
-    let resolvedName = (name || '').trim();
-
-    // If name is not provided, try to resolve it from live SNMP sysName.
-    if (!resolvedName) {
-      let snmpConfig = manual_snmp_config || null;
-      if (!snmpConfig && snmp_template_id) {
-        const tpl = await pool.query('SELECT version, community, security_name, security_level, auth_protocol, auth_key, priv_protocol, priv_key FROM snmp_templates WHERE id = $1', [snmp_template_id]);
-        if (tpl.rows.length > 0) snmpConfig = tpl.rows[0];
-      }
-
-      if (snmpConfig && ip_address) {
-        const info = await checkSnmpStatus(ip_address, snmpConfig);
-        if (info?.sysName) {
-          resolvedName = String(info.sysName).trim();
-        } else {
-          return res.status(400).json({
-            error: 'Cihaz adi SNMP canli veriden alinamadi.',
-            details: info?.error || 'sysName degeri okunamadi. SNMP ayarlarini kontrol edin.'
-          });
-        }
-      }
-
-      if (!resolvedName) resolvedName = ip_address;
-    }
-
+    const { name, ip_address, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom } = req.body;
+    
     const r = await pool.query(
-      'INSERT INTO devices (name, ip_address, snmp_template_id, manual_snmp_config, api_key, vdom) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [resolvedName, ip_address, snmp_template_id || null, manual_snmp_config ? JSON.stringify(manual_snmp_config) : null, api_key || '', vdom || 'root']
+      `INSERT INTO devices 
+       (name, ip_address, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [name || ip_address, ip_address, connection_method || 'snmp_ssh', api_template_id || null, snmp_template_id || null, ssh_template_id || null, vdom || 'root']
     );
     res.status(201).json(r.rows[0]);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1287,34 +1758,13 @@ app.post('/api/devices', async (req, res) => {
 
 app.put('/api/devices/:id', async (req, res) => {
   try {
-    const { name, ip_address, snmp_template_id, manual_snmp_config, api_key, vdom } = req.body;
-    let resolvedName = (name || '').trim();
-
-    // Keep compatibility for updates when UI no longer sends name.
-    if (!resolvedName) {
-      const current = await pool.query('SELECT name FROM devices WHERE id = $1', [req.params.id]);
-      resolvedName = current.rows[0]?.name || '';
-    }
-
-    if (!resolvedName) {
-      let snmpConfig = manual_snmp_config || null;
-      if (!snmpConfig && snmp_template_id) {
-        const tpl = await pool.query('SELECT version, community, security_name, security_level, auth_protocol, auth_key, priv_protocol, priv_key FROM snmp_templates WHERE id = $1', [snmp_template_id]);
-        if (tpl.rows.length > 0) snmpConfig = tpl.rows[0];
-      }
-      if (snmpConfig && ip_address) {
-        const info = await checkSnmpStatus(ip_address, snmpConfig);
-        if (info?.sysName) resolvedName = String(info.sysName).trim();
-      }
-    }
-
-    if (!resolvedName) resolvedName = ip_address;
+    const { name, ip_address, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom } = req.body;
 
     const r = await pool.query(
       `UPDATE devices
-       SET name=$1, ip_address=$2, snmp_template_id=$3, manual_snmp_config=$4, api_key=$5, vdom=$6, updated_at=NOW()
-       WHERE id=$7 RETURNING *`,
-      [resolvedName, ip_address, snmp_template_id || null, manual_snmp_config ? JSON.stringify(manual_snmp_config) : null, api_key, vdom, req.params.id]
+       SET name=$1, ip_address=$2, connection_method=$3, api_template_id=$4, snmp_template_id=$5, ssh_template_id=$6, vdom=$7, updated_at=NOW()
+       WHERE id=$8 RETURNING *`,
+      [name, ip_address, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom, req.params.id]
     );
     if (r.rows.length === 0) return res.status(404).json({ error: 'Cihaz bulunamadi.' });
     res.json(r.rows[0]);
@@ -1383,6 +1833,320 @@ app.get('/api/devices/monitor', async (req, res) => {
 });
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', db: isDbReady ? 'connected' : 'disconnected' }));
+
+// --- Network Scan Helpers ---
+const expandIpRange = (range) => {
+  const ips = [];
+  
+  // Single IP
+  if (!range.includes('-')) return [range];
+  
+  // Check if it's full IP range format: 192.168.1.100-192.168.1.105
+  if (range.match(/^\d+\.\d+\.\d+\.\d+-\d+\.\d+\.\d+\.\d+$/)) {
+    const [start, end] = range.split('-');
+    const startParts = start.split('.').map(Number);
+    const endParts = end.split('.').map(Number);
+    
+    // Ensure same network
+    if (startParts[0] === endParts[0] && startParts[1] === endParts[1] && startParts[2] === endParts[2]) {
+      const base = startParts.slice(0, 3).join('.');
+      const startNum = startParts[3];
+      const endNum = endParts[3];
+      for (let i = startNum; i <= endNum; i++) {
+        ips.push(`${base}.${i}`);
+      }
+      return ips;
+    }
+  }
+  
+  // Simple format: 192.168.1.1-50
+  const parts = range.split('.');
+  const lastPart = parts[3];
+  if (!lastPart || !lastPart.includes('-')) return [range];
+  
+  const [start, end] = lastPart.split('-').map(Number);
+  const base = parts.slice(0, 3).join('.');
+  for (let i = start; i <= end; i++) {
+    ips.push(`${base}.${i}`);
+  }
+  return ips;
+};
+
+const runBackgroundScan = async (scanId, ips, templateIds) => {
+  try {
+    const templatesRes = await pool.query('SELECT * FROM snmp_templates WHERE id = ANY($1)', [templateIds]);
+    const templates = templatesRes.rows;
+
+    await pool.query('UPDATE network_scans SET status = \'scanning\', progress_total = $1, progress_current = 0, updated_at = NOW() WHERE id = $2', [ips.length, scanId]);
+    console.log(`Starting scan ${scanId} for ${ips.length} IPs`);
+
+    let discoveredCount = 0;
+    for (let i = 0; i < ips.length; i++) {
+      // Check if scan was cancelled
+      const scanCheck = await pool.query('SELECT status FROM network_scans WHERE id = $1', [scanId]);
+      if (scanCheck.rows[0] && scanCheck.rows[0].status === 'cancelled') {
+        console.log(`Scan ${scanId} was cancelled, stopping.`);
+        return;
+      }
+
+      const ip = ips[i];
+      console.log(`Checking IP ${ip} for scan ${scanId}`);
+      for (const tpl of templates) {
+        const info = await checkSnmpStatus(ip, tpl);
+        if (info.status === 'online') {
+          await pool.query(
+            `INSERT INTO discovered_devices (scan_id, ip_address, hostname, snmp_template_id)
+             VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+            [scanId, ip, info.sysName || 'Unknown', tpl.id]
+          );
+          discoveredCount++;
+          console.log(`Device found: ${ip} (${info.sysName || 'Unknown'})`);
+          break; // Found one working template for this IP
+        }
+      }
+      await pool.query('UPDATE network_scans SET progress_current = $1 WHERE id = $2', [i + 1, scanId]);
+    }
+
+    await pool.query('UPDATE network_scans SET status = \'completed\', discovered_count = $1, updated_at = NOW() WHERE id = $2', [discoveredCount, scanId]);
+    console.log(`Scan ${scanId} completed. Found ${discoveredCount} devices.`);
+  } catch (err) {
+    console.error('Scan error:', err);
+    await pool.query('UPDATE network_scans SET status = \'error\', updated_at = NOW() WHERE id = $1', [scanId]);
+  }
+};
+
+// --- Network Scan API ---
+app.post('/api/network-scan', async (req, res) => {
+  try {
+    const { ip_range, snmp_template_ids } = req.body;
+    const ips = expandIpRange(ip_range);
+    
+    const r = await pool.query(
+      'INSERT INTO network_scans (ip_range, snmp_template_ids, status, progress_total) VALUES ($1, $2, \'idle\', $3) RETURNING *',
+      [ip_range, snmp_template_ids, ips.length]
+    );
+    const scan = r.rows[0];
+    
+    // Start background process
+    runBackgroundScan(scan.id, ips, snmp_template_ids);
+    
+    res.json(scan);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/network-scan/discovered', async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT dd.*, st.name as template_name, ns.ip_range as scan_range
+      FROM discovered_devices dd
+      JOIN snmp_templates st ON dd.snmp_template_id = st.id
+      JOIN network_scans ns ON dd.scan_id = ns.id
+      WHERE dd.status = 'discovered'
+      ORDER BY dd.discovered_at DESC
+    `);
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/network-scan/active', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM network_scans WHERE status = \'scanning\' OR status = \'idle\' OR status = \'paused\' ORDER BY id DESC LIMIT 1');
+    res.json(r.rows[0] || null);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/network-scan/history', async (req, res) => {
+  try {
+    const r = await pool.query(
+      'SELECT id, ip_range, status, progress_total, discovered_count, created_at, updated_at FROM network_scans WHERE status = \'completed\' OR status = \'error\' OR status = \'cancelled\' ORDER BY updated_at DESC LIMIT 10'
+    );
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/network-scan/add-discovered', async (req, res) => {
+  try {
+    const rawId = req.body.id;
+    if (!rawId) return res.status(400).json({ error: 'ID eksik' });
+    
+    const id = parseInt(rawId, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'Geçersiz ID formatı' });
+
+    console.log('[DEBUG] add-discovered request for ID:', id);
+    
+    // 1. Get discovery record
+    const discoveryRes = await pool.query('SELECT * FROM discovered_devices WHERE id = $1', [id]);
+    if (discoveryRes.rows.length === 0) {
+      console.error('[ERROR] Discovery record not found for ID:', id);
+      return res.status(404).json({ error: 'Cihaz bulunamadı' });
+    }
+    
+    const dev = discoveryRes.rows[0];
+    const devIP = String(dev.ip_address).trim();
+    const devName = (dev.hostname || dev.ip_address || 'Bilinmeyen Cihaz').trim();
+    const tplId = dev.snmp_template_id;
+
+    console.log(`[DEBUG] Adding device: IP=${devIP}, Name=${devName}, TplID=${tplId}`);
+
+    // 2. Perform UPSERT into devices table
+    // Minimalist query to maximize compatibility
+    try {
+      await pool.query(`
+        INSERT INTO devices (name, ip_address, connection_method, snmp_template_id)
+        VALUES ($1, $2, 'snmp_ssh', $3)
+        ON CONFLICT (ip_address) 
+        DO UPDATE SET 
+          name = EXCLUDED.name,
+          snmp_template_id = EXCLUDED.snmp_template_id
+      `, [devName, devIP, tplId]);
+      console.log('[DEBUG] UPSERT successful');
+    } catch (upsertErr) {
+      console.error('[ERROR] UPSERT failed:', upsertErr.message);
+      // Fallback if UPSERT fails (e.g. old postgres or schema mismatch)
+      const existing = await pool.query('SELECT id FROM devices WHERE ip_address = $1', [devIP]);
+      if (existing.rows.length > 0) {
+        await pool.query('UPDATE devices SET name = $1, snmp_template_id = $2 WHERE ip_address = $3', [devName, tplId, devIP]);
+      } else {
+        await pool.query('INSERT INTO devices (name, ip_address, snmp_template_id) VALUES ($1, $2, $3)', [devName, devIP, tplId]);
+      }
+    }
+
+    // 3. Mark as added in discovered_devices
+    await pool.query("UPDATE discovered_devices SET status = 'added' WHERE id = $1", [id]);
+    console.log('[DEBUG] Discovery status updated to added');
+    
+    res.json({ success: true });
+  } catch (e) { 
+    console.error('CRITICAL Error in add-discovered route:', e);
+    res.status(500).json({ 
+      error: 'Sunucu hatası', 
+      details: e.message,
+      code: e.code 
+    }); 
+  }
+});
+
+// Pause scan
+app.post('/api/network-scan/pause', async (req, res) => {
+  try {
+    const { scan_id } = req.body;
+    console.log('Pause request for scan:', scan_id);
+    const r = await pool.query('UPDATE network_scans SET status = \'paused\', updated_at = NOW() WHERE id = $1 RETURNING *', [scan_id]);
+    if (r.rows.length === 0) return res.status(404).json({ error: 'Tarama bulunamadı' });
+    console.log('Scan paused successfully:', r.rows[0]);
+    res.json(r.rows[0]);
+  } catch (e) { 
+    console.error('Pause error:', e);
+    res.status(500).json({ error: e.message }); 
+  }
+});
+
+// Resume scan
+app.post('/api/network-scan/resume', async (req, res) => {
+  try {
+    const { scan_id } = req.body;
+    console.log('Resume request for scan:', scan_id);
+    const r = await pool.query('UPDATE network_scans SET status = \'scanning\', updated_at = NOW() WHERE id = $1 RETURNING *', [scan_id]);
+    if (r.rows.length === 0) return res.status(404).json({ error: 'Tarama bulunamadı' });
+    console.log('Scan resumed successfully:', r.rows[0]);
+    res.json(r.rows[0]);
+  } catch (e) { 
+    console.error('Resume error:', e);
+    res.status(500).json({ error: e.message }); 
+  }
+});
+
+// Cancel scan
+app.post('/api/network-scan/cancel', async (req, res) => {
+  try {
+    const { scan_id } = req.body;
+    console.log('Cancel request for scan:', scan_id);
+    const r = await pool.query('UPDATE network_scans SET status = \'cancelled\', updated_at = NOW() WHERE id = $1 RETURNING *', [scan_id]);
+    if (r.rows.length === 0) return res.status(404).json({ error: 'Tarama bulunamadı' });
+    console.log('Scan cancelled successfully:', r.rows[0]);
+    res.json(r.rows[0]);
+  } catch (e) { 
+    console.error('Cancel error:', e);
+    res.status(500).json({ error: e.message }); 
+  }
+});
+
+// --- Topology API ---
+app.get('/api/topologies', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT id, name, created_at, updated_at FROM topologies ORDER BY updated_at DESC');
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/topologies/:id', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM topologies WHERE id = $1', [req.params.id]);
+    if (r.rows.length === 0) return res.status(404).json({ error: 'Topoloji bulunamadı' });
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/topologies', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const r = await pool.query(
+      'INSERT INTO topologies (name, nodes, edges) VALUES ($1, \'[]\', \'[]\') RETURNING *',
+      [name || 'Yeni Topoloji']
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/topologies/:id', async (req, res) => {
+  try {
+    const { name, nodes, edges } = req.body;
+    const r = await pool.query(
+      `UPDATE topologies 
+       SET name = COALESCE($1, name), 
+           nodes = COALESCE($2, nodes), 
+           edges = COALESCE($3, edges), 
+           updated_at = NOW() 
+       WHERE id = $4 RETURNING *`,
+      [name, JSON.stringify(nodes), JSON.stringify(edges), req.params.id]
+    );
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/topologies/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM topologies WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- Custom Icons API ---
+app.get('/api/icons', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM custom_icons ORDER BY name ASC');
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/icons', async (req, res) => {
+  try {
+    const { name, data } = req.body;
+    if (!name || !data) return res.status(400).json({ error: 'Name and data are required' });
+    const r = await pool.query(
+      'INSERT INTO custom_icons (name, data) VALUES ($1, $2) RETURNING *',
+      [name, data]
+    );
+    res.status(201).json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/icons/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM custom_icons WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // Start Server
 initDB().finally(() => {
