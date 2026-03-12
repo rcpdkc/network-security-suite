@@ -1,0 +1,2689 @@
+[
+  {
+    "id": "V-236544",
+    "name": "Admin Idle Timeout",
+    "issue_description": "Admin Idle Timeout kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.admintimeout degeri 15 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admintimeout 10.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236548",
+    "name": "Admin Lockout Threshold",
+    "issue_description": "Admin Lockout Threshold kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.admin-lockout-threshold degeri 3 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-lockout-threshold 3.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/279661/configuring-the-maximum-log-in-attempts-and-lockout-period"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236555",
+    "name": "Pre-login Banner",
+    "issue_description": "Pre-login Banner kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.pre-login-banner degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set pre-login-banner enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236545",
+    "name": "SSH v1 Disabled",
+    "issue_description": "SSH v1 Disabled kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.admin-ssh-v1 degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-ssh-v1 disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236588",
+    "name": "Maintainer Account",
+    "issue_description": "Maintainer Account kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.admin-maintainer degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-maintainer disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236558",
+    "name": "Strong Crypto",
+    "issue_description": "Strong Crypto kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.strong-crypto degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set strong-crypto enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236547",
+    "name": "Password Policy Status",
+    "issue_description": "Password Policy Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: password_policy.status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236576",
+    "name": "Min Password Length",
+    "issue_description": "Min Password Length kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: password_policy.minimum-length degeri en az 14 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set minimum-length 14.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236549",
+    "name": "Syslog Connection",
+    "issue_description": "Syslog Connection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: syslog_setting.status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: syslog setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236608",
+    "name": "SSL-VPN Web Mode",
+    "issue_description": "SSL-VPN Web Mode kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: vpn_ssl_settings.web-mode degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ssl settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set web-mode disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/869159/ssl-vpn-best-practices",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/100733/ssl-vpn-web-mode"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236561",
+    "name": "TCP Syncookies",
+    "issue_description": "TCP Syncookies kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.tcp-syncookies degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set tcp-syncookies enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236563",
+    "name": "Strict Source Check",
+    "issue_description": "Strict Source Check kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.asymroute degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set asymroute disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236572",
+    "name": "SNMP v1/v2c Status",
+    "issue_description": "SNMP v1/v2c Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_snmp.status degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: snmp sysinfo.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/62595/snmp",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547825/snmp-v1-v2c-communities"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236559",
+    "name": "NTP NTPSync",
+    "issue_description": "NTP NTPSync kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: ntp_setting.ntpsync degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system ntp.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ntpsync enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236583",
+    "name": "SSH Strong MACs",
+    "issue_description": "SSH Strong MACs kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.ssh-mac-algo icinde md5 gecmemelidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ssh-mac-algo hmac-sha2-256.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236585",
+    "name": "HTTPS HSTS Status",
+    "issue_description": "HTTPS HSTS Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.admin-hsts degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-hsts enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236586",
+    "name": "Admin Port Change",
+    "issue_description": "Admin Port Change kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.admin-sport degeri 443 olmamalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-sport 8443.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236587",
+    "name": "Console Timeout Status",
+    "issue_description": "Console Timeout Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.console-timeout degeri 15 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set console-timeout 5.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236589",
+    "name": "HA Session Encryption",
+    "issue_description": "HA Session Encryption kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_ha.session-pickup-expectation degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system ha.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set session-pickup-expectation enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/666376/high-availability",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236590",
+    "name": "HA Sync Password",
+    "issue_description": "HA Sync Password kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_ha.password alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system ha.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set password <SIFRE>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/666376/high-availability",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236614",
+    "name": "IPS Fail-Open Status",
+    "issue_description": "IPS Fail-Open Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_settings.ips-fail-open degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ips-fail-open disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236600",
+    "name": "IPS Auto-Update Status",
+    "issue_description": "IPS Auto-Update Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.ips-status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ips-status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236601",
+    "name": "AV Auto-Update Status",
+    "issue_description": "AV Auto-Update Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.antivirus-status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set antivirus-status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/922423/configuring-an-antivirus-profile"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": [
+      "Antivirus guncelleme kontrolu antivirus-status alanina gore normalize edildi; cihaz surumune gore son bir kez dogrulanmasi tavsiye edilir."
+    ]
+  },
+  {
+    "id": "V-236613",
+    "name": "Anycast FortiGuard",
+    "issue_description": "Anycast FortiGuard kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_fortiguard.fortiguard-anycast degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set fortiguard-anycast enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236612",
+    "name": "Disk Full Warning",
+    "issue_description": "Disk Full Warning kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: log_disk.storage-full-warning degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log disk setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set storage-full-warning enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236573",
+    "name": "SNMP v3 Auth",
+    "issue_description": "SNMP v3 Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: snmp_user.auth-proto alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: snmp user.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set auth-proto sha.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/62595/snmp",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/457149/snmp-v3-users"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236570",
+    "name": "In-Band Mgmt",
+    "issue_description": "In-Band Mgmt kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_settings.allow-inband-mgmt degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set allow-inband-mgmt disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236571",
+    "name": "Admin Trusted Hosts",
+    "issue_description": "Admin Trusted Hosts kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.trusthost1 alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set trusthost1 <IP>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236567",
+    "name": "Directed Broadcast",
+    "issue_description": "Directed Broadcast kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.bcast-forwarding degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set bcast-forwarding disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236568",
+    "name": "Proxy ARP Status",
+    "issue_description": "Proxy ARP Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.proxy-arp degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set proxy-arp disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236564",
+    "name": "Log Invalid Packet",
+    "issue_description": "Log Invalid Packet kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.log-invalid-packet degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set log-invalid-packet enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236556-2",
+    "name": "Post-login Msg",
+    "issue_description": "Post-login Msg kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.post-login-banner degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set post-login-banner enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236560-2",
+    "name": "ICMP Speed Limit",
+    "issue_description": "ICMP Speed Limit kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_settings.icmp-error-interval degeri en az 100 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set icmp-error-interval 100.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236562-2",
+    "name": "SCTP Protocol",
+    "issue_description": "SCTP Protocol kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.sctp degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set sctp disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236609-2",
+    "name": "SSL-VPN DTLS",
+    "issue_description": "SSL-VPN DTLS kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: vpn_ssl_settings.dtls-tunnel degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ssl settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set dtls-tunnel enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/869159/ssl-vpn-best-practices",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/100733/ssl-vpn-web-mode",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/774877/dtls-support"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236610-2",
+    "name": "VPN Idle Timeout",
+    "issue_description": "VPN Idle Timeout kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: vpn_ssl_settings.idle-timeout degeri 300 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ssl settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set idle-timeout 300.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/869159/ssl-vpn-best-practices",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/100733/ssl-vpn-web-mode"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236581-2",
+    "name": "PWD History",
+    "issue_description": "PWD History kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: password_policy.reuse-password degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set reuse-password disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236582-2",
+    "name": "PWD Expire",
+    "issue_description": "PWD Expire kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: password_policy.expire-days degeri 90 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set expire-days 90.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236577-2",
+    "name": "Upper Case Req",
+    "issue_description": "Upper Case Req kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: password_policy.min-upper-case degeri en az 1 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set min-upper-case 1.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236578-2",
+    "name": "Lower Case Req",
+    "issue_description": "Lower Case Req kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: password_policy.min-lower-case degeri en az 1 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set min-lower-case 1.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236579-2",
+    "name": "Special Char Req",
+    "issue_description": "Special Char Req kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: password_policy.min-non-alphanumeric degeri en az 1 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set min-non-alphanumeric 1.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236580-2",
+    "name": "Digit Req",
+    "issue_description": "Digit Req kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: password_policy.min-digit degeri en az 1 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: password-policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set min-digit 1.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/364729/password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313307/setting-the-password-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236574-3",
+    "name": "Log Warning Threshold",
+    "issue_description": "Log Warning Threshold kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: log_disk.full-first-warning degeri 90 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log disk setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set full-first-warning 90.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": [
+      "Orijinal ad alaninda bozuk karakter vardi; metadata tarafinda okunabilir aciklama ile destekleniyor."
+    ]
+  },
+  {
+    "id": "V-236546",
+    "name": "HTTP Access",
+    "issue_description": "HTTP Access kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: interface.allowaccess icinde http gecmemelidir.",
+    "recommendation_details": [
+      "Ilgili blok: system interface.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: unset allowaccess http.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/154471/interfaces",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236569",
+    "name": "Unused Port",
+    "issue_description": "Unused Port kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: interface.status degeri tam olarak down olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system interface.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status down.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/154471/interfaces",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236573-3",
+    "name": "SNMP Privacy",
+    "issue_description": "SNMP Privacy kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: snmp_user.priv-proto alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: snmp user.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set priv-proto aes.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/62595/snmp",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/457149/snmp-v3-users"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.1",
+    "name": "CIS Timeout",
+    "issue_description": "CIS Timeout kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.admintimeout degeri 10 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admintimeout 10.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.7",
+    "name": "HTTP Redirect",
+    "issue_description": "HTTP Redirect kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.admin-https-redirect degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-https-redirect enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.9",
+    "name": "USB Disable",
+    "issue_description": "USB Disable kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.usb-config degeri tam olarak disable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set usb-config disable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.2.1",
+    "name": "CIS Trusted Hosts",
+    "issue_description": "CIS Trusted Hosts kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.trusthost1 alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set trusthost1 <IP>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-2.2.1",
+    "name": "Custom DNS",
+    "issue_description": "Custom DNS kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_dns.primary degeri su degerlerden biri olmamalidir: 208.91.112.53, 208.91.112.52.",
+    "recommendation_details": [
+      "Ilgili blok: system dns.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set primary 8.8.8.8.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/780581/dns"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-4.1.2",
+    "name": "CIS Severity",
+    "issue_description": "CIS Severity kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: syslog_setting.level degeri su degerlerden biri olmalidir: information, notice.",
+    "recommendation_details": [
+      "Ilgili blok: syslog setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set level information.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-4.2.1",
+    "name": "Policy Logging",
+    "issue_description": "Policy Logging kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_settings.default-policy-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set default-policy-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-4.2.2",
+    "name": "Disk Logging",
+    "issue_description": "Disk Logging kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: log_disk.status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log disk setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-8.2.1",
+    "name": "Analyzer Link",
+    "issue_description": "Analyzer Link kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: log_fortianalyzer.status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log fortianalyzer.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/235849/logging-to-fortianalyzer"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.1",
+    "name": "SSL Deep Inspect",
+    "issue_description": "SSL Deep Inspect kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.ssl-ssh-profile degeri tam olarak deep-inspection olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ssl-ssh-profile deep-inspection.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.3",
+    "name": "Botnet Block",
+    "issue_description": "Botnet Block kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.scan-botnet-connections degeri tam olarak block olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set scan-botnet-connections block.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.4",
+    "name": "Auto Patching",
+    "issue_description": "Auto Patching kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.auto-fw-upgrade degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set auto-fw-upgrade enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.6",
+    "name": "Session TTL",
+    "issue_description": "Session TTL kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_settings.default-session-ttl degeri 3600 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set default-session-ttl 3600.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.18",
+    "name": "DNS over TLS",
+    "issue_description": "DNS over TLS kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_dns.dns-over-tls degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system dns.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set dns-over-tls enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/780581/dns",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42181/dns-over-tls-and-https"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.35",
+    "name": "Backup Encrypt",
+    "issue_description": "Backup Encrypt kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.pcfg-password-enc degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set pcfg-password-enc enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/702257/configuration-backups"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.8",
+    "name": "MFA Status",
+    "issue_description": "MFA Status kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_admin.two-factor alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set two-factor email.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/419391/applying-multi-factor-authentication"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-1.1.2",
+    "name": "App Control",
+    "issue_description": "App Control kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.appctrl-profile alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set appctrl-profile default.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/836937/configuring-an-application-sensor"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "STIG-V-236544-ALT",
+    "name": "Global TTL Check",
+    "issue_description": "Global TTL Check kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.udp-idle-timer degeri 180 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set udp-idle-timer 60.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-2.3.2",
+    "name": "NTP Auth",
+    "issue_description": "NTP Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: ntp_setting.authentication degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system ntp.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set authentication enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-RESOURCE-CPU",
+    "name": "CPU Alert",
+    "issue_description": "CPU Alert kontrolu icin beklenen durum saglanmazsa: Bu eksiklik tek başına kritik olmayabilir ancak savunma derinliğini zayıflatır.",
+    "verification_note": "Denetim mantigi: system_global.cpu-usage-threshold degeri 90 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set cpu-usage-threshold 90.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236615",
+    "name": "Firewall Interface Check",
+    "issue_description": "Firewall Interface Check kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: interface.allowaccess icinde http gecmemelidir.",
+    "recommendation_details": [
+      "Ilgili blok: system interface.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set allowaccess ping https ssh.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/154471/interfaces",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236616",
+    "name": "Session Timeout",
+    "issue_description": "Session Timeout kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.session-timeout degeri 15 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set session-timeout 15.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/215451/setting-the-idle-timeout-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236617",
+    "name": "Certificate Validation",
+    "issue_description": "Certificate Validation kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.certificate-validation degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set certificate-validation enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236618",
+    "name": "BGP Auth",
+    "issue_description": "BGP Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: router_bgp.auth-key alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: router bgp.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set auth-key <KEY>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/216371/bgp-neighbor-password"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236619",
+    "name": "OSPF Auth",
+    "issue_description": "OSPF Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: router_ospf.auth-key alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: router ospf.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set auth-key <KEY>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/425672/ospfv3-neighbor-authentication"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236620",
+    "name": "ACL Logging",
+    "issue_description": "ACL Logging kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: firewall_address.log-changes degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall address.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set log-changes enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/214805/address-objects"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236621",
+    "name": "Console Access",
+    "issue_description": "Console Access kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_console.access degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system console.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set access enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236622",
+    "name": "Firewall Rule Review",
+    "issue_description": "Firewall Rule Review kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.custom-log-fields degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set custom-log-fields enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236623",
+    "name": "Firewall Rule Retention",
+    "issue_description": "Firewall Rule Retention kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: log_memory.diskarchive degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log memory.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set diskarchive enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236624",
+    "name": "Antivirus Auto-Update",
+    "issue_description": "Antivirus Auto-Update kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.antivirus-status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set antivirus-status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/922423/configuring-an-antivirus-profile"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236625",
+    "name": "Botnet/C&C Detection",
+    "issue_description": "Botnet/C&C Detection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.botnet-status degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set botnet-status enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.2",
+    "name": "CIS Admin Account",
+    "issue_description": "CIS Admin Account kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.name degeri admin olmamalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set name admin-prod.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.3",
+    "name": "CIS Password Auth",
+    "issue_description": "CIS Password Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.password-reset degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set password-reset enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-1.1.4",
+    "name": "CIS SSH Key",
+    "issue_description": "CIS SSH Key kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_admin.access-profile degeri tam olarak SSH-Key olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set access-profile SSH-Key.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol FortiGate uzerinde dogrudan SSH key zorunlulugu yerine yonetici erisim tasarimi ile ele alinabilir; access-profile alani tek basina yeterli olmayabilir."
+    ]
+  },
+  {
+    "id": "CIS-2.1.1",
+    "name": "CIS NTP Server",
+    "issue_description": "CIS NTP Server kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: ntp_setting.server alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system ntp.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set server 0.pool.ntp.org.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/512210/setting-the-system-time"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-3.1.1",
+    "name": "CIS VPN Encryption",
+    "issue_description": "CIS VPN Encryption kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: vpn_ipsec.encapsulation degeri tam olarak tunnel-mode olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ipsec.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set encapsulation tunnel-mode.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/762500/general-ipsec-vpn-configuration"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-3.1.2",
+    "name": "CIS VPN Auth",
+    "issue_description": "CIS VPN Auth kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: vpn_ipsec.authentication degeri su degerlerden biri olmalidir: sha256, sha384, sha512.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ipsec.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set authentication sha256.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/762500/general-ipsec-vpn-configuration"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-3.2.1",
+    "name": "CIS SSL Version",
+    "issue_description": "CIS SSL Version kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: firewall_ssl_setting.min-version degeri su degerlerden biri olmalidir: tls1-2, tls1-3.",
+    "recommendation_details": [
+      "Ilgili blok: firewall ssl-setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set min-version tls1-2.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-4.0.1",
+    "name": "CIS Syslog Server",
+    "issue_description": "CIS Syslog Server kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: syslog_setting.server alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: syslog setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set server <IP>.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-4.0.2",
+    "name": "CIS Log Retention",
+    "issue_description": "CIS Log Retention kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: log_disk_setting.diskquota degeri en az 1024 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log disk setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set diskquota 3GB.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-REDUNDANCY",
+    "name": "HA Redundancy",
+    "issue_description": "HA Redundancy kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_ha.mode degeri su degerlerden biri olmalidir: active-passive, active-active.",
+    "recommendation_details": [
+      "Ilgili blok: system ha.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set mode active-passive.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/666376/high-availability",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-PERFORMANCE",
+    "name": "NP Acceleration",
+    "issue_description": "NP Acceleration kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.np6-flow-hash-enable degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set np6-flow-hash-enable enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-PROXY-PROTOCOL",
+    "name": "Proxy Protocol",
+    "issue_description": "Proxy Protocol kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.proxy-based degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set proxy-based enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-INSPECTION-MODE",
+    "name": "DLP Inspection",
+    "issue_description": "DLP Inspection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.inspect-all degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set inspect-all enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-RATE-LIMIT",
+    "name": "Rate Limiting",
+    "issue_description": "Rate Limiting kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.traffic-shaper alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set traffic-shaper enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-THREAT-FEED",
+    "name": "Threat Intelligence",
+    "issue_description": "Threat Intelligence kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.threat-weight degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set threat-weight enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-SANDBOX",
+    "name": "Cloud Sandbox",
+    "issue_description": "Cloud Sandbox kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_fortiguard.sandbox degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set sandbox enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-WEBFILTER",
+    "name": "Web Filter Profile",
+    "issue_description": "Web Filter Profile kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.webfilter-profile alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set webfilter-profile extended.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/833698/web-filter"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-DNS-SECURITY",
+    "name": "DNS Security",
+    "issue_description": "DNS Security kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_dns.dns-cache-limit degeri en az 5000 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system dns.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set dns-cache-limit 5000.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/780581/dns"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-SMTP-SCANNING",
+    "name": "Email Inspection",
+    "issue_description": "Email Inspection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: firewall_policy.inspection-mode degeri tam olarak advanced olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set inspection-mode advanced.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/709167/configuring-an-ssl-ssh-inspection-profile"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236626",
+    "name": "Admin Session Logging",
+    "issue_description": "Admin Session Logging kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.admin-audit-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set admin-audit-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236627",
+    "name": "VDOM Segmentation",
+    "issue_description": "VDOM Segmentation kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.vdom-mode degeri tam olarak multi-vdom olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set vdom-mode multi-vdom.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/109991/virtual-domains"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "V-236628",
+    "name": "Management VLAN",
+    "issue_description": "Management VLAN kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: interface.vlanid alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system interface.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set vlanid 4094.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cyber.mil/stigs/downloads/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/154471/interfaces",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
+    ],
+    "validation_status": "mapped",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-5.1.1",
+    "name": "Incident Response Plan",
+    "issue_description": "Incident Response Plan kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_alert.email-to alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system alert.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set email-to security@company.com.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "CIS-5.2.1",
+    "name": "Alert Notification",
+    "issue_description": "Alert Notification kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_alert_event.critical-event degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system alert-event.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set critical-event enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.cisecurity.org/benchmark/fortinet"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-COMPLIANCE-REPORTING",
+    "name": "Compliance Reports",
+    "issue_description": "Compliance Reports kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: log_report.compliance-report degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log report.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set compliance-report enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "FB-NETWORK-SEGMENTATION",
+    "name": "Network Segmentation",
+    "issue_description": "Network Segmentation kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_address.zone-id alani tanimli olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall address.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set zone-id 2.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/214805/address-objects"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": []
+  },
+  {
+    "id": "NIST-CSF-1.1",
+    "name": "Asset Inventory",
+    "issue_description": "Asset Inventory kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.device-inventory degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set device-inventory enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-1.2",
+    "name": "Software Inventory",
+    "issue_description": "Software Inventory kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.fw-policy-track degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set fw-policy-track enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-2.1",
+    "name": "Access Control",
+    "issue_description": "Access Control kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.action degeri tam olarak accept olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set action accept.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-2.2",
+    "name": "Privileged Access",
+    "issue_description": "Privileged Access kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.privilege-access degeri tam olarak limited olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set privilege-access limited.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-3.1",
+    "name": "Threat Detection",
+    "issue_description": "Threat Detection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_fortiguard.threat-weight degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set threat-weight enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-3.2",
+    "name": "Intrusion Detection",
+    "issue_description": "Intrusion Detection kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.ips-detect-anomaly degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set ips-detect-anomaly enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-4.1",
+    "name": "Incident Response",
+    "issue_description": "Incident Response kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_alert.incident-response degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system alert.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set incident-response enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-4.2",
+    "name": "Recovery Plan",
+    "issue_description": "Recovery Plan kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_backup.auto-backup degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system backup.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set auto-backup enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/702257/configuration-backups"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "NIST-CSF-5.1",
+    "name": "Risk Assessment",
+    "issue_description": "Risk Assessment kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_settings.risk-assessment degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set risk-assessment enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.nist.gov/cyberframework"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.5.1",
+    "name": "Information Policy",
+    "issue_description": "Information Policy kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.policy-enforcement degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set policy-enforcement enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.6.1",
+    "name": "Organization Access",
+    "issue_description": "Organization Access kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_admin.org-id degeri tam olarak enabled olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set org-id enabled.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.7.1",
+    "name": "Personnel Security",
+    "issue_description": "Personnel Security kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.accountability degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set accountability enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.8.1",
+    "name": "Asset Management",
+    "issue_description": "Asset Management kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_interface.asset-tag degeri tam olarak required olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system interface.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set asset-tag required.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/154471/interfaces",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/325005/interface-access"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.9.1",
+    "name": "User Registration",
+    "issue_description": "User Registration kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_admin.registration-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set registration-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.9.2",
+    "name": "Access Review",
+    "issue_description": "Access Review kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_settings.access-review-cycle degeri 90 veya altinda olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set access-review-cycle 90.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.10.1",
+    "name": "Cryptography",
+    "issue_description": "Cryptography kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.encryption-algorithm degeri tam olarak AES-256 olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set encryption-algorithm AES-256.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/45329/tls-configuration"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.12.1",
+    "name": "Equipment Management",
+    "issue_description": "Equipment Management kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_hardware.maintenance-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system hardware.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set maintenance-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/666376/high-availability",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/313152/out-of-band-management-with-reserved-management-interfaces"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.12.2",
+    "name": "Media Handling",
+    "issue_description": "Media Handling kontrolu icin beklenen durum saglanmazsa: Bu eksiklik sertleştirme seviyesini düşürür ve bir saldırganın hareket alanını genişletebilir.",
+    "verification_note": "Denetim mantigi: system_global.media-secure-erase degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set media-secure-erase enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.13.1",
+    "name": "Network Security",
+    "issue_description": "Network Security kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.network-isolation degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set network-isolation enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "ISO27001-A.14.1",
+    "name": "Dev/Test Environment",
+    "issue_description": "Dev/Test Environment kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_settings.environment-separation degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set environment-separation enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.iso.org/isoiec-27001-information-security.html"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-1.1",
+    "name": "Firewall Rules",
+    "issue_description": "Firewall Rules kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.firewall-enforce-policy degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set firewall-enforce-policy enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-1.2",
+    "name": "Default Deny",
+    "issue_description": "Default Deny kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.default-action degeri tam olarak deny olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set default-action deny.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-2.1",
+    "name": "Default Credentials Remove",
+    "issue_description": "Default Credentials Remove kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_admin.change-default-password degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set change-default-password enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-2.2",
+    "name": "Config Standards",
+    "issue_description": "Config Standards kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.config-enforce-policy degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set config-enforce-policy enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-3.1",
+    "name": "Data Encryption",
+    "issue_description": "Data Encryption kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: vpn_ipsec.encrypt-data degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: vpn ipsec.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set encrypt-data enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/583477/configuring-an-ips-sensor",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/762500/general-ipsec-vpn-configuration"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-4.1",
+    "name": "Traffic Encryption",
+    "issue_description": "Traffic Encryption kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: firewall_policy.encryption-enforce degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: firewall policy.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set encryption-enforce enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-6.1",
+    "name": "Security Updates",
+    "issue_description": "Security Updates kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_fortiguard.security-update-schedule degeri tam olarak daily olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system fortiguard.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set security-update-schedule daily.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/42459/fortiguard",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/547335/automatic-updates",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/703926/verifying-connectivity-to-fortiguard"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-8.1",
+    "name": "Unique User ID",
+    "issue_description": "Unique User ID kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_admin.user-unique-id degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set user-unique-id enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-8.2",
+    "name": "Strong Authentication",
+    "issue_description": "Strong Authentication kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_admin.authentication-policy degeri tam olarak strong olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set authentication-policy strong.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/656084/firewall-policy"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-10.1",
+    "name": "Audit Trails",
+    "issue_description": "Audit Trails kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: log_syslogd.audit-logging degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log syslogd.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set audit-logging enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "PCI-DSS-10.2",
+    "name": "User Activity Logging",
+    "issue_description": "User Activity Logging kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: log_setting.user-activity-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log setting.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set user-activity-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.pcisecuritystandards.org/standards/pci-dss/",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir.",
+      "Bu PCI-DSS kontrolu teknik olarak desteklenmeyen bir eval_path kullandigi icin otomatik skorlamadan dislandi; kanit bazli manuel kontrol gerekir."
+    ]
+  },
+  {
+    "id": "HIPAA-164.308",
+    "name": "Access Controls",
+    "issue_description": "Access Controls kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_admin.hipaa-compliance degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system admin.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set hipaa-compliance enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/183365/administrators",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/14906/administrator-account-options"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "HIPAA-164.312",
+    "name": "Data Encryption HIPAA",
+    "issue_description": "Data Encryption HIPAA kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.hipaa-encryption degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set hipaa-encryption enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "HIPAA-164.320",
+    "name": "Privacy Plan",
+    "issue_description": "Privacy Plan kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_global.privacy-plan-enabled degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set privacy-plan-enabled enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "SOX-302",
+    "name": "Internal Controls",
+    "issue_description": "Internal Controls kontrolu icin beklenen durum saglanmazsa: Bu eksiklik doğrudan yetkisiz erişim, denetim kaybı veya kritik servislerin istismar edilmesi riskini artırır.",
+    "verification_note": "Denetim mantigi: system_settings.sox-internal-controls degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system settings.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set sox-internal-controls enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.sec.gov/about/laws/soa2002.pdf"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "SOX-404",
+    "name": "Change Management",
+    "issue_description": "Change Management kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: system_global.change-log degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: system global.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set change-log enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.sec.gov/about/laws/soa2002.pdf",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  },
+  {
+    "id": "SOX-409",
+    "name": "Real-time Reporting",
+    "issue_description": "Real-time Reporting kontrolu icin beklenen durum saglanmazsa: Bu eksiklik saldırı yüzeyini anlamlı şekilde büyütür ve güvenlik olaylarının etkisini artırabilir.",
+    "verification_note": "Denetim mantigi: log_report.realtime-report degeri tam olarak enable olmalidir.",
+    "recommendation_details": [
+      "Ilgili blok: log report.",
+      "Degisiklikten once running-config yedegi alin ve degisikligi degisiklik yonetimi kaydi ile uygulayin.",
+      "Onerilen CLI komutu: set realtime-report enable.",
+      "Degisiklikten sonra ilgili ayarin show/get ciktilari ve test loglari ile dogrulama yapin."
+    ],
+    "reference_urls": [
+      "https://www.sec.gov/about/laws/soa2002.pdf",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/738890/log-and-report",
+      "https://docs.fortinet.com/document/fortigate/7.4.0/administration-guide/250999/log-settings-and-targets"
+    ],
+    "validation_status": "needs_review",
+    "quality_notes": [
+      "Bu kontrol daha cok yonetisim veya surec gereksinimini temsil eder. Dogrudan native FortiOS anahtari yerine harici kanit, entegrasyon veya operasyonel prosedur gerekebilir."
+    ]
+  }
+]

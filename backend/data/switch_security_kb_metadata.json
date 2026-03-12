@@ -1,0 +1,1838 @@
+﻿[
+    {
+        "id":  "CISCO-SSH-001",
+        "name":  "Enforce SSH Version 2",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ip.ssh.version matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "ip ssh version 2",
+        "check_logic":  "SSHv1 must be disabled and SSHv2 enforced.",
+        "remediation":  "conf t; ip ssh version 2; line vty 0 15; transport input ssh; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.ssh.version",
+        "eval_type":  "equal",
+        "eval_expected":  "2",
+        "default_val":  "1",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-TELNET-001",
+        "name":  "Disable Telnet on VTY",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether line.vty.transport matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "line vty 0 15",
+        "check_logic":  "Telnet must not be allowed on management lines.",
+        "remediation":  "conf t; line vty 0 15; transport input ssh; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "line.vty.transport",
+        "eval_type":  "not_contains",
+        "eval_expected":  "telnet",
+        "default_val":  "telnet",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-AAA-001",
+        "name":  "Enable AAA New Model",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether aaa.new-model matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "aaa new-model",
+        "check_logic":  "AAA framework must be enabled for centralized auth.",
+        "remediation":  "conf t; aaa new-model; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.new-model",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-AAA-002",
+        "name":  "Use TACACS or RADIUS for Login",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether aaa.authentication.login.default matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "aaa authentication login",
+        "check_logic":  "Default login must use centralized authentication first.",
+        "remediation":  "conf t; aaa authentication login default group tacacs+ local; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.authentication.login.default",
+        "eval_type":  "contains",
+        "eval_expected":  "tacacs+|radius",
+        "default_val":  "local",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-AAA-003",
+        "name":  "Enable Command Accounting",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether aaa.accounting.commands matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "aaa accounting",
+        "check_logic":  "Privileged command execution must be audited.",
+        "remediation":  "conf t; aaa accounting commands 15 default start-stop group tacacs+; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.accounting.commands",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-SNMP-001",
+        "name":  "Disable SNMPv1 and SNMPv2c",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether snmp.version matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "snmp-server",
+        "check_logic":  "Legacy SNMP versions must be removed.",
+        "remediation":  "conf t; no snmp-server community public; no snmp-server community private; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp.version",
+        "eval_type":  "not_contains",
+        "eval_expected":  "v1|v2c",
+        "default_val":  "v2c",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-SNMP-002",
+        "name":  "Configure SNMPv3 AuthPriv",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether snmp.v3.user matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "snmp-server user",
+        "check_logic":  "SNMPv3 users with authPriv must exist.",
+        "remediation":  "conf t; snmp-server group SEC v3 priv; snmp-server user snmpops SEC v3 auth sha AuthPass123 priv aes 128 PrivPass123; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp.v3.user",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-LOG-001",
+        "name":  "Send Logs to Remote Syslog",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether logging.host matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "logging host",
+        "check_logic":  "Centralized logging is required for forensics.",
+        "remediation":  "conf t; logging host 10.10.10.10 transport udp port 514; logging trap informational; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "logging.host",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-NTP-001",
+        "name":  "Configure NTP Servers",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ntp.server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp server",
+        "check_logic":  "Network time sync must be configured.",
+        "remediation":  "conf t; ntp server 10.10.20.10 prefer; ntp server 10.10.20.11; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp.server",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-NTP-002",
+        "name":  "Enable NTP Authentication",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ntp.authenticate matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp authenticate",
+        "check_logic":  "NTP must be authenticated to prevent time spoofing.",
+        "remediation":  "conf t; ntp authenticate; ntp authentication-key 1 md5 NtpKey123; ntp trusted-key 1; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp.authenticate",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-VTY-ACL-001",
+        "name":  "Restrict Management Access with ACL",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether line.vty.access-class matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "access-class",
+        "check_logic":  "VTY access should be limited to management subnets.",
+        "remediation":  "conf t; ip access-list standard MGMT-ACL; permit 10.10.0.0 0.0.255.255; line vty 0 15; access-class MGMT-ACL in; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "line.vty.access-class",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-HTTP-001",
+        "name":  "Disable HTTP Management",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ip.http.server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "no ip http server",
+        "check_logic":  "Embedded web server must be disabled unless required.",
+        "remediation":  "conf t; no ip http server; no ip http secure-server; end; wr mem",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.http.server",
+        "eval_type":  "equal",
+        "eval_expected":  "disabled",
+        "default_val":  "enabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-CDP-001",
+        "name":  "Disable CDP on Untrusted Ports",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether interface.cdp matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "no cdp enable",
+        "check_logic":  "Discovery protocols leak topology details on edge ports.",
+        "remediation":  "conf t; interface range gi1/0/1-48; no cdp enable; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "interface.cdp",
+        "eval_type":  "equal",
+        "eval_expected":  "disabled",
+        "default_val":  "enabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-PORTSEC-001",
+        "name":  "Enable Port Security on Access Ports",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether switchport.port-security matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "switchport port-security",
+        "check_logic":  "Access ports should limit learned MAC addresses.",
+        "remediation":  "conf t; interface range gi1/0/1-48; switchport mode access; switchport port-security; switchport port-security maximum 5; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "switchport.port-security",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-DHCP-001",
+        "name":  "Enable DHCP Snooping",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ip.dhcp.snooping matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "ip dhcp snooping",
+        "check_logic":  "Rogue DHCP responses must be blocked.",
+        "remediation":  "conf t; ip dhcp snooping; ip dhcp snooping vlan 10,20,30; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.dhcp.snooping",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-DAI-001",
+        "name":  "Enable Dynamic ARP Inspection",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether ip.arp.inspection matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "ip arp inspection vlan",
+        "check_logic":  "ARP spoofing should be mitigated using DAI.",
+        "remediation":  "conf t; ip arp inspection vlan 10,20,30; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.arp.inspection",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-STP-001",
+        "name":  "Enable BPDU Guard on Edge Ports",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether spanning-tree.bpduguard matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "spanning-tree bpduguard",
+        "check_logic":  "Unexpected BPDUs on access ports must be blocked.",
+        "remediation":  "conf t; spanning-tree portfast default; spanning-tree portfast bpduguard default; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "spanning-tree.bpduguard",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "CISCO-STORM-001",
+        "name":  "Configure Storm Control",
+        "issue_description":  "Security hardening control for cisco switch platform.",
+        "verification_note":  "Check whether storm-control matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "storm-control",
+        "check_logic":  "Broadcast and multicast storms should be limited.",
+        "remediation":  "conf t; interface range gi1/0/1-48; storm-control broadcast level 1.00; storm-control multicast level 1.00; end; wr mem",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "storm-control",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "cisco",
+        "switch_model":  "IOS-XE"
+    },
+    {
+        "id":  "ARISTA-SSH-001",
+        "name":  "Enforce SSH Only Access",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether management.ssh.enabled matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "management ssh",
+        "check_logic":  "SSH must be enabled for secure CLI access.",
+        "remediation":  "configure; management ssh; no aaa root; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "management.ssh.enabled",
+        "eval_type":  "equal",
+        "eval_expected":  "true",
+        "default_val":  "false",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-TELNET-001",
+        "name":  "Disable Telnet Service",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether management.telnet matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "no management telnet",
+        "check_logic":  "Telnet must be disabled.",
+        "remediation":  "configure; no management telnet; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "management.telnet",
+        "eval_type":  "equal",
+        "eval_expected":  "disabled",
+        "default_val":  "enabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-AAA-001",
+        "name":  "Configure AAA Authentication",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether aaa.authentication matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "aaa authentication",
+        "check_logic":  "Centralized authentication should be primary.",
+        "remediation":  "configure; aaa authentication login default group radius local; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.authentication",
+        "eval_type":  "contains",
+        "eval_expected":  "radius|tacacs",
+        "default_val":  "local",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-AAA-002",
+        "name":  "Enable AAA Authorization",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether aaa.authorization matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "aaa authorization",
+        "check_logic":  "Authorization policy should be enforced.",
+        "remediation":  "configure; aaa authorization exec default group radius local; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.authorization",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-AAA-003",
+        "name":  "Enable AAA Accounting",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether aaa.accounting matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "aaa accounting",
+        "check_logic":  "Administrative command logging should be enabled.",
+        "remediation":  "configure; aaa accounting commands all default start-stop group radius; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.accounting",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-SNMP-001",
+        "name":  "Disable SNMP Community Strings",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether snmp.community matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "no snmp-server community",
+        "check_logic":  "Legacy SNMP communities should not exist.",
+        "remediation":  "configure; no snmp-server community public; no snmp-server community private; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp.community",
+        "eval_type":  "equal",
+        "eval_expected":  "none",
+        "default_val":  "present",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-SNMP-002",
+        "name":  "Configure SNMPv3 User",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether snmp.v3.user matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "snmp-server user",
+        "check_logic":  "SNMPv3 authPriv user should be defined.",
+        "remediation":  "configure; snmp-server group SEC v3 priv; snmp-server user snmpops SEC auth sha AuthPass123 priv aes 128 PrivPass123; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp.v3.user",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-LOG-001",
+        "name":  "Configure Remote Syslog",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether logging.host matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "logging host",
+        "check_logic":  "Logs must be exported to central collector.",
+        "remediation":  "configure; logging host 10.10.10.10; logging level informational; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "logging.host",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-NTP-001",
+        "name":  "Configure NTP Servers",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether ntp.server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp server",
+        "check_logic":  "NTP should be configured for consistent timestamps.",
+        "remediation":  "configure; ntp server 10.10.20.10 prefer; ntp server 10.10.20.11; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp.server",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-NTP-002",
+        "name":  "Enable NTP Authentication",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether ntp.authenticate matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp authenticate",
+        "check_logic":  "Authenticated NTP helps prevent time manipulation.",
+        "remediation":  "configure; ntp authenticate; ntp authentication-key 1 md5 NtpKey123; ntp trusted-key 1; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp.authenticate",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-API-001",
+        "name":  "Restrict eAPI to Management",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether management.api.http matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "management api http-commands",
+        "check_logic":  "API endpoints should be restricted and encrypted.",
+        "remediation":  "configure; management api http-commands; protocol https; no shutdown; vrf management; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "management.api.http",
+        "eval_type":  "equal",
+        "eval_expected":  "disabled",
+        "default_val":  "enabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-ACL-001",
+        "name":  "Apply Mgmt ACL to Management Interface",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether management.acl matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "ip access-list",
+        "check_logic":  "Only trusted subnets should reach management plane.",
+        "remediation":  "configure; ip access-list MGMT-ACL; 10 permit ip 10.10.0.0/16 any; 20 deny ip any any; interface Management1; ip access-group MGMT-ACL in; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "management.acl",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-PORTSEC-001",
+        "name":  "Limit MAC Addresses per Access Port",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether interface.port-security matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "switchport port-security",
+        "check_logic":  "MAC learning limits reduce spoofing/flooding risk.",
+        "remediation":  "configure; interface Ethernet1-48; switchport; switchport mode access; switchport port-security maximum 5; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "interface.port-security",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-DHCP-001",
+        "name":  "Enable DHCP Snooping",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether ip.dhcp.snooping matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "ip dhcp snooping",
+        "check_logic":  "Blocks unauthorized DHCP servers.",
+        "remediation":  "configure; ip dhcp snooping; ip dhcp snooping vlan 10,20,30; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.dhcp.snooping",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-DAI-001",
+        "name":  "Enable Dynamic ARP Inspection",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether ip.arp.inspection matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "ip arp inspection",
+        "check_logic":  "Protects against ARP poisoning attacks.",
+        "remediation":  "configure; ip arp inspection vlan 10,20,30; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ip.arp.inspection",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-STP-001",
+        "name":  "Enable BPDU Guard",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether spanning-tree.bpduguard matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "spanning-tree bpduguard",
+        "check_logic":  "Defends against rogue switch insertion.",
+        "remediation":  "configure; spanning-tree portfast default; spanning-tree bpduguard default; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "spanning-tree.bpduguard",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-UNUSED-001",
+        "name":  "Shutdown Unused Access Ports",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether interface.unused.admin-state matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "shutdown",
+        "check_logic":  "Unused edge ports should be administratively down.",
+        "remediation":  "configure; interface Ethernet40-48; shutdown; description UNUSED; end; write memory",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "interface.unused.admin-state",
+        "eval_type":  "equal",
+        "eval_expected":  "down",
+        "default_val":  "up",
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "ARISTA-BANNER-001",
+        "name":  "Configure Login Warning Banner",
+        "issue_description":  "Security hardening control for arista switch platform.",
+        "verification_note":  "Check whether banner.login matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://www.arista.com/en/support/advisories-notices/security-advisories"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "LOW",
+        "cli_path":  "banner login",
+        "check_logic":  "Legal banner supports policy and monitoring notices.",
+        "remediation":  "configure; banner login Authorized users only; end; write memory",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "banner.login",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "arista",
+        "switch_model":  "EOS"
+    },
+    {
+        "id":  "HUAWEI-SSH-001",
+        "name":  "Enable SSH and Disable Telnet",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether stelnet.server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "stelnet server enable",
+        "check_logic":  "Secure remote administration requires SSH only.",
+        "remediation":  "system-view; stelnet server enable; undo telnet server enable; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "stelnet.server",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-SSH-002",
+        "name":  "Set SSH User Service Type",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether ssh.user.service-type matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "ssh user",
+        "check_logic":  "SSH users should be restricted to secure service types.",
+        "remediation":  "system-view; ssh user admin authentication-type password; ssh user admin service-type stelnet; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ssh.user.service-type",
+        "eval_type":  "contains",
+        "eval_expected":  "stelnet",
+        "default_val":  "telnet",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-AAA-001",
+        "name":  "Configure RADIUS Authentication Scheme",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether aaa.authentication-scheme matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "CRITICAL",
+        "cli_path":  "authentication-scheme",
+        "check_logic":  "Centralized authentication should be primary.",
+        "remediation":  "system-view; aaa; authentication-scheme default; authentication-mode radius local; quit; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.authentication-scheme",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-AAA-002",
+        "name":  "Configure Command Accounting",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether aaa.accounting-scheme matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "accounting-scheme",
+        "check_logic":  "Command/accounting logs should be sent to AAA servers.",
+        "remediation":  "system-view; aaa; accounting-scheme default; accounting-mode radius; quit; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "aaa.accounting-scheme",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-SNMP-001",
+        "name":  "Disable SNMPv1 and SNMPv2c",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether snmp-agent.community matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "undo snmp-agent community",
+        "check_logic":  "Legacy SNMP communities should not remain configured.",
+        "remediation":  "system-view; undo snmp-agent community read public; undo snmp-agent community write private; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp-agent.community",
+        "eval_type":  "equal",
+        "eval_expected":  "none",
+        "default_val":  "present",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-SNMP-002",
+        "name":  "Configure SNMPv3 USM User",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether snmp-agent.usm-user matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "snmp-agent usm-user",
+        "check_logic":  "SNMPv3 auth/priv user should be configured.",
+        "remediation":  "system-view; snmp-agent group v3 sec privacy; snmp-agent usm-user v3 snmpops sec authentication-mode sha AuthPass123 privacy-mode aes128 PrivPass123; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "snmp-agent.usm-user",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-LOG-001",
+        "name":  "Configure Remote Info-Center Loghost",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether info-center.loghost matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "info-center loghost",
+        "check_logic":  "Logs should be sent to centralized collectors.",
+        "remediation":  "system-view; info-center enable; info-center loghost 10.10.10.10 facility local6; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "info-center.loghost",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-NTP-001",
+        "name":  "Configure NTP Unicast Servers",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether ntp-service.unicast-server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp-service unicast-server",
+        "check_logic":  "Time synchronization should be configured.",
+        "remediation":  "system-view; ntp-service unicast-server 10.10.20.10; ntp-service unicast-server 10.10.20.11; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp-service.unicast-server",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-NTP-002",
+        "name":  "Enable NTP Authentication",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether ntp-service.authentication matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "ntp-service authentication enable",
+        "check_logic":  "NTP peers should be authenticated.",
+        "remediation":  "system-view; ntp-service authentication enable; ntp-service authentication-keyid 1 authentication-mode md5 cipher NtpKey123; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "ntp-service.authentication",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-ACL-001",
+        "name":  "Restrict VTY Access with ACL",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether user-interface.vty.acl matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "acl",
+        "check_logic":  "Only trusted management subnets should reach VTY.",
+        "remediation":  "system-view; acl 2000; rule 5 permit source 10.10.0.0 0.0.255.255; user-interface vty 0 4; acl 2000 inbound; quit; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "user-interface.vty.acl",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-HTTP-001",
+        "name":  "Disable HTTP Server",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether http.server matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "HIGH",
+        "cli_path":  "undo http server enable",
+        "check_logic":  "Disable web management when not required.",
+        "remediation":  "system-view; undo http server enable; undo https server enable; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "http.server",
+        "eval_type":  "equal",
+        "eval_expected":  "disabled",
+        "default_val":  "enabled",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-PORTSEC-001",
+        "name":  "Enable Port Security on Access Ports",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether port-security.enable matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "port-security enable",
+        "check_logic":  "Limit learned MAC addresses per edge port.",
+        "remediation":  "system-view; interface GigabitEthernet0/0/1; port-security enable; port-security max-mac-num 5; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "port-security.enable",
+        "eval_type":  "equal",
+        "eval_expected":  "true",
+        "default_val":  "false",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-DHCP-001",
+        "name":  "Enable DHCP Snooping",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether dhcp.snooping matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "dhcp snooping enable",
+        "check_logic":  "Mitigates rogue DHCP servers.",
+        "remediation":  "system-view; dhcp snooping enable; vlan batch 10 20 30; dhcp snooping enable vlan 10 20 30; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "dhcp.snooping",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-DAI-001",
+        "name":  "Enable ARP Anti-Attack",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether arp.anti-attack matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "HIGH",
+        "cli_path":  "arp anti-attack",
+        "check_logic":  "ARP validation should be enabled against spoofing.",
+        "remediation":  "system-view; arp anti-attack check user-bind enable; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "arp.anti-attack",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-STP-001",
+        "name":  "Enable BPDU Protection",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether stp.bpdu-protection matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "stp bpdu-protection",
+        "check_logic":  "Protects topology from rogue BPDUs on edge ports.",
+        "remediation":  "system-view; stp bpdu-protection; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "stp.bpdu-protection",
+        "eval_type":  "equal",
+        "eval_expected":  "enabled",
+        "default_val":  "disabled",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-STORM-001",
+        "name":  "Configure Broadcast Storm Suppression",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether storm-suppression matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "storm suppression",
+        "check_logic":  "Storm control should limit abusive traffic floods.",
+        "remediation":  "system-view; interface GigabitEthernet0/0/1; storm suppression broadcast cir 1000; storm suppression multicast cir 1000; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "storm-suppression",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-UNUSED-001",
+        "name":  "Shutdown Unused Access Ports",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether interface.unused.state matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "CIS",
+        "severity":  "MEDIUM",
+        "cli_path":  "shutdown",
+        "check_logic":  "Unused ports should be disabled.",
+        "remediation":  "system-view; interface GigabitEthernet0/0/45 to GigabitEthernet0/0/48; shutdown; description UNUSED; quit; save",
+        "references":  [
+                           "CIS",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "interface.unused.state",
+        "eval_type":  "equal",
+        "eval_expected":  "down",
+        "default_val":  "up",
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    },
+    {
+        "id":  "HUAWEI-BANNER-001",
+        "name":  "Configure Login Banner",
+        "issue_description":  "Security hardening control for huawei switch platform.",
+        "verification_note":  "Check whether header.login matches expected policy value.",
+        "recommendation_details":  [
+                                       "Validate current running configuration before change.",
+                                       "Apply change during approved maintenance window.",
+                                       "Verify behavior after change with operational tests.",
+                                       "Capture post-change evidence for audit records."
+                                   ],
+        "reference_urls":  [
+                               "https://support.huawei.com/enterprise/en/doc/EDOC1100419286"
+                           ],
+        "validation_status":  "mapped",
+        "quality_notes":  [
+
+                          ],
+        "category":  "STIG",
+        "severity":  "LOW",
+        "cli_path":  "header login",
+        "check_logic":  "Legal warning banner should be displayed before login.",
+        "remediation":  "system-view; header login information Authorized access only; quit; save",
+        "references":  [
+                           "STIG",
+                           "Vendor Guidance"
+                       ],
+        "eval_path":  "header.login",
+        "eval_type":  "exists",
+        "eval_expected":  true,
+        "default_val":  null,
+        "switch_vendor":  "huawei",
+        "switch_model":  "VRP"
+    }
+]
