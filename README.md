@@ -1,176 +1,65 @@
-﻿# Network Security Suite (NSS ENGINE)
+# Network Security Suite (NSS) 🛡️
 
-FortiGate konfigürasyon analizi, CVE takibi ve cihaz izleme islevlerini tek panelde birlestiren Docker tabanli bir guvenlik denetim platformu.
+Network Security Suite, ağ cihazlarınızın güvenlik konfigürasyonlarını analiz eden, zafiyet takibi yapan ve ağ topolojinizi otomatik olarak çıkaran kapsamlı bir açık kaynak güvenlik yönetim platformudur.
 
-## Ne Yapar?
-- FortiGate config dosyalarini parse eder ve guvenlik bulgularini raporlar.
-- Shadow rule, genis erisim, profil eksigi, IP/DHCP gibi analizleri cikarir.
-- CVE verilerini birden fazla kaynaktan cekip veritabaninda saklar (offline goruntuleme).
-- FortiGate API ve SNMP uzerinden cihazlari izler, metrik ve hit count toplar.
-- PDF/rapor gorunumu ile bulgulari sunar.
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
-## Mimari
-- Frontend: React (`frontend`)
-- Backend: Node.js + Express (`backend`)
-- DB: PostgreSQL (`db`)
-- Orkestrasyon: Docker Compose
+## 🚀 Temel Özellikler
 
-Servisler:
-- `nss-frontend` -> `http://localhost:3001`
-- `nss-backend` -> `http://localhost:5001` (API root: `/api`)
-- `nss-postgres` -> `localhost:5433`
+### 🔍 Güvenlik Analizi & Uyumluluk
+*   **FortiGate & Switch Denetimi:** Konfigürasyon dosyalarını (veya canlı API/SSH bağlantısını) parse ederek STIG, CIS ve Best Practice standartlarına göre analiz eder.
+*   **Kural Tabanlı Kontrol:** Shadow rule (çakışan kurallar), aşırı geniş erişim (All/Any) ve eksik güvenlik profili (IPS, AV, WebFilter) tespiti.
+*   **Özelleştirilebilir Bilgi Tabanı (KB):** Kendi güvenlik kurallarınızı tanımlayabilir ve global standartlarla karşılaştırabilirsiniz.
 
-## Ozellikler
+### 🌐 Canlı Ağ Keşfi (Discovery)
+*   **Akıllı Tarama:** SNMP (v2c/v3) üzerinden ağdaki cihazları otomatik tespit eder.
+*   **Derin Keşif (Deep Discovery):** LLDP, CDP ve ARP tablolarını kullanarak cihazlar arası komşuluk ilişkilerini çıkarır.
+*   **Dinamik Topoloji:** Keşfedilen verilerle ağ haritanızı otomatik olarak oluşturur ve görselleştirir.
 
-### 1) Konfigurasyon Analizi
-- Dosya yukleme (`/api/upload-config`) ve parse (`/api/parse-config`)
-- Ozet, detay, interface etkilesimi, IP analizi, shadow analizi
-- Guvenlik KB tabanli kural denetimi
+### ⚠️ Zafiyet & Risk Yönetimi
+*   **Otomatik CVE Takibi:** NVD, FortiGuard, CISA KEV ve ZDI kaynaklarından anlık zafiyet akışı.
+*   **SSL Sertifika Takibi:** Kritik servislerin sertifika sürelerini hem dosya hem de URL üzerinden izler, son kullanma yaklaşınca uyarı verir.
+*   **Performans İzleme:** Cihazların CPU, RAM, VPN ve HA durumlarını canlı grafiklerle takip eder.
 
-### 2) CVE Takibi
-- Kaynak bazli CVE toplama (FortiGuard, NVD, CISA KEV, ZDI, generic RSS/JSON)
-- Kaynak ekle/sil/guncelle/aktif-pasif
-- Senkron periyodu ayari (5-1440 dk)
-- CVE aciklamasi + cozum bilgisi saklama
+## 🛠️ Teknik Mimari
 
-### 3) Cihaz Yonetimi
-- API tabanli FortiGate cihaz ekleme/izleme
-- SNMP template yonetimi (v2c/v3)
-- SNMP canli takip (sysName, online/offline)
-- Hit count gecmisi ve performans metrikleri
+*   **Frontend:** React.js, Recharts, Lucide Icons, Axios.
+*   **Backend:** Node.js, Express, net-snmp, ssh2, RSS Parser.
+*   **Database:** PostgreSQL (İlişkisel veri ve JSONB log desteği).
+*   **DevOps:** Docker & Docker Compose.
 
-### 4) Ayarlar
-- LDAP ayarlari
-- Sertifika ayarlari
-- Security KB yonetimi
-- CVE DB kaynak yonetimi
+## 📦 Kurulum
 
-## Hizli Baslangic (Docker)
+### Gereksinimler
+*   Docker ve Docker Compose
 
-```bash
-cd network-security-suite
-docker compose up -d --build
-```
+### Hızlı Başlangıç
+1.  Projeyi klonlayın:
+    ```bash
+    git clone https://github.com/rcpdkc/network-security-suite.git
+    cd network-security-suite
+    ```
+2.  Sistemi başlatın:
+    ```bash
+    docker-compose up -d --build
+    ```
+3.  Tarayıcınızdan erişin:
+    *   **Frontend:** `http://localhost:3001`
+    *   **Backend API:** `http://localhost:5001`
 
-Durum kontrolu:
-```bash
-docker compose ps
-docker logs -f nss-backend
-docker logs -f nss-frontend
-```
+## 📖 Kullanım Senaryoları
 
-Durdurma:
-```bash
-docker compose down
-```
+1.  **Güvenlik Sertifikasyonu:** Yeni kurulan bir Firewall'un kurum standartlarına uygunluğunu saniyeler içinde denetleyin.
+2.  **Envanter Çıkarma:** Bilinmeyen bir ağa bağlandığınızda SNMP taraması ve Deep Discovery ile tüm cihazları ve bağlantılarını haritalandırın.
+3.  **Proaktif İzleme:** Kritik güvenlik açıklarını (CVE) dashboard üzerinden takip ederek cihazlarınızın etkilenip etkilenmediğini analiz edin.
 
-## Gelistirme
+## 🤝 Katkıda Bulunma
+Katkılarınızı bekliyoruz! Lütfen bir `Pull Request` açmadan önce projenin kodlama standartlarını inceleyin.
 
-Backend:
-```bash
-cd backend
-npm install
-npm run dev
-```
+## 📄 Lisans
+Bu proje MIT Lisansı ile lisanslanmıştır.
 
-Frontend:
-```bash
-cd frontend
-npm install
-npm start
-```
-
-## API Ozeti
-Base URL: `http://localhost:5001/api`
-
-### Saglik
-- `GET /health`
-
-### Dosya/Analiz
-- `GET /uploaded-files`
-- `POST /upload-config`
-- `POST /parse-config`
-- `GET /analysis/:fileUid`
-- `GET /config-detail/:fileUid`
-
-### CVE
-- `GET /cve`
-- `GET /cve/unread-count`
-- `POST /cve/mark-read`
-- `POST /cve/sync`
-- `GET /cve/sources`
-- `POST /cve/sources`
-- `PUT /cve/sources/:id`
-- `DELETE /cve/sources/:id`
-- `GET /cve/sync-config`
-- `POST /cve/sync-config`
-
-### Ayarlar
-- `GET /settings/ldap`
-- `POST /settings/ldap`
-- `GET /settings/certs`
-- `POST /settings/certs`
-- `GET /security-kb`
-- `POST /security-kb`
-- `DELETE /security-kb/:id`
-
-### Cihaz/SNMP
-- `GET /snmp-templates`
-- `POST /snmp-templates`
-- `PUT /snmp-templates/:id`
-- `DELETE /snmp-templates/:id`
-- `GET /devices`
-- `POST /devices`
-- `PUT /devices/:id`
-- `DELETE /devices/:id`
-- `GET /devices/snmp-track`
-- `GET /devices/monitor`
-- `POST /devices/:id/scan-config`
-- `POST /devices/:id/fetch-hits`
-- `POST /devices/:id/collect-metrics`
-- `GET /devices/:id/hit-history`
-- `GET /metrics/latest`
-
-## Veritabani Notlari
-- Tablolarin bir kismi `db/init.sql` ile olusur.
-- Guncel tablo/kolon migrationlari backend acilisinda (`backend/app.js`) `CREATE TABLE IF NOT EXISTS` ve `ALTER TABLE IF NOT EXISTS` ile tamamlanir.
-
-## Onemli Konfigurasyonlar
-- Frontend API adresi: `docker-compose.yml` icinde `REACT_APP_API_URL`
-- Backend DB bilgisi: `docker-compose.yml` -> backend environment
-- CVE scheduler periyodu: `settings` tablosunda `cve_sync_config`
-
-## Sorun Giderme
-
-### `ERR_EMPTY_RESPONSE` / API ulasilamiyor
-```bash
-docker logs --tail 200 nss-backend
-docker compose restart backend frontend
-```
-
-### `Cannot find module 'net-snmp'`
-```bash
-docker compose exec backend npm install net-snmp
-docker compose restart backend
-```
-
-### Port cakismasi
-- 3001, 5001, 5433 portlarini kullanan baska stack/servis olmadigini kontrol edin.
-
-## Dizin Yapisi
-```text
-network-security-suite/
-  backend/
-    app.js
-    fortigate-parser.js
-    data/
-  frontend/
-    src/App.js
-    src/App.css
-  db/
-    init.sql
-  docker-compose.yml
-```
-
-## Lisans
-Repo icindeki lisans dosyasina bakin (`LICENSE`).
+---
+Developed with ❤️ by [rcpdkc](https://github.com/rcpdkc)
