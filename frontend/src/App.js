@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import { Shield, Home, Upload, Activity, AlertTriangle, Zap, CheckCircle2, FileJson, ArrowLeft, ArrowRight, Printer, Info, BarChart3, Clock, Database, ChevronRight, Terminal, Search, Lock, Cpu, Monitor, Image, XCircle } from 'lucide-react';
+import { Shield, Home, Upload, Activity, AlertTriangle, Zap, CheckCircle2, FileJson, ArrowLeft, ArrowRight, Printer, Info, BarChart3, Clock, Database, ChevronRight, Terminal, Search, Lock, Cpu, Monitor, Image, XCircle, Wifi } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Settings as SettingsIcon, Key, FileText, Plus, Save, Trash2, Edit, Globe, Server, FileCheck, Bell, RefreshCw, ChevronDown, ChevronUp, LinkIcon, X } from 'lucide-react';
 import './App.css';
@@ -1294,7 +1294,7 @@ const SettingsView = ({ API_URL }) => {
 };
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
-const APP_VERSION = 'v1.0.4-stable';
+const APP_VERSION = 'v1.2.2';
 
 // --- How-To View Component ---
 const HowToView = ({ API_URL }) => {
@@ -1507,7 +1507,7 @@ const HealthIndicators = () => {
         const res = await axios.get(`${API_URL}/health`);
         setStatus({
           backend: res.data.status === 'OK' ? 'online' : 'error',
-          db: res.data.database === 'connected' ? 'online' : 'error'
+          db: res.data.db === 'connected' ? 'online' : 'error'
         });
       } catch (err) {
         setStatus({ backend: 'error', db: 'error' });
@@ -2179,15 +2179,202 @@ const DeviceTracker = ({ API_URL }) => {
   );
 };
 
+const DeviceMonitorView = ({ API_URL, onUpdateStatus }) => {
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [filterTag, setFilterTag] = useState('All');
+  const [allTags, setAllTags] = useState([]);
+  const monitorRef = useRef(null);
+
+  const fetchMonitorData = async (isManual = false) => {
+    if (isManual) setLoading(true);
+    try {
+      const [devsRes, tagsRes] = await Promise.all([
+        axios.get(`${API_URL}/devices/snmp-track`),
+        axios.get(`${API_URL}/tags`)
+      ]);
+      setDevices(devsRes.data || []);
+      setAllTags(tagsRes.data || []);
+      if (onUpdateStatus) onUpdateStatus(new Date());
+    } catch (e) { 
+      console.error('Monitor fetch error:', e); 
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMonitorData();
+    const interval = setInterval(fetchMonitorData, 15000); // 15 seconds refresh
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleFsChange = () => setIsFullScreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      if (monitorRef.current.requestFullscreen) monitorRef.current.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
+
+  const filteredDevices = filterTag === 'All' 
+    ? devices 
+    : devices.filter(d => Array.isArray(d.tags) && d.tags.includes(filterTag));
+
+  const getDeviceIcon = (type, size = 32) => {
+    const t = String(type || '').toLowerCase();
+    if (t.includes('firewall')) return <Shield size={size} />;
+    if (t.includes('switch')) return <Server size={size} />;
+    if (t.includes('router')) return <Globe size={size} />;
+    if (t.includes('access point') || t.includes('ap')) return <Wifi size={size} />;
+    if (t.includes('server')) return <Database size={size} />;
+    return <Cpu size={size} />;
+  };
+
+  if (loading && devices.length === 0) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <RefreshCw className="spin" size={40} color="var(--primary)" />
+        <p style={{ marginTop: '15px', color: '#64748b', fontWeight: '600' }}>Cihazlar taranıyor...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={monitorRef} className={`monitor-view-wrapper ${isFullScreen ? 'fs-mode' : ''}`} style={{ 
+      background: isFullScreen ? '#020617' : 'transparent', 
+      minHeight: isFullScreen ? '100vh' : 'auto', 
+      padding: isFullScreen ? '40px' : '0',
+      transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+      overflowY: 'auto'
+    }}>
+      {!isFullScreen && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '25px', gap: '12px' }}>
+          <button 
+            onClick={() => fetchMonitorData(true)}
+            style={{ background: 'white', border: '1px solid #e2e8f0', color: '#64748b', padding: '10px', borderRadius: '12px', cursor: 'pointer' }}
+            title="Yenile"
+          >
+            <RefreshCw size={18} className={loading ? 'spin' : ''} />
+          </button>
+          <select 
+            value={filterTag} 
+            onChange={(e) => setFilterTag(e.target.value)}
+            style={{ padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', background: 'white', fontSize: '13px', fontWeight: '700', outline: 'none', color: '#475569' }}
+          >
+            <option value="All">Tüm Gruplar ({devices.length})</option>
+            {allTags.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+          </select>
+        </div>
+      )}
+
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isFullScreen ? 'repeat(auto-fill, minmax(200px, 1fr))' : 'repeat(auto-fill, minmax(260px, 1fr))', 
+        gap: isFullScreen ? '30px' : '20px'
+      }}>
+        {filteredDevices.map((d, idx) => {
+          const isOnline = d.status === 'online';
+          const glowColor = isOnline ? 'rgba(16,185,129,0.5)' : 'rgba(244,63,94,0.5)';
+
+          return (
+            <div 
+              key={d.id || idx} 
+              className={isOnline ? 'monitor-card-online' : ''}
+              style={{ 
+                background: isFullScreen 
+                  ? (isOnline ? 'rgba(6, 78, 59, 0.4)' : 'rgba(76, 5, 25, 0.4)') 
+                  : 'white',
+                backdropFilter: isFullScreen ? 'blur(10px)' : 'none',
+                border: isFullScreen 
+                  ? `2px solid ${isOnline ? '#10b981' : '#f43f5e'}` 
+                  : `1px solid ${isOnline ? '#bbf7d0' : '#fecaca'}`,
+                borderRadius: '24px',
+                padding: '25px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                transition: 'all 0.3s ease',
+                boxShadow: isOnline 
+                  ? `0 10px 30px -10px ${glowColor}` 
+                  : 'none',
+              }}
+            >
+              {/* Online/Offline Status LED */}
+              <div style={{ 
+                position: 'absolute', top: '15px', right: '15px',
+                width: '10px', height: '10px', borderRadius: '50%',
+                background: isOnline ? '#10b981' : '#ef4444',
+                boxShadow: isOnline ? '0 0 12px #10b981' : '0 0 12px #ef4444'
+              }} className={isOnline ? 'pulse' : ''} />
+
+              <div style={{ 
+                width: isFullScreen ? '70px' : '60px', 
+                height: isFullScreen ? '70px' : '60px', 
+                borderRadius: '18px', 
+                background: isFullScreen ? 'rgba(255,255,255,0.05)' : (isOnline ? '#f0fdf4' : '#fff1f2'),
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                marginBottom: '15px',
+                color: isOnline ? '#10b981' : '#f43f5e'
+              }}>
+                {getDeviceIcon(d.device_type, isFullScreen ? 36 : 28)}
+              </div>
+
+              <div style={{ 
+                fontWeight: '800', 
+                fontSize: '15px', 
+                color: isFullScreen ? 'white' : '#1e293b', 
+                marginBottom: '4px', 
+                textAlign: 'center'
+              }}>{d.name || d.ip_address}</div>
+
+              <div style={{ fontSize: '12px', color: isFullScreen ? '#94a3b8' : '#64748b', fontWeight: '600', marginBottom: '12px' }}>{d.ip_address}</div>
+
+              {!isFullScreen && Array.isArray(d.tags) && d.tags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', justifyContent: 'center' }}>
+                  {d.tags.map(t => (
+                    <span key={t} style={{ fontSize: '9px', background: isOnline ? '#dcfce7' : '#f1f5f9', color: isOnline ? '#15803d' : '#475569', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {filteredDevices.length === 0 && !loading && (
+        <div style={{ textAlign: 'center', padding: '100px', background: 'white', borderRadius: '24px', border: '1px dashed #e2e8f0' }}>
+          <Monitor size={48} style={{ opacity: 0.2, marginBottom: '15px' }} />
+          <h3 style={{ color: '#475569', margin: '0 0 5px' }}>Cihaz Bulunamadı</h3>
+          <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Seçili filtreye uygun aktif izlenen cihaz yok.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const DeviceManagementView = ({ API_URL }) => {
   const [devices, setDevices] = useState([]);
   const [snmpTemplates, setSnmpTemplates] = useState([]);
   const [sshTemplates, setSshTemplates] = useState([]);
   const [apiTemplates, setApiTemplates] = useState([]);
+  const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [isTestSuccessful, setIsTestSuccessful] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
   const [form, setForm] = useState({
@@ -2199,8 +2386,11 @@ const DeviceManagementView = ({ API_URL }) => {
     snmp_template_id: '',
     ssh_template_id: '',
     api_template_id: '',
-    vdom: 'root'
+    vdom: 'root',
+    tags: []
   });
+
+  const [newTagForm, setNewTagForm] = useState({ name: '', color: '#6366f1' });
 
   const hasApiConfig = (device) => !!device?.api_template_id;
   const hasSnmpSshConfig = (device) => !!device?.snmp_template_id && !!device?.ssh_template_id;
@@ -2211,23 +2401,6 @@ const DeviceManagementView = ({ API_URL }) => {
     if (hasApi) return 'API (FortiGate)';
     return 'SNMP + SSH';
   };
-
-  const fetchAll = async () => {
-    try {
-      const [d, snmp, ssh, api] = await Promise.all([
-        axios.get(`${API_URL}/devices`),
-        axios.get(`${API_URL}/snmp-templates`),
-        axios.get(`${API_URL}/ssh-templates`),
-        axios.get(`${API_URL}/api-templates`)
-      ]);
-      setDevices(d.data);
-      setSnmpTemplates(snmp.data);
-      setSshTemplates(ssh.data);
-      setApiTemplates(api.data);
-    } catch (e) { console.error(e); }
-  };
-
-  useEffect(() => { fetchAll(); }, []);
 
   const handleTest = async () => {
     setLoading(true);
@@ -2259,6 +2432,43 @@ const DeviceManagementView = ({ API_URL }) => {
     }
   };
 
+  const fetchTags = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/tags`);
+      setAllTags(res.data || []);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleCreateTag = async (e) => {
+    e.preventDefault();
+    if (!newTagForm.name.trim()) return;
+    try {
+      await axios.post(`${API_URL}/tags`, newTagForm);
+      await fetchTags();
+      setIsTagModalOpen(false);
+      setNewTagForm({ name: '', color: '#6366f1' });
+    } catch (e) { alert('Tag oluşturulamadı: ' + e.message); }
+  };
+
+  const fetchAll = async () => {
+    try {
+      const [d, snmp, ssh, api, t] = await Promise.all([
+        axios.get(`${API_URL}/devices`),
+        axios.get(`${API_URL}/snmp-templates`),
+        axios.get(`${API_URL}/ssh-templates`),
+        axios.get(`${API_URL}/api-templates`),
+        axios.get(`${API_URL}/tags`)
+      ]);
+      setDevices(d.data);
+      setSnmpTemplates(snmp.data);
+      setSshTemplates(ssh.data);
+      setApiTemplates(api.data);
+      setAllTags(t.data || []);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => { fetchAll(); }, []);
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isTestSuccessful) {
@@ -2288,6 +2498,15 @@ const DeviceManagementView = ({ API_URL }) => {
     }
   };
 
+  const toggleTagInForm = (tagName) => {
+    setForm(prev => {
+      const tags = prev.tags.includes(tagName)
+        ? prev.tags.filter(t => t !== tagName)
+        : [...prev.tags, tagName];
+      return { ...prev, tags };
+    });
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Cihazı silmek istediğinize emin misiniz?')) return;
     try {
@@ -2299,10 +2518,7 @@ const DeviceManagementView = ({ API_URL }) => {
   return (
     <div className="device-mgmt-view fade-in">
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'25px'}}>
-        <div>
-          <h2 style={{margin:0, fontSize:'1.5rem', fontWeight:'800', color:'#1e293b'}}>Cihaz Yönetimi</h2>
-          <p style={{margin:0, color:'#64748b'}}>Tüm ağ cihazlarını buradan ekleyebilir ve yönetebilirsiniz.</p>
-        </div>
+
         <button 
           onClick={() => {
             setForm({ name: '', ip_address: '', device_type: 'Firewall', vendor: 'Fortinet', connection_method: 'snmp_ssh', snmp_template_id: '', ssh_template_id: '', api_template_id: '', vdom: 'root' });
@@ -2323,9 +2539,9 @@ const DeviceManagementView = ({ API_URL }) => {
             <tr>
               <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>CİHAZ ADI</th>
               <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>IP ADRESİ</th>
+              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TAGS</th>
               <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TÜR / MARKA</th>
               <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>BAĞLANTI METODU</th>
-              <th style={{padding:'15px 25px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>TEMPLATELER</th>
               <th style={{padding:'15px 25px', textAlign:'right', fontSize:'12px', color:'#64748b'}}>İŞLEMLER</th>
             </tr>
           </thead>
@@ -2334,6 +2550,13 @@ const DeviceManagementView = ({ API_URL }) => {
               <tr key={d.id} style={{borderBottom:'1px solid #f1f5f9'}}>
                 <td style={{padding:'15px 25px'}}><span style={{fontWeight:'700', color:'#1e293b'}}>{d.name}</span></td>
                 <td style={{padding:'15px 25px'}}><span style={{color:'#475569', fontSize:'13px'}}>{d.ip_address}</span></td>
+                <td style={{padding:'15px 25px'}}>
+                  <div style={{display:'flex', flexWrap:'wrap', gap:'4px'}}>
+                    {Array.isArray(d.tags) && d.tags.map(t => (
+                      <span key={t} style={{padding:'2px 8px', borderRadius:'6px', background:'#eff6ff', color:'#1d4ed8', fontSize:'10px', fontWeight:'700'}}>{t}</span>
+                    ))}
+                  </div>
+                </td>
                 <td style={{padding:'15px 25px'}}>
                   <div style={{display:'flex', flexDirection:'column'}}>
                     <span style={{fontSize:'13px', fontWeight:'600', color:'#1e293b'}}>{d.device_type || 'N/A'}</span>
@@ -2344,9 +2567,6 @@ const DeviceManagementView = ({ API_URL }) => {
                   <span style={{background:'#f1f5f9', color:'#475569', padding:'4px 10px', borderRadius:'8px', fontSize:'11px', fontWeight:'800'}}>
                     {getDeviceMethodLabel(d)}
                   </span>
-                </td>
-                <td style={{padding:'15px 25px', fontSize:'12px', color:'#64748b'}}>
-                  {`API: ${d.api_template_name || 'N/A'}, SNMP: ${d.snmp_template_name || 'N/A'}, SSH: ${d.ssh_template_name || 'N/A'}`}
                 </td>
                 <td style={{padding:'15px 25px', textAlign:'right'}}>
                   <button onClick={() => {
@@ -2359,11 +2579,12 @@ const DeviceManagementView = ({ API_URL }) => {
                       snmp_template_id: d.snmp_template_id || '',
                       ssh_template_id: d.ssh_template_id || '',
                       api_template_id: d.api_template_id || '',
-                      vdom: d.vdom || 'root'
+                      vdom: d.vdom || 'root',
+                      tags: d.tags || []
                     });
                     setEditingId(d.id);
                     setTestResult(null);
-                    setIsTestSuccessful(true); // Allow saving since it's an edit
+                    setIsTestSuccessful(true);
                     setIsModalOpen(true);
                   }} style={{padding:'8px', borderRadius:'10px', border:'1px solid #e2e8f0', background:'white', cursor:'pointer', marginRight:'8px'}}>Düzenle</button>
                   <button onClick={() => handleDelete(d.id)} style={{padding:'8px', borderRadius:'10px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#ef4444', cursor:'pointer'}}><Trash2 size={16}/></button>
@@ -2462,6 +2683,19 @@ const DeviceManagementView = ({ API_URL }) => {
                 </div>
               )}
 
+              <div>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px'}}>
+                  <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>ETİKETLER (TAGS)</label>
+                  <button type="button" onClick={() => setIsTagModalOpen(true)} style={{background:'none', border:'none', color:'var(--primary)', cursor:'pointer', fontWeight:'800', fontSize:'11px', display:'flex', alignItems:'center', gap:'4px'}}><Plus size={14}/> Yeni Tag</button>
+                </div>
+                <div style={{display:'flex', flexWrap:'wrap', gap:'8px', padding:'12px', border:'1px solid #e2e8f0', borderRadius:'12px', minHeight:'45px'}}>
+                  {allTags.map(t => (
+                    <button key={t.id} type="button" onClick={() => toggleTagInForm(t.name)} style={{padding:'4px 10px', borderRadius:'8px', border: form.tags.includes(t.name) ? `2px solid ${t.color}` : '1px solid #e2e8f0', background: form.tags.includes(t.name) ? `${t.color}15` : 'white', color: form.tags.includes(t.name) ? t.color : '#64748b', fontSize:'11px', fontWeight:'700', cursor:'pointer'}}>{t.name}</button>
+                  ))}
+                  {allTags.length === 0 && <span style={{fontSize:'11px', color:'#94a3b8'}}>Henüz tag tanımlanmamış.</span>}
+                </div>
+              </div>
+
               <div style={{padding:'20px', borderRadius:'15px', background: testResult ? (testResult.success ? '#f0fdf4' : '#fef2f2') : '#f8fafc', border: testResult ? (testResult.success ? '1px solid #bbf7d0' : '1px solid #fecaca') : '1px solid #e2e8f0'}}>
                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                   <div style={{fontSize:'13px', fontWeight:'700', color: testResult ? (testResult.success ? '#166534' : '#991b1b') : '#64748b'}}>
@@ -2486,6 +2720,27 @@ const DeviceManagementView = ({ API_URL }) => {
               <div style={{display:'flex', gap:'12px', marginTop:'10px'}}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={{flex:1, padding:'14px', borderRadius:'14px', border:'1px solid #e2e8f0', background:'white', fontWeight:'700', cursor:'pointer'}}>İptal</button>
                 <button type="submit" disabled={!isTestSuccessful} style={{flex:1, padding:'14px', borderRadius:'14px', border:'none', background: isTestSuccessful ? 'var(--primary)' : '#cbd5e1', color:'white', fontWeight:'800', cursor: isTestSuccessful ? 'pointer' : 'not-allowed'}}>Cihazı Kaydet</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isTagModalOpen && (
+        <div className="modal-overlay" style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(15,23,42,0.6)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:2000}}>
+          <div style={{background:'white', width:'400px', borderRadius:'24px', padding:'30px', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.25)'}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
+              <h3 style={{margin:0, fontSize:'1.1rem', fontWeight:'800'}}>Yeni Etiket Oluştur</h3>
+              <button onClick={() => setIsTagModalOpen(false)} style={{background:'none', border:'none', cursor:'pointer', fontSize:'18px', color:'#64748b'}}>✕</button>
+            </div>
+            <form onSubmit={handleCreateTag} style={{display:'grid', gap:'15px'}}>
+              <div>
+                <label style={{fontSize:'12px', fontWeight:'700', color:'#64748b'}}>ETİKET ADI</label>
+                <input type="text" value={newTagForm.name} onChange={e => setNewTagForm({...newTagForm, name: e.target.value})} style={{width:'100%', padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0'}} placeholder="Örn: Kritik, Test, DMZ" required />
+              </div>
+              <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
+                <button type="button" onClick={() => setIsTagModalOpen(false)} style={{flex:1, padding:'12px', borderRadius:'12px', border:'1px solid #e2e8f0', background:'white', fontWeight:'700', cursor:'pointer'}}>İptal</button>
+                <button type="submit" style={{flex:1, padding:'12px', borderRadius:'12px', border:'none', background:'var(--primary)', color:'white', fontWeight:'800', cursor:'pointer'}}>Tag Oluştur</button>
               </div>
             </form>
           </div>
@@ -2888,86 +3143,141 @@ const CertificateManagementView = ({ API_URL }) => {
   const warningCount = certificates.filter((c) => c.warning).length;
 
   return (
-    <div className="fade-in" style={{display:'grid', gap:'20px'}}>
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
-        <div style={{background:'white', borderRadius:'20px', border:'1px solid #e2e8f0', padding:'20px', display:'grid', gap:'10px'}}>
-          <h3 style={{margin:0, fontSize:'1.1rem', fontWeight:'800', color:'#0f172a'}}>1) Sertifika Dosyası Yükle</h3>
-          <input
-            type="text"
-            placeholder="Kayıt adı (opsiyonel)"
-            value={uploadForm.name}
-            onChange={(e) => setUploadForm((prev) => ({ ...prev, name: e.target.value }))}
-            style={{padding:'10px 12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}
-          />
-          <input type="file" accept=".crt,.pem,.cer,.txt" onChange={handleFileSelect} style={{padding:'10px', border:'1px solid #e2e8f0', borderRadius:'10px'}} />
-          <button onClick={handleUploadCertificate} disabled={loading} style={{background:'var(--primary)', color:'white', border:'none', padding:'11px 16px', borderRadius:'10px', fontWeight:'700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1}}>
-            {loading ? 'Yükleniyor...' : 'Dosyadan Kaydet'}
-          </button>
+    <div className="fade-in" style={{ paddingBottom: '40px' }}>
+      <div style={{ background: 'white', borderRadius: '24px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '30px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Shield size={28} color="var(--primary)" />
+              Sertifika Yönetimi
+            </h3>
+            <p style={{ margin: '5px 0 0', fontSize: '14px', color: '#64748b' }}>Dosya yükleyerek veya URL üzerinden sertifika son kullanma tarihlerini izleyin.</p>
+          </div>
+          <div style={{ background: warningCount > 0 ? '#fef2f2' : '#f0fdf4', border: `1px solid ${warningCount > 0 ? '#fecaca' : '#bbf7d0'}`, color: warningCount > 0 ? '#b91c1c' : '#15803d', padding: '10px 20px', borderRadius: '14px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {warningCount > 0 ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+            {warningCount > 0 ? `${warningCount} Sertifika Kritik Sürede` : 'Tüm Sertifikalar Güvenli'}
+          </div>
         </div>
 
-        <div style={{background:'white', borderRadius:'20px', border:'1px solid #e2e8f0', padding:'20px', display:'grid', gap:'10px'}}>
-          <h3 style={{margin:0, fontSize:'1.1rem', fontWeight:'800', color:'#0f172a'}}>2) URL’den Sertifika Çek</h3>
-          <input
-            type="text"
-            placeholder="Kayıt adı (opsiyonel)"
-            value={urlForm.name}
-            onChange={(e) => setUrlForm((prev) => ({ ...prev, name: e.target.value }))}
-            style={{padding:'10px 12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}
-          />
-          <input
-            type="text"
-            placeholder="https://ornek.com"
-            value={urlForm.url}
-            onChange={(e) => setUrlForm((prev) => ({ ...prev, url: e.target.value }))}
-            style={{padding:'10px 12px', borderRadius:'10px', border:'1px solid #e2e8f0'}}
-          />
-          <button onClick={handleFetchFromUrl} disabled={loading} style={{background:'#0f172a', color:'white', border:'none', padding:'11px 16px', borderRadius:'10px', fontWeight:'700', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1}}>
-            {loading ? 'Bağlanıyor...' : 'URL’den Al ve Kaydet'}
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+          {/* Dosya Yükleme */}
+          <div style={{ background: '#f8fafc', borderRadius: '20px', padding: '25px', border: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: 'white', padding: '12px', borderRadius: '14px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <Upload size={24} color="#6366f1" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>Dosyadan Yükle</h4>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>.crt, .pem, .cer formatları</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: '12px' }}>
+              <input
+                type="text"
+                placeholder="Kayıt Adı (İsteğe Bağlı)"
+                value={uploadForm.name}
+                onChange={(e) => setUploadForm((prev) => ({ ...prev, name: e.target.value }))}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+              />
+              <div style={{ position: 'relative' }}>
+                <input type="file" accept=".crt,.pem,.cer,.txt" onChange={handleFileSelect} style={{ opacity: 0, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
+                <div style={{ background: 'white', border: '1px solid #e2e8f0', padding: '12px 16px', borderRadius: '12px', fontSize: '13px', color: uploadForm.file_name ? '#0f172a' : '#94a3b8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{uploadForm.file_name || 'Bilgisayardan dosya seçin...'}</span>
+                  <FileText size={16} />
+                </div>
+              </div>
+              <button onClick={handleUploadCertificate} disabled={loading || !uploadForm.file_content} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: '800', cursor: (loading || !uploadForm.file_content) ? 'not-allowed' : 'pointer', opacity: (loading || !uploadForm.file_content) ? 0.6 : 1, transition: 'all 0.2s', marginTop: '5px' }}>
+                {loading ? 'Yükleniyor...' : 'Sertifikayı Kaydet'}
+              </button>
+            </div>
+          </div>
+
+          {/* URL'den Çekme */}
+          <div style={{ background: '#f8fafc', borderRadius: '20px', padding: '25px', border: '1px dashed #cbd5e1', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: 'white', padding: '12px', borderRadius: '14px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <Globe size={24} color="#0ea5e9" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>URL Üzerinden Çek</h4>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>Canlı sunucu bağlantısı ile oku</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: '12px' }}>
+              <input
+                type="text"
+                placeholder="Kayıt Adı (İsteğe Bağlı)"
+                value={urlForm.name}
+                onChange={(e) => setUrlForm((prev) => ({ ...prev, name: e.target.value }))}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+              />
+              <input
+                type="text"
+                placeholder="https://ornek.com"
+                value={urlForm.url}
+                onChange={(e) => setUrlForm((prev) => ({ ...prev, url: e.target.value }))}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+              />
+              <button onClick={handleFetchFromUrl} disabled={loading || !urlForm.url} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: '800', cursor: (loading || !urlForm.url) ? 'not-allowed' : 'pointer', opacity: (loading || !urlForm.url) ? 0.6 : 1, transition: 'all 0.2s', marginTop: '5px' }}>
+                {loading ? 'Bağlanıyor...' : 'URL\'den Al ve Kaydet'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={{background:'white', borderRadius:'20px', border:'1px solid #e2e8f0', overflow:'hidden'}}>
-        <div style={{padding:'16px 18px', borderBottom:'1px solid #e2e8f0', background:'#f8fafc', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <h3 style={{margin:0, fontSize:'1rem', fontWeight:'800', color:'#0f172a'}}>Sertifika Takip Listesi</h3>
-          <span style={{fontSize:'12px', fontWeight:'700', color: warningCount > 0 ? '#b91c1c' : '#166534', background: warningCount > 0 ? '#fee2e2' : '#dcfce7', padding:'6px 10px', borderRadius:'999px'}}>
-            {warningCount > 0 ? `${warningCount} adet sertifika 3 aydan kısa` : 'Kritik sürede sertifika yok'}
-          </span>
-        </div>
-        <div style={{overflowX:'auto'}}>
-          <table style={{width:'100%', borderCollapse:'collapse'}}>
-            <thead style={{background:'#f8fafc'}}>
-              <tr>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>AD</th>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KAYNAK</th>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>VALID TO</th>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>KALAN GÜN</th>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>DURUM</th>
-                <th style={{padding:'10px 12px', textAlign:'left', fontSize:'12px', color:'#64748b'}}>İŞLEM</th>
-              </tr>
-            </thead>
-            <tbody>
-              {certificates.map((c) => (
-                <tr key={c.id} style={{borderTop:'1px solid #f1f5f9'}}>
-                  <td style={{padding:'10px 12px', fontWeight:'700', color:'#1e293b'}}>{c.name}</td>
-                  <td style={{padding:'10px 12px', color:'#475569'}}>{c.source_type === 'url' ? `URL: ${c.source_value}` : `Dosya: ${c.source_value || '-'}`}</td>
-                  <td style={{padding:'10px 12px', color:'#475569'}}>{c.valid_to ? new Date(c.valid_to).toLocaleDateString('tr-TR') : '-'}</td>
-                  <td style={{padding:'10px 12px', color:'#475569'}}>{Number.isFinite(c.days_remaining) ? c.days_remaining : '-'}</td>
-                  <td style={{padding:'10px 12px'}}>
-                    <span style={{padding:'4px 8px', borderRadius:'999px', fontSize:'11px', fontWeight:'700', background: c.warning ? '#fee2e2' : '#dcfce7', color: c.warning ? '#b91c1c' : '#166534'}}>
-                      {c.warning ? 'Uyarı (3 aydan kısa)' : 'Normal'}
+      <div>
+        <h3 style={{ margin: '0 0 20px', fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Takip Edilen Sertifikalar ({certificates.length})</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+          {certificates.map((c) => {
+            const isCritical = c.warning;
+            const daysColor = isCritical ? '#ef4444' : '#10b981';
+            const bgClass = isCritical ? '#fff1f2' : 'white';
+            
+            return (
+              <div key={c.id} style={{ background: bgClass, borderRadius: '24px', border: `1px solid ${isCritical ? '#fecdd3' : '#e2e8f0'}`, padding: '24px', display: 'flex', flexDirection: 'column', position: 'relative', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.1)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+                <button onClick={() => handleDeleteCertificate(c.id)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }} onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#94a3b8'; }} title="Sertifikayı Sil">
+                  <Trash2 size={16} />
+                </button>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', paddingRight: '30px' }}>
+                  <div style={{ background: isCritical ? '#fee2e2' : '#f0f9ff', padding: '10px', borderRadius: '12px' }}>
+                    {c.source_type === 'url' ? <Globe size={20} color={isCritical ? '#ef4444' : '#0284c7'} /> : <FileText size={20} color={isCritical ? '#ef4444' : '#6366f1'} />}
+                  </div>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800', color: '#0f172a', wordBreak: 'break-all' }}>{c.name}</h4>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{c.source_type === 'url' ? c.source_value : 'Dosya Yüklemesi'}</div>
+                  </div>
+                </div>
+
+                <div style={{ background: isCritical ? '#ffe4e6' : '#f8fafc', borderRadius: '16px', padding: '15px', marginBottom: '20px', flex: 1, border: `1px solid ${isCritical ? '#fecdd3' : '#f1f5f9'}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '700' }}>Son Kullanma</span>
+                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#1e293b' }}>{c.valid_to ? new Date(c.valid_to).toLocaleDateString('tr-TR') : '-'}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '700' }}>Kalan Süre</span>
+                    <span style={{ fontSize: '16px', fontWeight: '900', color: daysColor }}>
+                      {Number.isFinite(c.days_remaining) ? `${c.days_remaining} Gün` : '-'}
                     </span>
-                  </td>
-                  <td style={{padding:'10px 12px'}}>
-                    <button onClick={() => handleDeleteCertificate(c.id)} style={{padding:'6px 10px', borderRadius:'8px', border:'1px solid #fee2e2', background:'#fef2f2', color:'#b91c1c', fontWeight:'700', cursor:'pointer'}}>
-                      Sil
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {certificates.length === 0 && <tr><td colSpan="6" style={{padding:'24px', textAlign:'center', color:'#94a3b8'}}>Henüz sertifika kaydı yok.</td></tr>}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+
+                {isCritical && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b91c1c', fontSize: '12px', fontWeight: '800', justifyContent: 'center' }}>
+                    <AlertTriangle size={14} /> Sertifika süresi dolmak üzere!
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {certificates.length === 0 && (
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '80px 20px', background: 'white', borderRadius: '24px', border: '1px dashed #cbd5e1', color: '#94a3b8' }}>
+              <Shield size={48} style={{ opacity: 0.3, marginBottom: '15px' }} />
+              <h3 style={{ margin: '0 0 5px', color: '#475569' }}>Kayıtlı Sertifika Yok</h3>
+              <p style={{ margin: 0, fontSize: '14px' }}>Yukarıdaki formları kullanarak takip etmek istediğiniz sertifikaları ekleyin.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -3270,17 +3580,30 @@ const DiscoveryTemplatesManager = ({ API_URL }) => {
   );
 };
 
-const NetworkScanView = ({ API_URL }) => {
-  const [snmpTemplates, setSnmpTemplates] = useState([]);
+const BaseScanView = ({ API_URL, scanType = 'snmp' }) => {
+  const [templates, setTemplates] = useState([]);
   const [discovered, setDiscovered] = useState([]);
   const [activeScan, setActiveScan] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
-  const [selectedScanId, setSelectedScanId] = useState(null);
-  const [form, setForm] = useState({ ip_range: '', snmp_template_ids: [] });
+  const [form, setForm] = useState({ 
+    ip_range: '', 
+    snmp_template_ids: [],
+    ssh_template_ids: [],
+    scan_type: scanType
+  });
   const [loading, setLoading] = useState(false);
   const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
   const [scanLogs, setScanLogs] = useState([]);
   const [activeScanId, setActiveScanId] = useState(null);
+  
+  // IP Range Builder State
+  const [isRangeModalOpen, setIsRangeModalOpen] = useState(false);
+  const [octets, setOctets] = useState([
+    { type: 'standard', value: '192', start: '1', end: '254' },
+    { type: 'standard', value: '168', start: '1', end: '254' },
+    { type: 'standard', value: '1', start: '1', end: '254' },
+    { type: 'special', value: '1', start: '1', end: '50' },
+  ]);
 
   const addScanLog = (message, type = 'info', scanId = null) => {
     const scanIdToUse = scanId || activeScanId;
@@ -3304,10 +3627,6 @@ const NetworkScanView = ({ API_URL }) => {
     addScanLog('Tarama durduruldu', 'warning', scanId);
   };
 
-  const completeScan = (scanId) => {
-    addScanLog('Tarama tamamlandı', 'success', scanId);
-  };
-
   const clearScanLogs = () => {
     setScanLogs([]);
     setActiveScanId(null);
@@ -3317,15 +3636,11 @@ const NetworkScanView = ({ API_URL }) => {
     if (!activeScan) return;
     try {
       addScanLog('Tarama duraklat\u0131l\u0131yor...', 'info', activeScanId);
-      console.log('Pausing scan:', activeScan.id);
-      const response = await axios.post(`${API_URL}/network-scan/pause`, { scan_id: activeScan.id });
-      console.log('Pause response:', response.data);
+      await axios.post(`${API_URL}/network-scan/pause`, { scan_id: activeScan.id });
       setActiveScan(prev => ({ ...prev, status: 'paused' }));
       addScanLog('Tarama başarıyla duraklat\u0131ld\u0131', 'warning', activeScanId);
-      // Immediate refetch
       await fetchData();
     } catch (e) {
-      console.error('Pause error:', e);
       addScanLog(`Hata: Tarama durdurulamad\u0131 - ${e.message}`, 'error', activeScanId);
     }
   };
@@ -3334,15 +3649,11 @@ const NetworkScanView = ({ API_URL }) => {
     if (!activeScan) return;
     try {
       addScanLog('Tarama devam ettiriliyor...', 'info', activeScanId);
-      console.log('Resuming scan:', activeScan.id);
-      const response = await axios.post(`${API_URL}/network-scan/resume`, { scan_id: activeScan.id });
-      console.log('Resume response:', response.data);
+      await axios.post(`${API_URL}/network-scan/resume`, { scan_id: activeScan.id });
       setActiveScan(prev => ({ ...prev, status: 'scanning' }));
       addScanLog('Tarama başarıyla devam etirildi', 'success', activeScanId);
-      // Immediate refetch
       await fetchData();
     } catch (e) {
-      console.error('Resume error:', e);
       addScanLog(`Hata: Tarama devam ettirilemedi - ${e.message}`, 'error', activeScanId);
     }
   };
@@ -3351,32 +3662,29 @@ const NetworkScanView = ({ API_URL }) => {
     if (!activeScan) return;
     try {
       addScanLog('Tarama iptal ediliyor...', 'error', activeScanId);
-      console.log('Cancelling scan:', activeScan.id);
-      const response = await axios.post(`${API_URL}/network-scan/cancel`, { scan_id: activeScan.id });
-      console.log('Cancel response:', response.data);
+      await axios.post(`${API_URL}/network-scan/cancel`, { scan_id: activeScan.id });
       setActiveScan(null);
       clearScanLogs();
       addScanLog('Tarama iptal edildi', 'error', activeScanId);
-      // Immediate refetch
       await fetchData();
     } catch (e) {
-      console.error('Cancel error:', e);
       addScanLog(`Hata: Tarama iptal edilemedi - ${e.message}`, 'error', activeScanId);
     }
   };
 
   const fetchData = async () => {
     try {
+      const templatePath = scanType === 'ssh' ? 'ssh-templates' : 'snmp-templates';
       const [tpls, disc, active, history] = await Promise.all([
-        axios.get(`${API_URL}/snmp-templates`),
+        axios.get(`${API_URL}/${templatePath}`),
         axios.get(`${API_URL}/network-scan/discovered`),
         axios.get(`${API_URL}/network-scan/active`),
         axios.get(`${API_URL}/network-scan/history`)
       ]);
-      setSnmpTemplates(tpls.data);
-      setDiscovered(disc.data);
+      setTemplates(tpls.data);
+      setDiscovered(disc.data.filter(d => scanType === 'ssh' ? d.ssh_template_id : d.snmp_template_id));
       
-      if (active.data) {
+      if (active.data && active.data.scan_type === scanType) {
         setActiveScan(active.data);
         if (active.data.logs && Array.isArray(active.data.logs)) {
           setScanLogs(active.data.logs);
@@ -3385,7 +3693,7 @@ const NetworkScanView = ({ API_URL }) => {
         setActiveScan(null);
       }
       
-      setScanHistory(history.data || []);
+      setScanHistory((history.data || []).filter(h => h.scan_type === scanType));
     } catch (e) { 
       console.error('FetchData error:', e.message);
     }
@@ -3395,29 +3703,7 @@ const NetworkScanView = ({ API_URL }) => {
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Monitor scan completion
-  useEffect(() => {
-    if (activeScan && activeScanId) {
-      if (activeScan.status === 'completed') {
-        addScanLog(`Tarama tamamlandı. ${activeScan.progress_current} cihaz bulundu.`, 'success', activeScanId);
-      } else if (activeScan.status === 'error') {
-        addScanLog('Tarama sırasında hata oluştu', 'error', activeScanId);
-      } else if (activeScan.status === 'cancelled') {
-        addScanLog('Tarama iptal edildi', 'warning', activeScanId);
-      }
-    }
-  }, [activeScan?.status]);
-
-  // IP Range Builder State
-  const [isRangeModalOpen, setIsRangeModalOpen] = useState(false);
-  const [octets, setOctets] = useState([
-    { type: 'standard', value: '192', start: '1', end: '254' },
-    { type: 'standard', value: '168', start: '1', end: '254' },
-    { type: 'standard', value: '1', start: '1', end: '254' },
-    { type: 'special', value: '1', start: '1', end: '50' },
-  ]);
+  }, [scanType]);
 
   const generateIPs = () => {
     let results = [''];
@@ -3433,7 +3719,6 @@ const NetworkScanView = ({ API_URL }) => {
           currentValues.push(v.toString());
         }
       }
-
       let newResults = [];
       for (let res of results) {
         for (let val of currentValues) {
@@ -3448,34 +3733,25 @@ const NetworkScanView = ({ API_URL }) => {
   const applySpecialRange = () => {
     const ips = generateIPs();
     if (ips.length > 10000) {
-      if (!window.confirm(`Bu işlem ${ips.length} adet IP oluşturacak. Devam etmek istediğinize emin misiniz? (Çok büyük taramalar sistemi yavaşlatabilir)`)) {
-        return;
-      }
+      if (!window.confirm(`Bu işlem ${ips.length} adet IP oluşturacak. Devam etmek istediğinize emin misiniz?`)) return;
     }
-    setForm({ ...form, ip_range: ips }); // Send as array
+    setForm({ ...form, ip_range: ips });
     setIsRangeModalOpen(false);
-    alert(`${ips.length} adet IP adresi tanımlandı.`);
   };
 
   const handleStartScan = async (e) => {
     e.preventDefault();
-    if (form.snmp_template_ids.length === 0) {
-      alert('Lütfen en az bir SNMP template seçin.');
+    const templateIds = scanType === 'ssh' ? form.ssh_template_ids : form.snmp_template_ids;
+    if (templateIds.length === 0) {
+      alert(`Lütfen en az bir ${scanType.toUpperCase()} şablonu seçin.`);
       return;
     }
     
-    const displayRange = Array.isArray(form.ip_range) 
-      ? `${form.ip_range.length} Özel IP` 
-      : form.ip_range;
-
-    const scanId = startScan('Ağ Taraması');
-    addScanLog(`IP Aralığı: ${displayRange}`, 'info', scanId);
-    addScanLog(`Seçili SNMP Templateler: ${form.snmp_template_ids.length} adet`, 'info', scanId);
+    const scanId = startScan(`${scanType.toUpperCase()} Taraması`);
     setLoading(true);
     try {
-      addScanLog('API\'ye tarama isteği gönderiliyor...', 'info', scanId);
-      await axios.post(`${API_URL}/network-scan`, form);
-      addScanLog('Tarama başarıyla başlatıldı, IP\'ler taranıyor...', 'success', scanId);
+      await axios.post(`${API_URL}/network-scan`, { ...form, scan_type: scanType });
+      addScanLog('Tarama başarıyla başlatıldı...', 'success', scanId);
       fetchData();
     } catch (e) { 
       addScanLog(`Hata: ${e.message}`, 'error', scanId);
@@ -3486,214 +3762,101 @@ const NetworkScanView = ({ API_URL }) => {
 
   const handleAddDevice = async (id) => {
     try {
-      addScanLog(`Cihaz ekleniyor (ID: ${id})...`, 'info');
       const res = await axios.post(`${API_URL}/network-scan/add-discovered`, { id });
       if (res.data.success) {
-        addScanLog('Cihaz başarıyla eklendi', 'success');
         fetchData();
         alert('Cihaz başarıyla eklendi.');
       }
     } catch (e) {
-      console.error('Add device error:', e);
-      const errorMsg = e.response?.data?.error || 'Cihaz eklenemedi';
-      const details = e.response?.data?.details ? ` (${e.response.data.details})` : '';
-      const code = e.response?.data?.code ? ` [Hata Kodu: ${e.response.data.code}]` : '';
-      addScanLog(`Hata: ${errorMsg}${details}${code}`, 'error');
-      alert(`Hata: ${errorMsg}${details}`);
+      alert(`Hata: ${e.response?.data?.error || e.message}`);
     }
   };
+
   const toggleTemplate = (id) => {
+    const field = scanType === 'ssh' ? 'ssh_template_ids' : 'snmp_template_ids';
     setForm(prev => {
-      const ids = prev.snmp_template_ids.includes(id)
-        ? prev.snmp_template_ids.filter(i => i !== id)
-        : [...prev.snmp_template_ids, id];
-      return { ...prev, snmp_template_ids: ids };
+      const ids = prev[field].includes(id)
+        ? prev[field].filter(i => i !== id)
+        : [...prev[field], id];
+      return { ...prev, [field]: ids };
     });
   };
 
   return (
     <div className="network-scan-view fade-in" style={{ padding: '20px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '30px' }}>
-        {/* Sol Panel: Tarama Kontrolü */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <div style={{ background: 'white', borderRadius: '24px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
               <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '12px', color: '#0369a1' }}>
                 <Search size={24} />
               </div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Yeni Tarama</h3>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Yeni {scanType.toUpperCase()} Taraması</h3>
             </div>
             
             <form onSubmit={handleStartScan} style={{ display: 'grid', gap: '20px' }}>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>IP Aralığı veya Tekil IP</label>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsRangeModalOpen(true)}
-                    title="Özel Aralığı Oluştur"
-                    style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', color: 'var(--primary)', padding: '6px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                    onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
-                    onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                  >
-                    <Plus size={16} />
-                  </button>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>IP Aralığı</label>
+                  <button type="button" onClick={() => setIsRangeModalOpen(true)} style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', color: 'var(--primary)', padding: '6px', borderRadius: '8px', cursor: 'pointer' }}><Plus size={16} /></button>
                 </div>
                 <input 
                   type="text" 
-                  value={Array.isArray(form.ip_range) ? `${form.ip_range.length} Özel IP Adresi` : form.ip_range} 
+                  value={Array.isArray(form.ip_range) ? `${form.ip_range.length} Özel IP` : form.ip_range} 
                   onChange={e => setForm({...form, ip_range: e.target.value})} 
-                  placeholder="Örn: 192.168.1.1-50" 
-                  style={{ width: '100%', padding: '14px', borderRadius: '14px', border: '1px solid #e2e8f0', fontSize: '14px', outline: 'none', background: Array.isArray(form.ip_range) ? '#f0f9ff' : 'white', fontWeight: Array.isArray(form.ip_range) ? '700' : '400' }} 
+                  placeholder="192.168.1.1-50" 
+                  style={{ width: '100%', padding: '14px', borderRadius: '14px', border: '1px solid #e2e8f0', background: Array.isArray(form.ip_range) ? '#f0f9ff' : 'white' }} 
                   required 
                   readOnly={Array.isArray(form.ip_range)}
                 />
                 {Array.isArray(form.ip_range) && (
-                  <button 
-                    type="button" 
-                    onClick={() => setForm({...form, ip_range: ''})}
-                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '11px', marginTop: '6px', cursor: 'pointer', fontWeight: '700' }}
-                  >
-                    ✕ Seçimi Temizle
-                  </button>
+                  <button type="button" onClick={() => setForm({...form, ip_range: ''})} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '11px', marginTop: '6px', cursor: 'pointer' }}>✕ Seçimi Temizle</button>
                 )}
               </div>
 
-              {/* Special IP Range Modal */}
               {isRangeModalOpen && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '20px' }}>
-                  <div style={{ background: 'white', width: '100%', maxWidth: '700px', maxHeight: '90vh', borderRadius: '28px', padding: '30px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexShrink: 0 }}>
-                      <div>
-                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>Gelişmiş IP Aralığı Oluşturucu</h3>
-                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>Her oktet için standart değer veya tarama aralığı belirleyin.</p>
-                      </div>
-                      <button onClick={() => setIsRangeModalOpen(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}>✕</button>
+                  <div style={{ background: 'white', width: '100%', maxWidth: '700px', maxHeight: '90vh', borderRadius: '28px', padding: '30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>Gelişmiş IP Oluşturucu</h3>
+                      <button onClick={() => setIsRangeModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
                     </div>
-                    
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '4px', marginBottom: '20px' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px' }}>
-                        {[0, 1, 2, 3].map(idx => (
-                          <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ fontSize: '11px', fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'center' }}>
-                              {idx + 1}. OCTET
-                            </div>
-                            
-                            <div style={{ display: 'flex', background: '#e2e8f0', padding: '3px', borderRadius: '10px' }}>
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  const newOctets = [...octets];
-                                  newOctets[idx].type = 'standard';
-                                  setOctets(newOctets);
-                                }}
-                                style={{ 
-                                  flex: 1, padding: '7px', fontSize: '10px', fontWeight: '800', borderRadius: '7px', border: 'none', cursor: 'pointer',
-                                  background: octets[idx].type === 'standard' ? 'white' : 'transparent',
-                                  color: octets[idx].type === 'standard' ? '#0f172a' : '#64748b',
-                                  boxShadow: octets[idx].type === 'standard' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                  transition: 'all 0.2s'
-                                }}
-                              >SABİT</button>
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  const newOctets = [...octets];
-                                  newOctets[idx].type = 'special';
-                                  setOctets(newOctets);
-                                }}
-                                style={{ 
-                                  flex: 1, padding: '7px', fontSize: '10px', fontWeight: '800', borderRadius: '7px', border: 'none', cursor: 'pointer',
-                                  background: octets[idx].type === 'special' ? 'white' : 'transparent',
-                                  color: octets[idx].type === 'special' ? '#0f172a' : '#64748b',
-                                  boxShadow: octets[idx].type === 'special' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                  transition: 'all 0.2s'
-                                }}
-                              >ARALIK</button>
-                            </div>
-
-                            <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              {octets[idx].type === 'standard' ? (
-                                <input 
-                                  type="number" min="0" max="255" value={octets[idx].value}
-                                  onChange={e => {
-                                    const newOctets = [...octets];
-                                    newOctets[idx].value = e.target.value;
-                                    setOctets(newOctets);
-                                  }}
-                                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '16px', fontWeight: '800', color: 'var(--primary)', outline: 'none' }}
-                                />
-                              ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
-                                  <input 
-                                    type="number" min="0" max="255" value={octets[idx].start} placeholder="Baş."
-                                    onChange={e => {
-                                      const newOctets = [...octets];
-                                      newOctets[idx].start = e.target.value;
-                                      setOctets(newOctets);
-                                    }}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '13px', fontWeight: '600', outline: 'none' }}
-                                  />
-                                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#94a3b8', fontWeight: 'bold' }}>İLE</div>
-                                  <input 
-                                    type="number" min="0" max="255" value={octets[idx].end} placeholder="Bit."
-                                    onChange={e => {
-                                      const newOctets = [...octets];
-                                      newOctets[idx].end = e.target.value;
-                                      setOctets(newOctets);
-                                    }}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '13px', fontWeight: '600', outline: 'none' }}
-                                  />
-                                </div>
-                              )}
-                            </div>
+                    <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+                      {[0, 1, 2, 3].map(idx => (
+                        <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: '900', color: '#94a3b8', textAlign: 'center' }}>{idx + 1}. OCTET</div>
+                          <div style={{ display: 'flex', background: '#e2e8f0', padding: '3px', borderRadius: '10px' }}>
+                            <button type="button" onClick={() => { const n = [...octets]; n[idx].type = 'standard'; setOctets(n); }} style={{ flex: 1, padding: '7px', fontSize: '10px', background: octets[idx].type === 'standard' ? 'white' : 'transparent', border: 'none', borderRadius: '7px', cursor: 'pointer' }}>SABİT</button>
+                            <button type="button" onClick={() => { const n = [...octets]; n[idx].type = 'special'; setOctets(n); }} style={{ flex: 1, padding: '7px', fontSize: '10px', background: octets[idx].type === 'special' ? 'white' : 'transparent', border: 'none', borderRadius: '7px', cursor: 'pointer' }}>ARALIK</button>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ flexShrink: 0 }}>
-                      <div style={{ background: '#f1f5f9', padding: '18px', borderRadius: '20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed #cbd5e1' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Activity size={18} color="#64748b" />
-                          <span style={{ fontSize: '14px', color: '#475569', fontWeight: '700' }}>Oluşturulacak Toplam IP:</span>
+                          {octets[idx].type === 'standard' ? (
+                            <input type="number" value={octets[idx].value} onChange={e => { const n = [...octets]; n[idx].value = e.target.value; setOctets(n); }} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #cbd5e1', textAlign: 'center' }} />
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <input type="number" value={octets[idx].start} onChange={e => { const n = [...octets]; n[idx].start = e.target.value; setOctets(n); }} style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid #cbd5e1' }} />
+                              <input type="number" value={octets[idx].end} onChange={e => { const n = [...octets]; n[idx].end = e.target.value; setOctets(n); }} style={{ width: '100%', padding: '8px', borderRadius: '10px', border: '1px solid #cbd5e1' }} />
+                            </div>
+                          )}
                         </div>
-                        <span style={{ fontSize: '20px', color: 'var(--primary)', fontWeight: '900' }}>{generateIPs().length.toLocaleString('tr-TR')}</span>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <button 
-                          onClick={() => setIsRangeModalOpen(false)}
-                          style={{ flex: 1, padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: '800', cursor: 'pointer', transition: 'all 0.2s' }}
-                          onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
-                          onMouseOut={(e) => e.currentTarget.style.background = 'white'}
-                        >İptal</button>
-                        <button 
-                          onClick={applySpecialRange}
-                          style={{ flex: 2, padding: '16px', borderRadius: '16px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: '900', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', transition: 'all 0.2s' }}
-                          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                          onMouseOut={(e) => e.currentTarget.style.transform = 'none'}
-                        >Listeyi Uygula</button>
-                      </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button onClick={() => setIsRangeModalOpen(false)} style={{ flex: 1, padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white' }}>İptal</button>
+                      <button onClick={applySpecialRange} style={{ flex: 2, padding: '16px', borderRadius: '16px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: '900' }}>Uygula</button>
                     </div>
                   </div>
                 </div>
               )}
 
               <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginBottom: '10px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SNMP Şablonları</label>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginBottom: '10px', display: 'block', textTransform: 'uppercase' }}>{scanType.toUpperCase()} Şablonları</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-                  {snmpTemplates.map(t => (
-                    <label key={t.id} style={{ 
-                      display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '12px', 
-                      background: form.snmp_template_ids.includes(t.id) ? '#f0f9ff' : '#f8fafc', 
-                      border: form.snmp_template_ids.includes(t.id) ? '1px solid #bae6fd' : '1px solid #e2e8f0', 
-                      cursor: 'pointer'
-                    }}>
-                      <input type="checkbox" checked={form.snmp_template_ids.includes(t.id)} onChange={() => toggleTemplate(t.id)} />
+                  {templates.map(t => (
+                    <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '12px', background: (scanType === 'ssh' ? form.ssh_template_ids : form.snmp_template_ids).includes(t.id) ? '#f0f9ff' : '#f8fafc', border: (scanType === 'ssh' ? form.ssh_template_ids : form.snmp_template_ids).includes(t.id) ? '1px solid #bae6fd' : '1px solid #e2e8f0', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={(scanType === 'ssh' ? form.ssh_template_ids : form.snmp_template_ids).includes(t.id)} onChange={() => toggleTemplate(t.id)} />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{t.name}</span>
-                        <span style={{ fontSize: '11px', color: '#64748b' }}>{t.version}</span>
+                        <span style={{ fontSize: '11px', color: '#64748b' }}>{scanType === 'snmp' ? t.version : t.username}</span>
                       </div>
                     </label>
                   ))}
@@ -3701,81 +3864,40 @@ const NetworkScanView = ({ API_URL }) => {
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  type="submit" 
-                  disabled={loading || (activeScan && activeScan.status === 'scanning')} 
-                  style={{ 
-                    flex: 1, background: 'var(--primary)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', 
-                    fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    opacity: (loading || (activeScan && activeScan.status === 'scanning')) ? 0.7 : 1
-                  }}
-                >
+                <button type="submit" disabled={loading || (activeScan && activeScan.status === 'scanning')} style={{ flex: 1, background: 'var(--primary)', color: 'white', border: 'none', padding: '16px', borderRadius: '16px', fontWeight: '800', opacity: (loading || (activeScan && activeScan.status === 'scanning')) ? 0.7 : 1 }}>
                   {(activeScan && activeScan.status === 'scanning') ? 'Tarama Yapılıyor...' : 'Taramayı Başlat'}
                 </button>
-                
-                <button 
-                  type="button" 
-                  onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)} 
-                  style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px', width: '54px', position: 'relative' }}
-                >
+                <button type="button" onClick={() => setIsDebugMenuOpen(true)} style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '16px', cursor: 'pointer', width: '54px' }}>
                   <Terminal size={22} color="#64748b" />
-                  {scanLogs.length > 0 && (
-                    <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '10px', fontWeight: '900', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white' }}>
-                      {scanLogs.length}
-                    </span>
-                  )}
                 </button>
               </div>
             </form>
 
             {activeScan && (activeScan.status === 'scanning' || activeScan.status === 'paused') && (
               <div style={{ marginTop: '25px', padding: '20px', borderRadius: '20px', background: activeScan.status === 'paused' ? '#fffbeb' : '#f0f9ff', border: activeScan.status === 'paused' ? '1px solid #fde68a' : '1px solid #bae6fd' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '800', color: activeScan.status === 'paused' ? '#92400e' : '#0369a1', textTransform: 'uppercase' }}>
-                      {activeScan.status === 'paused' ? 'DURAKLATILDI' : 'TARANIYOR...'}
-                    </span>
-                    <span style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', marginTop: '2px' }}>{activeScan.progress_current} / {activeScan.progress_total}</span>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '800' }}>{activeScan.progress_current} / {activeScan.progress_total}</span>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    {activeScan.status === 'scanning' ? (
-                      <button onClick={pauseScan} style={{ background: 'white', border: '1px solid #f59e0b', color: '#f59e0b', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><Clock size={16} /></button>
-                    ) : (
-                      <button onClick={resumeScan} style={{ background: 'white', border: '1px solid #10b981', color: '#10b981', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><RefreshCw size={16} /></button>
-                    )}
-                    <button onClick={cancelScan} style={{ background: 'white', border: '1px solid #ef4444', color: '#ef4444', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer' }}><X size={16} /></button>
+                    <button onClick={activeScan.status === 'scanning' ? pauseScan : resumeScan} style={{ background: 'white', border: '1px solid #e2e8f0', padding: '4px', borderRadius: '6px' }}>{activeScan.status === 'scanning' ? <Clock size={14} /> : <RefreshCw size={14} />}</button>
+                    <button onClick={cancelScan} style={{ background: 'white', border: '1px solid #fee2e2', padding: '4px', borderRadius: '6px', color: '#ef4444' }}><X size={14} /></button>
                   </div>
                 </div>
-                <div style={{ height: '10px', background: activeScan.status === 'paused' ? '#fef3c7' : '#e0f2fe', borderRadius: '5px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', background: activeScan.status === 'paused' ? '#f59e0b' : 'var(--primary)', width: `${(activeScan.progress_current / activeScan.progress_total) * 100}%`, transition: 'width 0.4s ease' }}></div>
+                <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', background: 'var(--primary)', width: `${(activeScan.progress_current / activeScan.progress_total) * 100}%` }}></div>
                 </div>
               </div>
             )}
           </div>
 
           <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-            <div style={{ padding: '20px 25px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: '#1e293b' }}>Son Taramalar</h3>
-            </div>
-            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            <div style={{ padding: '15px 25px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}><h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '800' }}>Son Taramalar</h3></div>
+            <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
               {scanHistory.map(scan => {
                 const isArray = typeof scan.ip_range === 'string' && scan.ip_range.startsWith('{');
-                const displayRange = isArray ? 'Özel IP Listesi' : scan.ip_range;
-                
                 return (
-                  <div key={scan.id} style={{ padding: '16px 25px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b' }}>
-                        {isArray && <span style={{ color: 'var(--primary)', marginRight: '5px' }}>[Özel]</span>}
-                        {displayRange}
-                      </div>
-                      <div style={{ fontSize: '10px', color: '#64748b' }}>{new Date(scan.updated_at).toLocaleString('tr-TR')}</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '11px', fontWeight: '800', color: scan.status === 'completed' ? '#059669' : '#94a3b8', background: scan.status === 'completed' ? '#ecfdf5' : '#f8fafc', padding: '4px 8px', borderRadius: '6px' }}>
-                        {scan.discovered_count} Cihaz Bulundu
-                      </div>
-                    </div>
+                  <div key={scan.id} style={{ padding: '12px 25px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '12px' }}>{isArray ? '[Özel Liste]' : scan.ip_range}</div>
+                    <div style={{ fontSize: '11px', fontWeight: '800', color: '#059669' }}>{scan.discovered_count} Bulundu</div>
                   </div>
                 );
               })}
@@ -3783,51 +3905,21 @@ const NetworkScanView = ({ API_URL }) => {
           </div>
         </div>
 
-        {/* Sağ Panel: Bulunan Cihazlar */}
-        <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)' }}>
-          <div style={{ padding: '25px 30px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Tespit Edilen Cihazlar</h3>
-            <div style={{ background: 'var(--primary)', color: 'white', padding: '6px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '800' }}>
-              {discovered.length} Cihaz Bulundu
-            </div>
+        <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 30px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '800' }}>Tespit Edilen Cihazlar</h3>
+            <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '10px', fontSize: '12px' }}>{discovered.length} Cihaz</span>
           </div>
-          
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <tr>
-                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>IP ADRESİ</th>
-                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>CİHAZ ADI</th>
-                  <th style={{ padding: '18px 30px', textAlign: 'left', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>ŞABLON</th>
-                  <th style={{ padding: '18px 30px', textAlign: 'center', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>İŞLEM</th>
-                </tr>
-              </thead>
+              <thead><tr style={{ textAlign: 'left', fontSize: '11px', color: '#64748b' }}><th style={{ padding: '15px 30px' }}>IP ADRESİ</th><th style={{ padding: '15px 30px' }}>HOSTNAME</th><th style={{ padding: '15px 30px' }}>ŞABLON</th><th style={{ padding: '15px 30px', textAlign: 'center' }}>İŞLEM</th></tr></thead>
               <tbody>
                 {discovered.map(d => (
                   <tr key={d.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '20px 30px' }}><span style={{ fontWeight: '800', color: '#1e293b' }}>{d.ip_address}</span></td>
-                    <td style={{ padding: '20px 30px' }}><span style={{ color: '#475569', fontSize: '14px', fontWeight: '600' }}>{d.hostname}</span></td>
-                    <td style={{ padding: '20px 30px' }}>
-                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: '800' }}>
-                        {d.template_name}
-                      </span>
-                    </td>
-                    <td style={{ padding: '20px 30px', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => handleAddDevice(d.id)} 
-                        title="Cihazı Envantere Ekle"
-                        style={{
-                          background: 'white', border: '2px solid var(--primary)', color: 'var(--primary)', 
-                          width: '42px', height: '42px', borderRadius: '14px', cursor: 'pointer',
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = 'white'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--primary)'; }}
-                      >
-                        <Plus size={24} />
-                      </button>
-                    </td>
+                    <td style={{ padding: '15px 30px', fontWeight: '700' }}>{d.ip_address}</td>
+                    <td style={{ padding: '15px 30px' }}>{d.hostname}</td>
+                    <td style={{ padding: '15px 30px' }}><span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', fontSize: '11px' }}>{d.template_name}</span></td>
+                    <td style={{ padding: '15px 30px', textAlign: 'center' }}><button onClick={() => handleAddDevice(d.id)} style={{ background: 'none', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '6px', borderRadius: '8px', cursor: 'pointer' }}><Plus size={18} /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -3835,18 +3927,13 @@ const NetworkScanView = ({ API_URL }) => {
           </div>
         </div>
       </div>
-      {isDebugMenuOpen && (
-        <DebugMenu
-          isOpen={isDebugMenuOpen}
-          onClose={() => setIsDebugMenuOpen(false)}
-          scanLogs={scanLogs}
-          onStopScan={(scanId) => stopScan(scanId)}
-          onClearLogs={clearScanLogs}
-        />
-      )}
+      {isDebugMenuOpen && <DebugMenu isOpen={isDebugMenuOpen} onClose={() => setIsDebugMenuOpen(false)} scanLogs={scanLogs} onStopScan={stopScan} onClearLogs={clearScanLogs} />}
     </div>
   );
 };
+
+const SNMPScanView = ({ API_URL }) => <BaseScanView API_URL={API_URL} scanType="snmp" />;
+const SSHScanView = ({ API_URL }) => <BaseScanView API_URL={API_URL} scanType="ssh" />;
 
 const TopologyView = ({ API_URL }) => {
   const [topologies, setTopologies] = useState([]);
@@ -4692,7 +4779,7 @@ const SwitchAnalysisView = ({ API_URL, onStartAnalysis, devices = [] }) => {
   return (
     <div className="switch-analysis-view fade-in">
       <div style={{background:'white', padding:'30px', borderRadius:'24px', border:'1px solid #e2e8f0', boxShadow:'0 10px 15px -3px rgba(0,0,0,0.05)'}}>
-        <h3 style={{fontSize:'1.25rem', fontWeight:'800', marginBottom:'20px'}}>Switch Güvenlik Analizi</h3>
+        <h3 style={{fontSize:'1.25rem', fontWeight:'800', marginBottom:'20px'}}>Switch Analizi</h3>
         
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'30px'}}>
           {/* Step 1: Vendor Selection */}
@@ -4812,6 +4899,7 @@ function Dashboard() {
   const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
   const [scanLogs, setScanLogs] = useState([]);
   const [activeScanId, setActiveScanId] = useState(null);
+  const [monitorLastUpdate, setMonitorLastUpdate] = useState(null);
   const devicesRef = useRef([]);
 
   const addScanLog = (message, type = 'info', scanId = null) => {
@@ -5098,8 +5186,10 @@ function Dashboard() {
         <nav className="sidebar-nav">
           <div className={`nav-item ${currentView === 'recent' ? 'active' : ''}`} onClick={() => setCurrentView('recent')} style={{cursor:'pointer'}}><Home size={20} /><span>Ana Panel</span></div>
           <div className={`nav-item ${currentView === 'deviceMgmt' ? 'active' : ''}`} onClick={() => setCurrentView('deviceMgmt')} style={{cursor:'pointer'}}><Monitor size={20} /><span>Cihaz Yönetimi</span></div>
-          <div className={`nav-item ${currentView === 'deepDiscovery' ? 'active' : ''}`} onClick={() => setCurrentView('deepDiscovery')} style={{cursor:'pointer'}}><Search size={20} /><span>Derin Ağ Keşfi</span></div>
-          <div className={`nav-item ${currentView === 'networkScan' ? 'active' : ''}`} onClick={() => setCurrentView('networkScan')} style={{cursor:'pointer'}}><Search size={20} /><span>Ağ Tarama</span></div>
+          <div className={`nav-item ${currentView === 'monitor' ? 'active' : ''}`} onClick={() => setCurrentView('monitor')} style={{cursor:'pointer'}}><Activity size={20} /><span>Cihaz Monitörü</span></div>
+          <div className={`nav-item ${currentView === 'snmpScan' ? 'active' : ''}`} onClick={() => setCurrentView('snmpScan')} style={{cursor:'pointer'}}><Search size={20} /><span>SNMP Tarama</span></div>
+          <div className={`nav-item ${currentView === 'sshScan' ? 'active' : ''}`} onClick={() => setCurrentView('sshScan')} style={{cursor:'pointer'}}><Terminal size={20} /><span>SSH Tarama</span></div>
+          <div className={`nav-item ${currentView === 'deepDiscovery' ? 'active' : ''}`} onClick={() => setCurrentView('deepDiscovery')} style={{cursor:'pointer'}}><Zap size={20} /><span>Derin Keşif</span></div>
           <div className={`nav-item ${currentView === 'topology' ? 'active' : ''}`} onClick={() => setCurrentView('topology')} style={{cursor:'pointer'}}><Activity size={20} /><span>Topoloji</span></div>
 
           <div className="nav-group">
@@ -5133,17 +5223,43 @@ function Dashboard() {
       </aside>
       <div className="app-main">
         <header className="app-topbar">
-          <div className="welcome-msg"><h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'firewallAnalysis' ? 'Firewall Güvenlik Analizi' : currentView === 'deviceMgmt' ? 'Cihaz Yönetimi' : currentView === 'deepDiscovery' ? 'Derin Ağ Keşfi' : currentView === 'monitor' ? 'Cihaz Monitor' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : currentView === 'certManager' ? 'Sertifika Yönetimi' : currentView === 'switchAnalysis' ? 'Switch Güvenlik Analizi' : currentView === 'howto' ? 'Nasıl Yapılır Rehberleri' : 'Sistem Ayarları'}</h1><p>{currentView === 'recent' ? 'Son analiz raporları ve sistem özeti' : currentView === 'firewallAnalysis' ? 'Dosya yükleyerek veya API üzerinden cihaz tarayarak güvenlik analizi başlatın' : currentView === 'deviceMgmt' ? 'Ağ cihazlarınızı merkezi olarak ekleyin ve yönetin' : currentView === 'deepDiscovery' ? 'Seçili cihazlarda SNMP/SSH ile LLDP/CDP/ARP tabanlı komşu keşfi yapın' : currentView === 'monitor' ? 'Eklenen cihazların acik/kapali durumunu izleyin' : currentView === 'hitcounts' ? 'Politika hit count trendi ve gecmis analizi' : currentView === 'performance' ? 'CPU, Memory, VPN, Interface, HA Status, Certificates' : currentView === 'cve' ? 'Güncel Fortinet PSIRT ve CVE duyuruları' : currentView === 'certManager' ? 'Dosyadan ve URL üzerinden sertifika son kullanımlarını takip edin' : currentView === 'switchAnalysis' ? 'Switch konfigürasyonlarını analiz edin' : currentView === 'howto' ? 'Adım adım işlem rehberleri ve dokümantasyon' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p></div>
-          <div style={{display:'flex', alignItems:'center', gap:'20px'}}>
-            <button onClick={() => setIsDebugMenuOpen(true)} style={{position:'relative', cursor:'pointer', color:'#64748b', background:'none', border:'none', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.3s', borderRadius:'8px'}} className="debug-button" title="Debug Menüsünü Aç">
-              <Terminal size={20} />
-              {scanLogs.length > 0 && <span style={{position:'absolute', top:'0px', right:'0px', background:'#6366f1', color:'white', fontSize:'9px', fontWeight:'800', padding:'1px 4px', borderRadius:'8px', minWidth:'16px', textAlign:'center', boxShadow:'0 4px 10px rgba(99,102,241,0.4)'}}>{scanLogs.length}</span>}
+          <div className="welcome-msg">
+            <h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'firewallAnalysis' ? 'Firewall Güvenlik Analizi' : currentView === 'deviceMgmt' ? 'Cihaz Yönetimi' : currentView === 'deepDiscovery' ? 'Derin Ağ Keşfi' : currentView === 'snmpScan' ? 'SNMP Ağ Taraması' : currentView === 'sshScan' ? 'SSH Ağ Taraması' : currentView === 'monitor' ? 'Sistem İzleme Merkezi' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : currentView === 'certManager' ? 'Sertifika Yönetimi' : currentView === 'switchAnalysis' ? 'Switch Güvenlik Analizi' : currentView === 'howto' ? 'Nasıl Yapılır Rehberleri' : 'Sistem Ayarları'}</h1>
+            <p>{currentView === 'recent' ? 'Son analiz raporları ve sistem özeti' : currentView === 'firewallAnalysis' ? 'Dosya yükleyerek veya API üzerinden cihaz tarayarak güvenlik analizi başlatın' : currentView === 'deviceMgmt' ? 'Ağ cihazlarınızı merkezi olarak ekleyin ve yönetin' : currentView === 'deepDiscovery' ? 'Seçili cihazlarda SNMP/SSH ile LLDP/CDP/ARP tabanlı komşu keşfi yapın' : currentView === 'monitor' ? 'Cihazların anlık durumlarını ve bağlantılarını izleyin' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p>
+          </div>
+          <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
+            {currentView === 'monitor' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', padding: '8px 15px', borderRadius: '10px', border: '1px solid #bbf7d0', marginRight: '10px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} className="pulse" />
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#166534', whiteSpace: 'nowrap' }}>
+                  CANLI TAKİP: {monitorLastUpdate ? monitorLastUpdate.toLocaleTimeString() : '--:--'}
+                </span>
+              </div>
+            )}
+            {currentView === 'monitor' && (
+              <button 
+                onClick={() => {
+                  const el = document.querySelector('.monitor-view-wrapper');
+                  if (!document.fullscreenElement) {
+                    if (el?.requestFullscreen) el.requestFullscreen();
+                  } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                  }
+                }}
+                title="Projeksiyon Modu (ESC ile çıkılır)"
+                style={{ background: '#1e293b', color: 'white', border: 'none', width: '42px', height: '42px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
+              >
+                <Monitor size={20} />
+              </button>
+            )}
+            <button onClick={() => setIsDebugMenuOpen(true)} style={{position:'relative', cursor:'pointer', color:'#64748b', background:'#f8fafc', border:'1px solid #e2e8f0', width:'42px', height:'42px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'10px'}} title="Debug Kayıtları">
+              <Terminal size={18} />
+              {scanLogs.length > 0 && <span style={{position:'absolute', top:'-5px', right:'-5px', background:'#6366f1', color:'white', fontSize:'9px', fontWeight:'800', width:'18px', height:'18px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid white'}}>{scanLogs.length}</span>}
             </button>
-            <div onClick={() => setCurrentView('cve')} style={{position:'relative', cursor:'pointer', color: unreadCVE > 0 ? '#ef4444' : '#64748b', transition:'all 0.3s'}} className={unreadCVE > 0 ? 'pulse' : ''}>
-              <Bell size={24} />
-              {unreadCVE > 0 && <span style={{position:'absolute', top:'-5px', right:'-5px', background:'#ef4444', color:'white', fontSize:'10px', fontWeight:'800', padding:'2px 6px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(239,68,68,0.4)'}}>{unreadCVE}</span>}
+            <div onClick={() => setCurrentView('cve')} style={{cursor:'pointer', color: unreadCVE > 0 ? '#ef4444' : '#64748b', background:'#f8fafc', border:'1px solid #e2e8f0', width:'42px', height:'42px', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'10px', position:'relative'}}>
+              <Bell size={20} />
+              {unreadCVE > 0 && <span style={{position:'absolute', top:'-5px', right:'-5px', background:'#ef4444', color:'white', fontSize:'9px', fontWeight:'800', width:'18px', height:'18px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid white'}}>{unreadCVE}</span>}
             </div>
-            <div className="status-pill success"><CheckCircle2 size={14}/> Online</div>
           </div>
         </header>
         <div className="content-area">
@@ -5157,10 +5273,14 @@ function Dashboard() {
             </div>
           ) : currentView === 'deviceMgmt' ? (
             <DeviceManagementView API_URL={API_URL} />
+          ) : currentView === 'monitor' ? (
+            <DeviceMonitorView API_URL={API_URL} onUpdateStatus={setMonitorLastUpdate} />
           ) : currentView === 'deepDiscovery' ? (
             <DeepDiscoveryView API_URL={API_URL} />
-          ) : currentView === 'networkScan' ? (
-            <NetworkScanView API_URL={API_URL} />
+          ) : currentView === 'snmpScan' ? (
+            <SNMPScanView API_URL={API_URL} />
+          ) : currentView === 'sshScan' ? (
+            <SSHScanView API_URL={API_URL} />
           ) : currentView === 'topology' ? (
             <TopologyView API_URL={API_URL} />
           ) : currentView === 'certManager' ? (
@@ -5241,51 +5361,7 @@ function Dashboard() {
           ) : currentView === 'switchAnalysis' ? (
             <SwitchAnalysisView API_URL={API_URL} onStartAnalysis={simulateAnalysis} devices={devices.filter(d => d.snmp_template_id && d.ssh_template_id)} />
           ) : currentView === 'monitor' ? (
-            <div className="monitor-view fade-in">
-              <div style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'24px', padding:'24px', marginBottom:'20px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'20px', flexWrap:'wrap'}}>
-                <div>
-                  <h3 style={{margin:'0 0 6px', fontSize:'1.15rem', fontWeight:'800', color:'#0f172a'}}>CIHAZ MONITORU</h3>
-                  <p style={{margin:0, fontSize:'13px', color:'#64748b'}}>
-                    Son kontrol: {lastMonitorCheck ? lastMonitorCheck.toLocaleString() : 'Henuz yapilmadi'}
-                  </p>
-                </div>
-                <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
-                  <select 
-                    value={autoRefreshInterval} 
-                    onChange={(e) => setAutoRefreshInterval(Number(e.target.value))}
-                    style={{padding:'11px 14px', borderRadius:'10px', border:'1px solid #e2e8f0', fontSize:'13px', fontWeight:'600', background:'white', cursor:'pointer'}}
-                  >
-                    <option value="0">Manuel</option>
-                    <option value="15">15 saniye</option>
-                    <option value="30">30 saniye</option>
-                    <option value="60">60 saniye</option>
-                  </select>
-                  <button type="button" onClick={monitorDevices} disabled={isMonitoring} style={{background:'#0f172a', color:'white', border:'none', padding:'11px 18px', borderRadius:'10px', fontWeight:'700', cursor: isMonitoring ? 'not-allowed' : 'pointer', opacity: isMonitoring ? 0.7 : 1}}>
-                    {isMonitoring ? 'Kontrol Ediliyor...' : 'Simdi Kontrol Et'}
-                  </button>
-                </div>
-              </div>
-
-              <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:'16px'}}>
-                {devices.map((d, idx) => {
-                  const isOnline = d.status === 'online';
-                  return (
-                    <div key={`${d.id ?? d.ip_address ?? 'monitor-device'}-${idx}`} style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'18px', padding:'18px', boxShadow:'0 10px 20px rgba(15,23,42,0.04)'}}>
-                      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px'}}>
-                        <strong style={{fontSize:'14px', color:'#0f172a'}}>{d.name || d.ip_address || 'Isimsiz Cihaz'}</strong>
-                        <span style={{fontSize:'11px', fontWeight:'700', padding:'4px 8px', borderRadius:'999px', background:isOnline ? '#dcfce7' : '#fee2e2', color:isOnline ? '#166534' : '#991b1b'}}>
-                          {isOnline ? 'Acik' : 'Kapali'}
-                        </span>
-                      </div>
-                      <div style={{fontSize:'13px', color:'#334155', marginBottom:'8px'}}>{d.ip_address || '-'}</div>
-                      <div style={{fontSize:'12px', color:'#64748b'}}>VDOM: {d.vdom || 'root'}</div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {devices.length === 0 && <div style={{marginTop:'20px', background:'white', border:'1px solid #e2e8f0', borderRadius:'16px', padding:'24px', textAlign:'center', color:'#64748b'}}>Monitor icin once cihaz ekleyin.</div>}
-            </div>
+            <DeviceMonitorView API_URL={API_URL} />
           ) : currentView === 'hitcounts' ? (
             <HitCountView devices={devices} API_URL={API_URL} autoRefreshInterval={autoRefreshInterval} />
           ) : currentView === 'performance' ? (

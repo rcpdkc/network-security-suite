@@ -207,6 +207,8 @@ const initDB = async () => {
       id SERIAL PRIMARY KEY,
       ip_range VARCHAR(255) NOT NULL,
       snmp_template_ids INTEGER[] NOT NULL,
+      ssh_template_ids INTEGER[] DEFAULT '{}'::integer[],
+      scan_type VARCHAR(20) DEFAULT 'snmp', -- 'snmp' or 'ssh'
       status VARCHAR(50) DEFAULT 'idle',
       progress_current INTEGER DEFAULT 0,
       progress_total INTEGER DEFAULT 0,
@@ -220,6 +222,8 @@ const initDB = async () => {
     await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS discovered_count INTEGER DEFAULT 0`);
     await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
     await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS logs JSONB DEFAULT '[]'::jsonb`);
+    await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS ssh_template_ids INTEGER[] DEFAULT '{}'::integer[]`);
+    await pool.query(`ALTER TABLE network_scans ADD COLUMN IF NOT EXISTS scan_type VARCHAR(20) DEFAULT 'snmp'`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS discovered_devices (
       id SERIAL PRIMARY KEY,
@@ -227,9 +231,11 @@ const initDB = async () => {
       ip_address VARCHAR(255) NOT NULL,
       hostname VARCHAR(255),
       snmp_template_id INTEGER REFERENCES snmp_templates(id),
+      ssh_template_id INTEGER REFERENCES ssh_templates(id),
       status VARCHAR(50) DEFAULT 'discovered', -- 'discovered', 'added'
       discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
+    await pool.query(`ALTER TABLE discovered_devices ADD COLUMN IF NOT EXISTS ssh_template_id INTEGER REFERENCES ssh_templates(id)`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS deep_discovery_runs (
       id SERIAL PRIMARY KEY,
@@ -299,6 +305,13 @@ const initDB = async () => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    await pool.query(`CREATE TABLE IF NOT EXISTS device_tags (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      color VARCHAR(20) DEFAULT '#6366f1',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     await pool.query(`CREATE TABLE IF NOT EXISTS devices (
       id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
@@ -315,6 +328,7 @@ const initDB = async () => {
       status VARCHAR(50) DEFAULT 'unknown',
       last_sync TIMESTAMP,
       metadata JSONB,
+      tags TEXT[] DEFAULT '{}',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
@@ -332,6 +346,7 @@ const initDB = async () => {
         { name: 'metadata', type: 'JSONB' },
         { name: 'vdom', type: 'VARCHAR(100) DEFAULT \'root\'' },
         { name: 'api_key', type: 'TEXT' },
+        { name: 'tags', type: 'TEXT[] DEFAULT \'{}\'' },
         { name: 'created_at', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' },
         { name: 'updated_at', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' }
       ];
@@ -390,16 +405,17 @@ const initDB = async () => {
 
     await pool.query(`CREATE TABLE IF NOT EXISTS cve_alerts (
       id SERIAL PRIMARY KEY,
-      cve_id VARCHAR(100) UNIQUE,
+      cve_id VARCHAR(50) UNIQUE,
       title TEXT,
       description TEXT,
-      severity VARCHAR(50),
+      severity VARCHAR(20),
       link TEXT,
       solution TEXT,
       published_at TIMESTAMP,
       is_new BOOLEAN DEFAULT true,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
+    await pool.query(`ALTER TABLE cve_alerts ADD COLUMN IF NOT EXISTS solution TEXT`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS cve_sources (
       id SERIAL PRIMARY KEY,
@@ -2324,6 +2340,25 @@ app.post('/api/devices/test-connection', async (req, res) => {
 });
 
 // --- Updated Device API ---
+// --- Tag Management ---
+app.get('/api/tags', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM device_tags ORDER BY name ASC');
+    res.json(r.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/tags', async (req, res) => {
+  try {
+    const { name, color } = req.body;
+    const r = await pool.query(
+      'INSERT INTO device_tags (name, color) VALUES ($1, $2) ON CONFLICT (name) DO UPDATE SET color = EXCLUDED.color RETURNING *',
+      [name, color || '#6366f1']
+    );
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/devices', async (req, res) => {
   try {
     const isSnmpOnly = req.query.snmp === 'true';
@@ -2359,7 +2394,7 @@ app.get('/api/devices', async (req, res) => {
 
 app.post('/api/devices', async (req, res) => {
   try {
-    const { name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom } = req.body;
+    const { name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom, tags } = req.body;
     const hasApi = !!api_template_id;
     const hasSnmpSsh = !!snmp_template_id && !!ssh_template_id;
     const resolvedConnectionMethod = hasApi && hasSnmpSsh
@@ -2372,9 +2407,9 @@ app.post('/api/devices', async (req, res) => {
     
     const r = await pool.query(
       `INSERT INTO devices 
-       (name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [name || ip_address, ip_address, device_type || 'FortiGate', vendor || 'Fortinet', resolvedConnectionMethod, api_template_id || null, snmp_template_id || null, ssh_template_id || null, vdom || 'root']
+       (name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom, tags) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [name || ip_address, ip_address, device_type || 'FortiGate', vendor || 'Fortinet', resolvedConnectionMethod, api_template_id || null, snmp_template_id || null, ssh_template_id || null, vdom || 'root', tags || []]
     );
     res.status(201).json(r.rows[0]);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -2382,7 +2417,7 @@ app.post('/api/devices', async (req, res) => {
 
 app.put('/api/devices/:id', async (req, res) => {
   try {
-    const { name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom } = req.body;
+    const { name, ip_address, device_type, vendor, connection_method, api_template_id, snmp_template_id, ssh_template_id, vdom, tags } = req.body;
     const hasApi = !!api_template_id;
     const hasSnmpSsh = !!snmp_template_id && !!ssh_template_id;
     const resolvedConnectionMethod = hasApi && hasSnmpSsh
@@ -2395,9 +2430,9 @@ app.put('/api/devices/:id', async (req, res) => {
 
     const r = await pool.query(
       `UPDATE devices
-       SET name=$1, ip_address=$2, device_type=$3, vendor=$4, connection_method=$5, api_template_id=$6, snmp_template_id=$7, ssh_template_id=$8, vdom=$9, updated_at=NOW()
-       WHERE id=$10 RETURNING *`,
-      [name, ip_address, device_type, vendor, resolvedConnectionMethod, api_template_id, snmp_template_id, ssh_template_id, vdom, req.params.id]
+       SET name=$1, ip_address=$2, device_type=$3, vendor=$4, connection_method=$5, api_template_id=$6, snmp_template_id=$7, ssh_template_id=$8, vdom=$9, tags=$10, updated_at=NOW()
+       WHERE id=$11 RETURNING *`,
+      [name, ip_address, device_type, vendor, resolvedConnectionMethod, api_template_id, snmp_template_id, ssh_template_id, vdom, tags || [], req.params.id]
     );
     if (r.rows.length === 0) return res.status(404).json({ error: 'Cihaz bulunamadi.' });
     res.json(r.rows[0]);
@@ -3047,7 +3082,37 @@ const expandIpRange = (range) => {
   return ips;
 };
 
-const runBackgroundScan = async (scanId, ips, templateIds) => {
+// SSH Utility Function for discovery
+const checkSshStatus = (target, config) => {
+  return new Promise((resolve) => {
+    const conn = new SSHClient();
+    conn.on('ready', () => {
+      conn.exec('hostname', (err, stream) => {
+        if (err) {
+          conn.end();
+          resolve({ status: 'online', hostname: 'Unknown (SSH)' });
+          return;
+        }
+        let data = '';
+        stream.on('data', (d) => { data += d; });
+        stream.on('close', () => {
+          conn.end();
+          resolve({ status: 'online', hostname: data.trim() || 'Unknown (SSH)' });
+        });
+      });
+    }).on('error', (err) => {
+      resolve({ status: 'offline', error: err.message });
+    }).connect({
+      host: target,
+      port: config.port || 22,
+      username: config.username,
+      password: config.password,
+      timeout: 5000
+    });
+  });
+};
+
+const runBackgroundScan = async (scanId, ips, templateIds, scanType = 'snmp') => {
   const addScanLog = async (id, message, type = 'info') => {
     const log = {
       id: uuidv4(),
@@ -3059,16 +3124,21 @@ const runBackgroundScan = async (scanId, ips, templateIds) => {
   };
 
   try {
-    const templatesRes = await pool.query('SELECT * FROM snmp_templates WHERE id = ANY($1)', [templateIds]);
-    const templates = templatesRes.rows;
+    let templates = [];
+    if (scanType === 'ssh') {
+      const res = await pool.query('SELECT * FROM ssh_templates WHERE id = ANY($1)', [templateIds]);
+      templates = res.rows;
+    } else {
+      const res = await pool.query('SELECT * FROM snmp_templates WHERE id = ANY($1)', [templateIds]);
+      templates = res.rows;
+    }
 
     await pool.query('UPDATE network_scans SET status = \'scanning\', progress_total = $1, progress_current = 0, updated_at = NOW() WHERE id = $2', [ips.length, scanId]);
-    await addScanLog(scanId, `${ips.length} IP adresi için tarama başlatıldı.`, 'info');
+    await addScanLog(scanId, `${ips.length} IP adresi için ${scanType.toUpperCase()} tarama başlatıldı.`, 'info');
 
     let discoveredCount = 0;
     for (let i = 0; i < ips.length; i++) {
       const ip = ips[i];
-      // Check if scan was cancelled
       const scanCheck = await pool.query('SELECT status FROM network_scans WHERE id = $1', [scanId]);
       if (scanCheck.rows[0] && scanCheck.rows[0].status === 'cancelled') {
         await addScanLog(scanId, `Tarama kullanıcı tarafından iptal edildi.`, 'warning');
@@ -3079,26 +3149,40 @@ const runBackgroundScan = async (scanId, ips, templateIds) => {
       
       let foundOnThisIp = false;
       for (const tpl of templates) {
-        await addScanLog(scanId, `  - ${tpl.name} (${tpl.version}) deneniyor...`, 'info');
-        const info = await checkSnmpStatus(ip, tpl);
+        await addScanLog(scanId, `  - ${tpl.name} deneniyor...`, 'info');
+        
+        let info;
+        if (scanType === 'ssh') {
+          info = await checkSshStatus(ip, tpl);
+        } else {
+          info = await checkSnmpStatus(ip, tpl);
+        }
         
         if (info.status === 'online') {
-          await pool.query(
-            `INSERT INTO discovered_devices (scan_id, ip_address, hostname, snmp_template_id)
-             VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
-            [scanId, ip, info.sysName || 'Unknown', tpl.id]
-          );
+          if (scanType === 'ssh') {
+            await pool.query(
+              `INSERT INTO discovered_devices (scan_id, ip_address, hostname, ssh_template_id)
+               VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+              [scanId, ip, info.hostname || 'Unknown', tpl.id]
+            );
+          } else {
+            await pool.query(
+              `INSERT INTO discovered_devices (scan_id, ip_address, hostname, snmp_template_id)
+               VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+              [scanId, ip, info.sysName || 'Unknown', tpl.id]
+            );
+          }
           discoveredCount++;
           foundOnThisIp = true;
-          await addScanLog(scanId, `  + Başarılı! Cihaz bulundu: ${info.sysName || ip}`, 'success');
-          break; // Found one working template for this IP
+          await addScanLog(scanId, `  + Başarılı! Cihaz bulundu: ${info.sysName || info.hostname || ip}`, 'success');
+          break;
         } else {
-          await addScanLog(scanId, `  x Başarısız: ${info.error || 'SNMP yanıt yok'}`, 'error');
+          await addScanLog(scanId, `  x Başarısız: ${info.error || 'Yanıt yok'}`, 'error');
         }
       }
       
       if (!foundOnThisIp) {
-        await addScanLog(scanId, `  ! ${ip} üzerinde uygun SNMP şablonu bulunamadı.`, 'warning');
+        await addScanLog(scanId, `  ! ${ip} üzerinde uygun şablon bulunamadı.`, 'warning');
       }
 
       await pool.query('UPDATE network_scans SET progress_current = $1 WHERE id = $2', [i + 1, scanId]);
@@ -3116,17 +3200,26 @@ const runBackgroundScan = async (scanId, ips, templateIds) => {
 // --- Network Scan API ---
 app.post('/api/network-scan', async (req, res) => {
   try {
-    const { ip_range, snmp_template_ids } = req.body;
+    const { ip_range, snmp_template_ids, ssh_template_ids, scan_type = 'snmp' } = req.body;
     const ips = expandIpRange(ip_range);
     
+    const templateIds = scan_type === 'ssh' ? ssh_template_ids : snmp_template_ids;
+
     const r = await pool.query(
-      'INSERT INTO network_scans (ip_range, snmp_template_ids, status, progress_total) VALUES ($1, $2, \'idle\', $3) RETURNING *',
-      [ip_range, snmp_template_ids, ips.length]
+      `INSERT INTO network_scans (ip_range, snmp_template_ids, ssh_template_ids, scan_type, status, progress_total) 
+       VALUES ($1, $2, $3, $4, 'idle', $5) RETURNING *`,
+      [
+        Array.isArray(ip_range) ? JSON.stringify(ip_range).replace('[','{').replace(']','}') : ip_range, 
+        scan_type === 'ssh' ? [] : (snmp_template_ids || []),
+        scan_type === 'ssh' ? (ssh_template_ids || []) : [],
+        scan_type,
+        ips.length
+      ]
     );
     const scan = r.rows[0];
     
     // Start background process
-    runBackgroundScan(scan.id, ips, snmp_template_ids);
+    runBackgroundScan(scan.id, ips, templateIds, scan_type);
     
     res.json(scan);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -3135,9 +3228,12 @@ app.post('/api/network-scan', async (req, res) => {
 app.get('/api/network-scan/discovered', async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT dd.*, st.name as template_name, ns.ip_range as scan_range
+      SELECT dd.*, 
+             COALESCE(st.name, ssht.name) as template_name, 
+             ns.ip_range as scan_range
       FROM discovered_devices dd
-      JOIN snmp_templates st ON dd.snmp_template_id = st.id
+      LEFT JOIN snmp_templates st ON dd.snmp_template_id = st.id
+      LEFT JOIN ssh_templates ssht ON dd.ssh_template_id = ssht.id
       JOIN network_scans ns ON dd.scan_id = ns.id
       WHERE dd.status = 'discovered'
       ORDER BY dd.discovered_at DESC
