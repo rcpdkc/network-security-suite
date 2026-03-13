@@ -1338,20 +1338,124 @@ const fetchFGTConfig = async (ip, key) => {
   throw new Error(`FortiGate config yedegi alinamadi. API token'in 'sysgrp.cfg.read' yetkisi olmayabilir. Detaylar: ${errorDetails}`);
 };
 
-// Monitor all devices
-app.get('/api/devices/monitor', async (req, res) => {
+// --- FortiGate Metadata Fetchers for Policy Checker ---
+app.get('/api/devices/:id/interfaces', async (req, res) => {
   try {
-    const devs = await pool.query('SELECT * FROM devices');
-    const results = [];
-    
-    for (const dev of devs.rows) {
-      const info = await getFGT(dev.ip_address, dev.api_key);
-      await pool.query('UPDATE devices SET status = $1, last_sync = NOW() WHERE id = $2', [info.status, dev.id]);
-      results.push({ id: dev.id, name: dev.name, status: info.status });
-    }
-    
-    res.json(results);
+    const dev = (await pool.query('SELECT * FROM devices WHERE id = $1', [req.params.id])).rows[0];
+    if (!dev?.api_key) return res.status(400).json({ error: 'API key missing' });
+    const url = `https://${dev.ip_address}/api/v2/cmdb/system/interface?access_token=${dev.api_key}`;
+    const fgt = await axios.get(url, { timeout: 10000, httpsAgent: new https.Agent({ rejectUnauthorized: false }) });
+    res.json(fgt.data?.results || []);
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/devices/:id/addresses', async (req, res) => {
+  try {
+    const dev = (await pool.query('SELECT * FROM devices WHERE id = $1', [req.params.id])).rows[0];
+    if (!dev?.api_key) return res.status(400).json({ error: 'API key missing' });
+    const url = `https://${dev.ip_address}/api/v2/cmdb/firewall/address?access_token=${dev.api_key}`;
+    const urlGrp = `https://${dev.ip_address}/api/v2/cmdb/firewall/addrgrp?access_token=${dev.api_key}`;
+    const [addr, grp] = await Promise.all([
+      axios.get(url, { timeout: 10000, httpsAgent: new https.Agent({ rejectUnauthorized: false }) }),
+      axios.get(urlGrp, { timeout: 10000, httpsAgent: new https.Agent({ rejectUnauthorized: false }) })
+    ]);
+    res.json({
+      addresses: addr.data?.results || [],
+      groups: grp.data?.results || []
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/devices/:id/services', async (req, res) => {
+  try {
+    const dev = (await pool.query('SELECT * FROM devices WHERE id = $1', [req.params.id])).rows[0];
+    if (!dev?.api_key) return res.status(400).json({ error: 'API key missing' });
+    const url = `https://${dev.ip_address}/api/v2/cmdb/firewall.service/custom?access_token=${dev.api_key}`;
+    const urlGrp = `https://${dev.ip_address}/api/v2/cmdb/firewall.service/group?access_token=${dev.api_key}`;
+    const [svc, grp] = await Promise.all([
+      axios.get(url, { timeout: 10000, httpsAgent: new https.Agent({ rejectUnauthorized: false }) }),
+      axios.get(urlGrp, { timeout: 10000, httpsAgent: new https.Agent({ rejectUnauthorized: false }) })
+    ]);
+    res.json({
+      services: svc.data?.results || [],
+      groups: grp.data?.results || []
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Policy Checker Logic
+const findConflicts = (draft, existingPolicies) => {
+  const conflicts = [];
+  
+  for (const policy of existingPolicies) {
+    // Basic match logic: overlap in src, dst, service and same interfaces
+    const srcMatch = draft.srcaddr.some(s => policy.srcaddr.some(ps => ps.name === s || s === 'all' || ps.name === 'all'));
+    const dstMatch = draft.dstaddr.some(d => policy.dstaddr.some(pd => pd.name === d || d === 'all' || pd.name === 'all'));
+    const serviceMatch = draft.service.some(s => policy.service.some(ps => ps.name === s || s === 'ALL' || ps.name === 'ALL'));
+    
+    // Check if interfaces match (if specified)
+    const draftSrcIntfs = Array.isArray(draft.srcintf) ? draft.srcintf : [draft.srcintf || 'any'];
+    const draftDstIntfs = Array.isArray(draft.dstintf) ? draft.dstintf : [draft.dstintf || 'any'];
+
+    const srcIntfMatch = draftSrcIntfs.includes('any') || policy.srcintf.some(i => draftSrcIntfs.includes(i.name) || i.name === 'any');
+    const dstIntfMatch = draftDstIntfs.includes('any') || policy.dstintf.some(i => draftDstIntfs.includes(i.name) || i.name === 'any');
+
+    if (srcMatch && dstMatch && serviceMatch && srcIntfMatch && dstIntfMatch) {
+      // Determine conflict type
+      let type = 'Partial Overlap';
+      const draftSrcAll = draft.srcaddr.includes('all');
+      const policySrcAll = policy.srcaddr.some(s => s.name === 'all');
+      const draftDstAll = draft.dstaddr.includes('all');
+      const policyDstAll = policy.dstaddr.some(d => d.name === 'all');
+
+      if (srcMatch && dstMatch && serviceMatch && policy.action === draft.action) {
+         type = 'Potential Duplicate';
+      }
+      
+      conflicts.push({
+        policyid: policy.policyid,
+        name: policy.name,
+        action: policy.action,
+        status: policy.status,
+        srcaddr: policy.srcaddr.map(s => s.name),
+        dstaddr: policy.dstaddr.map(d => d.name),
+        service: policy.service.map(s => s.name),
+        type: type
+      });
+    }
+  }
+  return conflicts;
+};
+
+app.post('/api/devices/:id/check-policy', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const draft = req.body; // { srcaddr: [], dstaddr: [], service: [], action: '', srcintf: '', dstintf: '' }
+    
+    const devRes = await pool.query('SELECT * FROM devices WHERE id = $1', [id]);
+    if (devRes.rows.length === 0) return res.status(404).json({ error: 'Cihaz bulunamadi.' });
+    const dev = devRes.rows[0];
+
+    if (!dev.api_key) return res.status(400).json({ error: 'Cihazin API anahtari tanimli degil.' });
+
+    // Fetch existing policies from FortiGate
+    const url = `https://${dev.ip_address}/api/v2/cmdb/firewall/policy?access_token=${dev.api_key}`;
+    const fgtRes = await axios.get(url, { 
+      timeout: 10000, 
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }) 
+    });
+
+    const existingPolicies = fgtRes.data?.results || [];
+    const conflicts = findConflicts(draft, existingPolicies);
+
+    res.json({
+      success: true,
+      total_checked: existingPolicies.length,
+      conflicts: conflicts
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message, details: e.response?.data });
+  }
 });
 
 // Scan device config via API

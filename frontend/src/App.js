@@ -2179,6 +2179,253 @@ const DeviceTracker = ({ API_URL }) => {
   );
 };
 
+const FgtObjectPicker = ({ label, options, selected, onSelect, onRemove, placeholder, multiple = true }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredOptions = (options || []).filter(opt => 
+    (opt.name || '').toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (!multiple ? true : !selected.includes(opt.name))
+  );
+
+  return (
+    <div ref={wrapperRef} style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+      <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ 
+          minHeight: '44px', padding: '6px 10px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', 
+          display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center', cursor: 'text', transition: 'all 0.2s',
+          borderColor: isOpen ? 'var(--primary)' : '#e2e8f0', boxShadow: isOpen ? '0 0 0 2px rgba(99,102,241,0.1)' : 'none'
+        }}
+      >
+        {selected.length === 0 && !isOpen && <span style={{ color: '#94a3b8', fontSize: '13px' }}>{placeholder}</span>}
+        {selected.map(item => (
+          <span key={item} style={{ background: '#eff6ff', color: '#1d4ed8', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {item}
+            <X size={12} onClick={(e) => { e.stopPropagation(); onRemove(item); }} style={{ cursor: 'pointer' }} />
+          </span>
+        ))}
+        {isOpen && (
+          <input autoFocus type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onClick={(e) => e.stopPropagation()} style={{ border: 'none', outline: 'none', flex: 1, fontSize: '13px', minWidth: '60px' }} placeholder="Ara..." />
+        )}
+      </div>
+      {isOpen && (
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', borderRadius: '10px', border: '1px solid #e2e8f0', marginTop: '4px', maxHeight: '250px', overflowY: 'auto', zIndex: 100, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
+          {filteredOptions.length > 0 ? filteredOptions.slice(0, 100).map(opt => (
+            <div 
+              key={opt.name} onClick={() => { if(multiple) { onSelect(opt.name); } else { onSelect([opt.name]); setIsOpen(false); } setSearchTerm(''); }}
+              style={{ padding: '8px 12px', fontSize: '13px', cursor: 'pointer', borderBottom: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            >
+              <span style={{ fontWeight: '600' }}>{opt.name}</span>
+              {opt.type && <span style={{ fontSize: '10px', color: '#94a3b8', background: '#f8fafc', padding: '2px 6px', borderRadius: '4px' }}>{opt.type}</span>}
+            </div>
+          )) : <div style={{ padding: '10px', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>Bulunamadı</div>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const PolicyCheckerView = ({ API_URL }) => {
+  const [devices, setDevices] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [fgtObjects, setFgtObjects] = useState({ interfaces: [], addresses: [], services: [] });
+  const [fetchingObjects, setFetchingObjects] = useState(false);
+
+  const [form, setForm] = useState({
+    srcaddr: ['all'],
+    dstaddr: ['all'],
+    service: ['ALL'],
+    action: 'accept',
+    srcintf: ['any'],
+    dstintf: ['any']
+  });
+
+  useEffect(() => {
+    const fetchApiDevices = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/devices?api=true`);
+        // Sadece Fortinet marka olanları filtrele
+        const fortinetDevices = (res.data || []).filter(d => d.vendor === 'Fortinet' || d.device_type === 'Firewall');
+        setDevices(fortinetDevices);
+        if (fortinetDevices.length > 0) setSelectedDevice(fortinetDevices[0].id);
+      } catch (e) { console.error(e); }
+    };
+    fetchApiDevices();
+  }, []);
+
+  const fetchFgtObjects = async (devId) => {
+    if (!devId) return;
+    setFetchingObjects(true);
+    try {
+      const [intf, addr, svc] = await Promise.all([
+        axios.get(`${API_URL}/devices/${devId}/interfaces`),
+        axios.get(`${API_URL}/devices/${devId}/addresses`),
+        axios.get(`${API_URL}/devices/${devId}/services`)
+      ]);
+      const allAddr = [...(addr.data.addresses || []), ...(addr.data.groups || [])];
+      const allSvc = [...(svc.data.services || []), ...(svc.data.groups || [])];
+      setFgtObjects({
+        interfaces: [{ name: 'any' }, ...intf.data],
+        addresses: [{ name: 'all' }, ...allAddr],
+        services: [{ name: 'ALL' }, ...allSvc]
+      });
+    } catch (e) { console.error('FGT Objects Fetch Error:', e); }
+    finally { setFetchingObjects(false); }
+  };
+
+  useEffect(() => {
+    if (selectedDevice) fetchFgtObjects(selectedDevice);
+  }, [selectedDevice]);
+
+  const handleCheck = async (e) => {
+    if (e) e.preventDefault();
+    if (!selectedDevice) return;
+    setLoading(true);
+    setResults(null);
+    try {
+      const res = await axios.post(`${API_URL}/devices/${selectedDevice}/check-policy`, form);
+      setResults(res.data);
+    } catch (err) {
+      alert('Hata: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="policy-checker-view fade-in">
+      <div style={{ background: 'white', padding: '25px', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '25px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+             <Shield size={28} color="var(--primary)" />
+             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>FortiGate Kural Analizcisi</h3>
+          </div>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <label style={{ fontSize: '12px', fontWeight: '700', color: '#64748b' }}>HEDEF CİHAZ:</label>
+            <select value={selectedDevice} onChange={e => setSelectedDevice(e.target.value)} style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', fontWeight: '700', minWidth: '200px' }}>
+              <option value="">Cihaz Seçin...</option>
+              {devices.map(d => <option key={d.id} value={d.id}>{d.name || d.ip_address}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gap: '20px' }}>
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+            <FgtObjectPicker 
+              label="Kaynak Interface" options={fgtObjects.interfaces} selected={form.srcintf} 
+              onSelect={val => setForm({...form, srcintf: [...form.srcintf, val]})} 
+              onRemove={val => setForm({...form, srcintf: form.srcintf.filter(v => v !== val)})} 
+              placeholder="any"
+            />
+            <FgtObjectPicker 
+              label="Hedef Interface" options={fgtObjects.interfaces} selected={form.dstintf} 
+              onSelect={val => setForm({...form, dstintf: [...form.dstintf, val]})} 
+              onRemove={val => setForm({...form, dstintf: form.dstintf.filter(v => v !== val)})} 
+              placeholder="any"
+            />
+            <FgtObjectPicker 
+              label="Kaynak Adres" options={fgtObjects.addresses} selected={form.srcaddr} 
+              onSelect={val => setForm({...form, srcaddr: [...form.srcaddr, val]})} 
+              onRemove={val => setForm({...form, srcaddr: form.srcaddr.filter(v => v !== val)})} 
+              placeholder="all"
+            />
+            <FgtObjectPicker 
+              label="Hedef Adres" options={fgtObjects.addresses} selected={form.dstaddr} 
+              onSelect={val => setForm({...form, dstaddr: [...form.dstaddr, val]})} 
+              onRemove={val => setForm({...form, dstaddr: form.dstaddr.filter(v => v !== val)})} 
+              placeholder="all"
+            />
+          </div>
+          
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <FgtObjectPicker 
+              label="Servis" options={fgtObjects.services} selected={form.service} 
+              onSelect={val => setForm({...form, service: [...form.service, val]})} 
+              onRemove={val => setForm({...form, service: form.service.filter(v => v !== val)})} 
+              placeholder="ALL"
+            />
+            <div style={{ minWidth: '150px' }}>
+              <label style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>Action</label>
+              <select value={form.action} onChange={e => setForm({...form, action: e.target.value})} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', fontSize: '13px', fontWeight: '700' }}>
+                <option value="accept">ACCEPT</option>
+                <option value="deny">DENY</option>
+              </select>
+            </div>
+            <button 
+              onClick={handleCheck} disabled={loading || !selectedDevice || fetchingObjects}
+              style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', height: '44px', transition: 'all 0.2s' }}
+            >
+              {loading ? <RefreshCw className="spin" size={18} /> : (fetchingObjects ? <RefreshCw className="spin" size={18} /> : <><Activity size={18}/> ANALİZ ET</>)}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {!results && !loading && (
+          <div style={{ background: 'white', borderRadius: '24px', padding: '60px', border: '1px solid #e2e8f0', textAlign: 'center', color: '#94a3b8' }}>
+            <Shield size={48} style={{ opacity: 0.2, marginBottom: '15px' }} />
+            <p style={{ fontWeight: '600' }}>Yeni bir kural yazmadan önce çakışmaları analiz etmek için yukarıdaki formu doldurun.</p>
+          </div>
+        )}
+
+        {results && (
+          <>
+            <div style={{ background: results.conflicts.length > 0 ? '#fffbeb' : '#f0fdf4', padding: '25px', borderRadius: '24px', border: `1px solid ${results.conflicts.length > 0 ? '#fde68a' : '#bbf7d0'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h4 style={{ margin: 0, color: results.conflicts.length > 0 ? '#92400e' : '#166534', fontSize: '1.1rem', fontWeight: '800' }}>
+                  {results.conflicts.length > 0 ? `${results.conflicts.length} Adet Çakışan/Benzer Kural Bulundu!` : 'Herhangi Bir Çakışma Tespit Edilmedi'}
+                </h4>
+                <p style={{ margin: '5px 0 0', fontSize: '13px', color: results.conflicts.length > 0 ? '#a16207' : '#15803d', fontWeight: '600' }}>
+                  {results.total_checked} kural API üzerinden gerçek zamanlı analiz edildi.
+                </p>
+              </div>
+              {results.conflicts.length === 0 && <CheckCircle2 size={32} color="#10b981" />}
+              {results.conflicts.length > 0 && <AlertTriangle size={32} color="#f59e0b" />}
+            </div>
+
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {results.conflicts.map((c, idx) => (
+                <div key={idx} style={{ background: 'white', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '1fr auto', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                      <span style={{ background: c.type === 'Potential Duplicate' ? '#fee2e2' : '#fef3c7', color: c.type === 'Potential Duplicate' ? '#ef4444' : '#92400e', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: '800' }}>{c.type.toUpperCase()}</span>
+                      <span style={{ fontWeight: '800', color: '#1e293b' }}>ID: {c.policyid}</span>
+                      <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '600' }}>{c.name || '(İsimsiz Kural)'}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ fontSize: '12px' }}><span style={{ fontWeight: '800', color: '#64748b' }}>SRC:</span> <span style={{ color: '#1e293b' }}>{c.srcaddr.join(', ')}</span></div>
+                      <div style={{ fontSize: '12px' }}><span style={{ fontWeight: '800', color: '#64748b' }}>DST:</span> <span style={{ color: '#1e293b' }}>{c.dstaddr.join(', ')}</span></div>
+                      <div style={{ fontSize: '12px' }}><span style={{ fontWeight: '800', color: '#64748b' }}>SVC:</span> <span style={{ color: '#1e293b' }}>{c.service.join(', ')}</span></div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <span style={{ background: c.action === 'accept' ? '#dcfce7' : '#fee2e2', color: c.action === 'accept' ? '#15803d' : '#991b1b', padding: '4px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.action}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const DeviceMonitorView = ({ API_URL, onUpdateStatus }) => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -4886,7 +5133,7 @@ function Dashboard() {
   const [currentView, setCurrentView] = useState('recent'); // 'recent' | 'devices' | 'monitor' | 'hitcounts' | 'performance'
   const [devices, setDevices] = useState([]);
   const [snmpDevices, setSnmpDevices] = useState([]);
-  const [newDevice, setNewDevice] = useState({ name: '', ip_address: '', api_key: '', vdom: 'root' });
+  const [newDevice, setNewDevice] = useState({ name: '', ip_address: '', api_key: '', vdom: 'root', device_type: 'Firewall', vendor: 'Fortinet' });
   const [editingDevice, setEditingDevice] = useState(null);
   const [isAddDeviceModalOpen, setIsAddDeviceModalOpen] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -5106,7 +5353,7 @@ function Dashboard() {
     e.preventDefault();
     try {
       await axios.post(`${API_URL}/devices`, newDevice);
-      setNewDevice({ name: '', ip_address: '', api_key: '', vdom: 'root' });
+      setNewDevice({ name: '', ip_address: '', api_key: '', vdom: 'root', device_type: 'Firewall', vendor: 'Fortinet' });
       setIsAddDeviceModalOpen(false);
       fetchDevices();
     } catch (err) { alert('Cihaz ekleme hatası!'); }
@@ -5204,11 +5451,25 @@ function Dashboard() {
                 <div className={`sub-nav-item ${currentView === 'hitcounts' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setCurrentView('hitcounts'); }}>
                   <BarChart3 size={16} /> <span>Hit Count Analizi</span>
                 </div>
+                <div className={`sub-nav-item ${currentView === 'policyChecker' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setCurrentView('policyChecker'); }}>
+                  <FileCheck size={16} /> <span>Kural Analizcisi</span>
+                </div>
               </div>
             )}
           </div>
 
-          <div className={`nav-item ${currentView === 'switchAnalysis' ? 'active' : ''}`} onClick={() => setCurrentView('switchAnalysis')} style={{cursor:'pointer'}}><Monitor size={20} /><span>Switch Güvenlik Analizi</span></div>
+          <div className="nav-group">
+            <div className={`nav-item ${currentView === 'switchAnalysis' ? 'active' : ''}`} onClick={() => setCurrentView('switchAnalysis')} style={{cursor:'pointer'}}>
+              <Monitor size={20} /><span>Switch Analizi</span>
+            </div>
+            {currentView === 'switchAnalysis' && (
+              <div className="sub-menu">
+                <div className={`sub-nav-item ${currentView === 'switchAnalysis' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); setCurrentView('switchAnalysis'); }}>
+                  <Shield size={16} /> <span>Güvenlik Analizi</span>
+                </div>
+              </div>
+            )}
+          </div>
           <div className={`nav-item ${currentView === 'cve' ? 'active' : ''}`} onClick={() => setCurrentView('cve')} style={{cursor:'pointer', position:'relative'}}><AlertTriangle size={20} /><span>CVE Takibi</span>{unreadCVE > 0 && <span style={{position:'absolute', top:'10px', right:'15px', width:'8px', height:'8px', background:'#ef4444', borderRadius:'50%', border:'2px solid #1e293b'}}></span>}</div>
           <div className={`nav-item ${currentView === 'certManager' ? 'active' : ''}`} onClick={() => setCurrentView('certManager')} style={{cursor:'pointer'}}><Key size={20} /><span>Sertifika Yönetimi</span></div>
           <div className={`nav-item ${currentView === 'performance' ? 'active' : ''}`} onClick={() => setCurrentView('performance')} style={{cursor:'pointer'}}><Cpu size={20} /><span>Performans</span></div>
@@ -5224,8 +5485,8 @@ function Dashboard() {
       <div className="app-main">
         <header className="app-topbar">
           <div className="welcome-msg">
-            <h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'firewallAnalysis' ? 'Firewall Güvenlik Analizi' : currentView === 'deviceMgmt' ? 'Cihaz Yönetimi' : currentView === 'deepDiscovery' ? 'Derin Ağ Keşfi' : currentView === 'snmpScan' ? 'SNMP Ağ Taraması' : currentView === 'sshScan' ? 'SSH Ağ Taraması' : currentView === 'monitor' ? 'Sistem İzleme Merkezi' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : currentView === 'certManager' ? 'Sertifika Yönetimi' : currentView === 'switchAnalysis' ? 'Switch Güvenlik Analizi' : currentView === 'howto' ? 'Nasıl Yapılır Rehberleri' : 'Sistem Ayarları'}</h1>
-            <p>{currentView === 'recent' ? 'Son analiz raporları ve sistem özeti' : currentView === 'firewallAnalysis' ? 'Dosya yükleyerek veya API üzerinden cihaz tarayarak güvenlik analizi başlatın' : currentView === 'deviceMgmt' ? 'Ağ cihazlarınızı merkezi olarak ekleyin ve yönetin' : currentView === 'deepDiscovery' ? 'Seçili cihazlarda SNMP/SSH ile LLDP/CDP/ARP tabanlı komşu keşfi yapın' : currentView === 'monitor' ? 'Cihazların anlık durumlarını ve bağlantılarını izleyin' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p>
+            <h1>{currentView === 'recent' ? 'Güvenlik Paneli' : currentView === 'firewallAnalysis' ? 'Firewall Güvenlik Analizi' : currentView === 'deviceMgmt' ? 'Cihaz Yönetimi' : currentView === 'deepDiscovery' ? 'Derin Ağ Keşfi' : currentView === 'snmpScan' ? 'SNMP Ağ Taraması' : currentView === 'sshScan' ? 'SSH Ağ Taraması' : currentView === 'monitor' ? 'Sistem İzleme Merkezi' : currentView === 'hitcounts' ? 'HitCount Analizi' : currentView === 'policyChecker' ? 'Kural Analizcisi (Shadow Policy Checker)' : currentView === 'performance' ? 'Performans & Metrikler' : currentView === 'cve' ? 'CVE Takibi' : currentView === 'certManager' ? 'Sertifika Yönetimi' : currentView === 'switchAnalysis' ? 'Switch Analizi' : currentView === 'howto' ? 'Nasıl Yapılır Rehberleri' : 'Sistem Ayarları'}</h1>
+            <p>{currentView === 'recent' ? 'Son analiz raporları ve sistem özeti' : currentView === 'firewallAnalysis' ? 'Dosya yükleyerek veya API üzerinden cihaz tarayarak güvenlik analizi başlatın' : currentView === 'deviceMgmt' ? 'Ağ cihazlarınızı merkezi olarak ekleyin ve yönetin' : currentView === 'deepDiscovery' ? 'Seçili cihazlarda SNMP/SSH ile LLDP/CDP/ARP tabanlı komşu keşfi yapın' : currentView === 'monitor' ? 'Cihazların anlık durumlarını ve bağlantılarını izleyin' : currentView === 'policyChecker' ? 'Yeni bir kural eklemeden önce mevcut kurallarla çakışma (Shadowing) kontrolü yapın' : 'LDAP, Sertifika ve Güvenlik Bilgi Tabanı yönetimi'}</p>
           </div>
           <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
             {currentView === 'monitor' && (
@@ -5364,6 +5625,8 @@ function Dashboard() {
             <DeviceMonitorView API_URL={API_URL} />
           ) : currentView === 'hitcounts' ? (
             <HitCountView devices={devices} API_URL={API_URL} autoRefreshInterval={autoRefreshInterval} />
+          ) : currentView === 'policyChecker' ? (
+            <PolicyCheckerView API_URL={API_URL} />
           ) : currentView === 'performance' ? (
             <PerformanceView devices={devices} API_URL={API_URL} autoRefreshInterval={autoRefreshInterval} />
           ) : currentView === 'cve' ? (
